@@ -77,3 +77,28 @@ alter publication supabase_realtime add table participants;
 alter table meetings add column if not exists mode text default 'fixed';   -- fixed | poll
 alter table meetings add column if not exists slots jsonb default '[]';    -- [{date, time}]
 alter table participants add column if not exists avail int[] default '{}'; -- 가능한 후보 인덱스
+
+-- v5: 약속 당일 실데이터 (진행 상태 + 채팅)
+alter table participants add column if not exists phase text default 'idle';      -- idle | prep | moving | arrived
+alter table participants add column if not exists prep_step int default 0;
+alter table participants add column if not exists status text;
+alter table participants add column if not exists progress real default 0;         -- 0~1, 정확한 좌표는 저장 안 함
+alter table participants add column if not exists departed_at bigint;
+alter table participants add column if not exists arrived_at bigint;
+alter table participants add column if not exists eta int;                         -- 남은 분
+alter table participants add column if not exists gps boolean default false;
+
+create table if not exists messages (
+  id          bigserial primary key,
+  code        text not null references meetings(code) on delete cascade,
+  device_id   text,
+  name        text,
+  text        text not null,
+  sys         boolean default false,
+  created_at  timestamptz default now()
+);
+create index if not exists messages_code_idx on messages(code, id);
+alter table messages enable row level security;
+drop policy if exists "messages rw" on messages;
+create policy "messages rw" on messages for all using (true) with check (true);
+alter publication supabase_realtime add table messages;
