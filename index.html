@@ -8,7 +8,8 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="모일곳 — 우리 어디서 만날까?">
 <meta property="og:description" content="친구가 초대했어요. 출발지만 입력하면 끝!">
-<meta property="og:image" content="/og.png">
+<meta property="og:image" content="https://moilgot.vercel.app/og.png">
+<meta property="og:url" content="https://moilgot.vercel.app">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="theme-color" content="#C8F135">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -569,8 +570,8 @@ const CONFIG={
   TRANSIT_ENDPOINT:"",             // "/api/transit" → 서버에서 카카오 대중교통 길찾기 API 호출 (REST 키는 서버에만)
   INVITE_BASE:"https://moilgot.vercel.app/j/",
   PLACES_URL:"",
-  SUPABASE_URL:"",                 // Supabase > Project Settings > API > Project URL
-  SUPABASE_ANON_KEY:"",            // 같은 화면의 anon public 키 (브라우저에 넣어도 되는 공개 키)                   // 크롤링한 장소 JSON 주소 (예: "/places.json"). 형식은 README 참고
+  SUPABASE_URL:"https://ttbsimsvicukpksilheb.supabase.co",                 // Supabase > Project Settings > API > Project URL
+  SUPABASE_ANON_KEY:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0YnNpbXN2aWN1a3Brc2lsaGViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNzEyMTgsImV4cCI6MjEwNTg0NzIxOH0.yJhdTNZSBkL98chW0qrpxr5G6Y_9NsXTCmRMmQN0lPo",            // 같은 화면의 anon public 키 (브라우저에 넣어도 되는 공개 키)                   // 크롤링한 장소 JSON 주소 (예: "/places.json"). 형식은 README 참고
 };
 const LANDMARKS=[["서울대학교",37.4591,126.9520,"관악구 관악로"],["연세대학교",37.5658,126.9386,"서대문구 신촌동"],["고려대학교",37.5895,127.0323,"성북구 안암동"],
 ["서강대학교",37.5509,126.9410,"마포구 신수동"],["이화여자대학교",37.5618,126.9468,"서대문구 대현동"],["성균관대학교",37.5877,126.9933,"종로구 명륜동"],
