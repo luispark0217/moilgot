@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>모일곳 — 우리 어디서 만날까?</title>
+<meta name="description" content="출발지만 입력하면 모두에게 공평한 만날 곳과 갈 곳을 찾아줘요">
+<meta property="og:type" content="website">
+<meta property="og:title" content="모일곳 — 우리 어디서 만날까?">
+<meta property="og:description" content="친구가 초대했어요. 출발지만 입력하면 끝!">
+<meta property="og:image" content="/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="theme-color" content="#C8F135">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --lime:#C8F135; --lime-soft:#F2FBD3; --lime-deep:#6F8F00;
+  --ink:#1F2022; --muted:#707070; --faint:#A3A39C;
+  --bg:#FFFFFF; --card:#F2F2EE; --line:#E6E6E0; --outer:#E9E9E3;
+  --btn:#1F2022; --btn-ink:#FFFFFF;
+  --map-bg:#ECEDE6; --map-road:#FFFFFF; --map-water:#CFE4EC; --map-park:#D9F0B8;
+  --heart:#F04452; --live:#22C55E;
+  --font:"Pretendard","Gothic A1","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#F2F2EE; --muted:#A8A8A2; --faint:#6E6E68;
+    --bg:#161715; --card:#242522; --line:#30312D; --outer:#0E0F0D;
+    --btn:#C8F135; --btn-ink:#1F2022; --lime-soft:#2B3314; --lime-deep:#C8F135;
+    --map-bg:#20211E; --map-road:#2C2D29; --map-water:#1E3440; --map-park:#27361A;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#F2F2EE; --muted:#A8A8A2; --faint:#6E6E68;
+  --bg:#161715; --card:#242522; --line:#30312D; --outer:#0E0F0D;
+  --btn:#C8F135; --btn-ink:#1F2022; --lime-soft:#2B3314; --lime-deep:#C8F135;
+  --map-bg:#20211E; --map-road:#2C2D29; --map-water:#1E3440; --map-park:#27361A;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--outer);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;letter-spacing:-0.01em}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+:focus-visible{outline:3px solid var(--lime);outline-offset:2px;border-radius:8px}
+#app{max-width:440px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;display:flex;flex-direction:column}
+.scr{flex:1;display:flex;flex-direction:column;padding:0 24px;position:relative}
+.top{display:flex;align-items:center;gap:12px;height:64px;flex:none}
+.top h1{flex:1;margin:0;font-size:17px;font-weight:700}
+.top .sub2{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+.top.center h1{text-align:center}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:22px;flex:none}
+.float-btn{background:var(--bg);box-shadow:0 2px 10px rgba(0,0,0,.14)}
+.progress{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:28px}
+.progress i{height:5px;border-radius:3px;background:var(--line)}
+.progress i.on{background:var(--lime)}
+.q{font-size:26px;font-weight:800;margin:0 0 8px;letter-spacing:-0.03em;line-height:1.3}
+.sub{color:var(--muted);font-size:15px;margin:0 0 28px}
+.label{font-size:15px;font-weight:700;margin:24px 0 10px;display:flex;align-items:center;gap:8px}
+.label small{font-weight:600;color:var(--muted);font-size:13px}
+.spacer{flex:1;min-height:24px}
+.cta-bar{position:sticky;bottom:0;padding:12px 0 calc(20px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 75%,transparent);z-index:5}
+.btn{width:100%;height:56px;border-radius:16px;background:var(--btn);color:var(--btn-ink);font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s}
+.btn:active{transform:scale(.98)}
+.btn[disabled]{opacity:.3;cursor:not-allowed}
+.btn.ghost{background:var(--card);color:var(--ink)}
+.btn.lime{background:var(--lime);color:#1F2022}
+.btn.sm{height:48px;font-size:15px;border-radius:14px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{height:37px;padding:0 16px;border-radius:19px;background:var(--card);font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex:none}
+.chip.on{background:var(--lime);color:#1F2022}
+.chip.sm{height:28px;padding:0 12px;font-size:12px;border-radius:14px}
+.chip.xs{height:23px;padding:0 10px;font-size:11.5px;border-radius:12px;font-weight:700}
+.chip.white{background:var(--bg)}
+.chip.dark{background:#1F2022;color:#fff}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;color:#1F2022;border:2.5px solid var(--bg);flex:none}
+.card{background:var(--card);border-radius:20px;padding:16px}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-size:14px;font-weight:600;z-index:80;max-width:340px;text-align:center;animation:pop .25s}
+@keyframes pop{from{opacity:0;transform:translate(-50%,8px)}}
+.sw{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;flex:none;transition:background .15s}
+.sw::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw.on{background:#1F2022}
+.sw.on::after{left:21px;background:var(--lime)}
+.toggle-row{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;padding:14px 16px}
+.toggle-row div{flex:1;min-width:0}
+.toggle-row b{display:block;font-size:15px}
+.toggle-row span{font-size:12.5px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- 00 홈 ---------- */
+.logo{font-size:26px;font-weight:900;letter-spacing:-0.05em}
+.dotbtn{width:40px;height:40px;border-radius:50%;background:var(--bg);box-shadow:0 2px 10px rgba(0,0,0,.12);display:grid;place-items:center;position:relative}
+.dotbtn i{width:14px;height:14px;border-radius:50%;background:var(--ink)}
+.dotbtn b{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--heart);border:2px solid var(--bg)}
+.hero{background:var(--lime);border-radius:28px;padding:24px 20px;position:relative;overflow:hidden;color:#1F2022;height:230px}
+.hero h2{font-size:30px;font-weight:900;line-height:1.24;margin:0 0 12px;letter-spacing:-0.04em;position:relative;z-index:1}
+.hero p{margin:0;font-size:14px;font-weight:600;line-height:1.5;max-width:190px;position:relative;z-index:1}
+.hero svg{position:absolute;right:6px;top:10px}
+.sec{font-size:17px;font-weight:800;margin:24px 0 10px;display:flex;justify-content:space-between;align-items:center}
+.sec small{font-size:13px;color:var(--muted);font-weight:600}
+.meet{background:var(--card);border-radius:22px;padding:16px;margin-bottom:10px;display:block;width:100%;text-align:left}
+.meet h3{margin:8px 0 4px;font-size:17px;font-weight:800}
+.meet .m{font-size:13px;color:var(--muted)}
+.stack{display:flex}
+.stack .av{width:30px;height:30px;font-size:12px;margin-right:-8px}
+.past{display:flex;gap:14px;align-items:center;background:var(--card);border-radius:18px;padding:12px 14px;margin-bottom:8px;width:100%;text-align:left}
+.past .sq{width:40px;height:40px;border-radius:12px;background:var(--lime);flex:none;display:grid;place-items:center;font-size:18px}
+.past b{display:block;font-size:15px}
+.past span{font-size:12px;color:var(--muted)}
+.empty{background:var(--card);border-radius:22px;padding:20px;color:var(--muted);font-size:14px;line-height:1.55}
+.tabbar{position:sticky;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border-top:1px solid var(--line);padding:10px 0 calc(12px + env(safe-area-inset-bottom,0px));margin:20px -24px 0;z-index:6}
+.tabbar button{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:var(--faint)}
+.tabbar button.on{color:var(--ink)}
+.tabbar svg{width:22px;height:22px}
+
+/* ---------- 01 ---------- */
+.counter{display:flex;align-items:center;justify-content:space-between;margin:40px 0 30px}
+.round{width:64px;height:64px;border-radius:50%;background:var(--card);display:grid;place-items:center}
+.round.dark{background:var(--btn);color:var(--btn-ink)}
+.round svg{width:22px;height:22px}
+.bign{text-align:center;font-size:84px;font-weight:900;line-height:1;letter-spacing:-0.05em}
+.bign small{display:block;font-size:17px;font-weight:600;color:var(--muted);letter-spacing:0;margin-top:8px}
+.avrow{display:flex;justify-content:center;gap:12px;margin-bottom:34px;flex-wrap:wrap}
+.avrow .av{width:52px;height:52px;font-size:18px;border:0}
+.qbox{width:52px;height:52px;border-radius:16px;border:2px dashed var(--line);display:grid;place-items:center;color:var(--faint);font-weight:800;font-size:17px}
+.field{width:100%;height:52px;border-radius:14px;border:0;background:var(--card);padding:0 16px;font-size:16px;font-weight:600}
+.field::placeholder{color:var(--faint);font-weight:500}
+
+/* ---------- 02 ---------- */
+.taste{border-radius:18px;border:1.5px solid var(--lime);background:var(--lime-soft);padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.taste div{flex:1}
+.taste p{margin:8px 0 0;font-size:12.5px;font-weight:600}
+.taste.off{background:var(--card);border-color:transparent}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pcard{background:var(--card);border-radius:20px;padding:14px;height:92px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;position:relative}
+.pcard .ic{width:36px;height:36px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-weight:800;font-size:14px;color:var(--ink)}
+.pcard b{font-size:17px}
+.pcard.on{background:var(--lime);color:#1F2022}
+.pcard.on .ic{background:#fff;color:#1F2022}
+.pcard.on::after{content:"";position:absolute;right:14px;top:14px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,var(--lime) 0 4px,#1F2022 4.5px)}
+
+/* ---------- 03 ---------- */
+.monthbar{display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:700;margin-bottom:12px}
+.monthbar .nav{display:flex;gap:4px}
+.monthbar .nav button{width:32px;height:32px;border-radius:50%;font-size:17px}
+.monthbar .nav button[disabled]{opacity:.25}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.day{height:68px;border-radius:14px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.day small{font-size:12px;color:var(--muted);font-weight:600}
+.day b{font-size:19px}
+.day.on{background:var(--btn);color:var(--btn-ink)}
+.day.on small{color:inherit;opacity:.75}
+.day[disabled]{opacity:.3}
+.day.sun small{color:#E5484D}
+.wheel{position:relative;height:150px;background:var(--card);border-radius:20px;overflow:hidden}
+.wheel .band{position:absolute;left:16px;right:16px;top:50px;height:50px;border-radius:14px;background:var(--bg);pointer-events:none}
+.wheel .list{position:relative;height:150px;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;padding:50px 0;mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
+.wheel .list::-webkit-scrollbar{display:none}
+.wheel .opt{height:50px;scroll-snap-align:center;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;color:var(--muted);width:100%}
+.wheel .opt.on{font-size:24px;font-weight:900;color:var(--ink)}
+
+/* ---------- 04 ---------- */
+.mecard{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;padding:12px 14px}
+.mecard div{flex:1;min-width:0}
+.mecard b{display:block;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mecard span{font-size:12px;color:var(--muted)}
+.mecard .chg{font-size:13px;font-weight:700;color:var(--muted);padding:6px}
+.frow{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;padding:10px 12px;margin-bottom:8px;width:100%;text-align:left}
+.frow div{flex:1;min-width:0}
+.frow b{display:block;font-size:14.5px}
+.frow span{font-size:12px;color:var(--muted)}
+.frow .chip{height:28px;font-size:12px;padding:0 12px}
+.poke{background:#1F2022;color:#fff}
+.poked{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.linkbar{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 14px}
+.linkbar button{height:50px;border-radius:14px;font-weight:700;font-size:15px;background:var(--card)}
+.linkbar .kakao{background:#FEE500;color:#191600}
+
+/* ---------- sheets ---------- */
+.dim{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:440px;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 20px calc(20px + env(safe-area-inset-bottom,0px));max-height:82vh;display:flex;flex-direction:column;animation:up .22s ease-out;overflow-y:auto}
+.sheet h3{margin:0 0 4px;font-size:19px;font-weight:800}
+.sheet .desc{font-size:13px;color:var(--muted);margin:0 0 12px}
+@keyframes up{from{transform:translateY(40px);opacity:.5}}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px;flex:none}
+.slist{overflow-y:auto;margin:8px -20px 0;padding:0 20px;min-height:200px}
+.sitem{display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 4px;border-bottom:1px solid var(--line);font-size:15px;font-weight:600;text-align:left}
+.lines{display:flex;gap:3px}
+.ln{min-width:18px;height:18px;border-radius:9px;font-size:10.5px;font-weight:800;color:#fff;display:grid;place-items:center;padding:0 5px}
+.opt-row{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px 4px;border-bottom:1px solid var(--line);font-size:16px;font-weight:700;text-align:left}
+.opt-row.on{color:var(--lime-deep)}
+.cand{display:block;width:100%;text-align:left;background:var(--card);border-radius:18px;padding:14px;margin-bottom:8px;border:2px solid transparent}
+.cand.on{border-color:var(--lime-deep);background:var(--lime-soft)}
+.cand .h{display:flex;justify-content:space-between;align-items:center;font-size:17px;font-weight:800}
+.cand p{margin:6px 0 0;font-size:12.5px;line-height:1.55;color:var(--muted)}
+.slider{margin-top:12px}
+.slider .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
+input[type=range]{width:100%;accent-color:#6F8F00}
+
+/* ---------- 05 / 06 / 08 maps ---------- */
+.mapwrap{position:relative;margin:0 -24px;overflow:hidden;background:var(--map-bg);flex:none}
+.mapwrap svg{width:100%;height:100%;display:block}
+.mapbtns{position:absolute;top:14px;left:20px;right:20px;display:flex;justify-content:space-between;z-index:2}
+.bsheet{background:var(--bg);border-radius:28px 28px 0 0;margin:-48px -24px 0;padding:10px 24px 0;position:relative;z-index:3;flex:1;display:flex;flex-direction:column;box-shadow:0 -4px 20px rgba(0,0,0,.06)}
+.eyebrow{color:var(--lime-deep);font-size:13px;font-weight:800}
+.hub-name{font-size:32px;font-weight:900;margin:2px 0 4px;letter-spacing:-0.04em}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0}
+.stat{background:var(--card);border-radius:16px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.stat small{font-size:12px;color:var(--muted);font-weight:600}
+.stat b{font-size:20px;font-weight:900}
+.bars{display:grid;grid-template-columns:34px 1fr 36px;gap:9px 12px;align-items:center;font-size:13px;font-weight:700}
+.bars span:last-child,.bars .r{text-align:right}
+.bar{height:8px;border-radius:4px;background:var(--card);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:4px;transition:width .3s}
+.pill-head{position:absolute;top:14px;left:20px;right:20px;height:48px;background:var(--bg);border-radius:24px;box-shadow:0 2px 12px rgba(0,0,0,.12);display:flex;align-items:center;gap:6px;padding:0 16px 0 8px;z-index:2;font-weight:700;font-size:15px}
+.pill-head .ttl{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.listhead{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.star{width:44px;height:44px;border-radius:14px;background:var(--lime);display:grid;place-items:center;font-size:20px;color:#1F2022;flex:none}
+.listhead div{flex:1;min-width:0}
+.listhead h2{font-size:18px;margin:0;font-weight:800}
+.listhead p{margin:3px 0 0;font-size:12.5px;color:var(--muted)}
+.place{display:flex;gap:14px;padding:8px 0 10px;align-items:flex-start;width:100%;text-align:left}
+.thumb{width:72px;height:72px;border-radius:16px;flex:none;background:var(--card);position:relative;display:grid;place-items:center;font-size:24px;font-weight:900;color:var(--faint)}
+.thumb i{position:absolute;left:6px;top:6px;width:14px;height:14px;border-radius:4px}
+.place .info{flex:1;min-width:0}
+.place h4{margin:2px 0 3px;font-size:16px;font-weight:800}
+.place .m{font-size:12.5px;color:var(--muted)}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:10px;background:var(--card);margin:7px 4px 0 0}
+.tag.fit{background:var(--lime);color:#1F2022}
+.heart{font-size:14px;font-weight:800;display:flex;align-items:center;gap:3px;padding:2px 0 8px 8px;color:var(--faint)}
+.heart.has{color:var(--heart)}
+.heart.mine{transform:scale(1.1)}
+.fab{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));right:max(24px,calc(50% - 196px));height:48px;padding:0 24px;border-radius:24px;background:var(--btn);color:var(--btn-ink);font-weight:800;font-size:15px;z-index:8;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.sample{font-size:11.5px;color:var(--faint);margin:10px 0 90px;text-align:center}
+
+/* vote sheet */
+.tally{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;margin-bottom:12px;font-size:14px;font-weight:700}
+.tally .bar{grid-column:1/-1;height:10px;border-radius:5px}
+.tally .bar i{background:var(--lime)}
+.tally .who{display:flex}
+.tally .who .av{width:20px;height:20px;font-size:9px;border-width:1.5px;margin-left:-5px}
+
+/* ---------- 확정 ---------- */
+.ticket{background:var(--lime);color:#1F2022;border-radius:28px;padding:22px;position:relative}
+.ticket h2{font-size:28px;font-weight:900;margin:8px 0 16px;letter-spacing:-0.04em;line-height:1.25}
+.ticket .kv{display:grid;grid-template-columns:52px 1fr;gap:8px;font-size:15px}
+.ticket .kv span{font-weight:600;opacity:.6}
+.ticket .kv b{font-weight:800}
+.ticket .perf{border-top:2px dashed rgba(31,32,34,.25);margin:18px -22px 16px}
+.dep{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-size:14px;font-weight:700;margin-bottom:8px}
+.dep .av{width:28px;height:28px;font-size:11px;border-color:var(--lime)}
+.dep em{font-style:normal;font-weight:600;opacity:.65;font-size:12.5px}
+textarea.share{width:100%;height:124px;border-radius:16px;border:0;background:var(--card);padding:14px;font-size:13px;line-height:1.55;resize:none}
+
+/* ---------- 07 ---------- */
+.noti{background:var(--card);border-radius:22px;padding:16px}
+.noti .src{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:600}
+.noti .src i{width:22px;height:22px;border-radius:7px;background:var(--lime);display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:900;color:#1F2022}
+.noti b{display:block;font-size:17px;margin:10px 0 4px}
+.noti span{font-size:12.5px;color:var(--muted)}
+.count{display:flex;justify-content:space-between;align-items:flex-end;margin:24px 0 8px}
+.count small{font-size:14px;color:var(--muted);font-weight:700}
+.count .big{font-size:50px;font-weight:900;letter-spacing:-0.04em;line-height:1.05}
+.tl{position:relative;margin-top:14px}
+.tl::before{content:"";position:absolute;left:21px;top:14px;bottom:14px;width:3px;background:var(--line);border-radius:2px}
+.tstep{display:grid;grid-template-columns:20px 44px 1fr auto;gap:12px;align-items:center;height:52px;padding:0 12px;border-radius:16px;position:relative}
+.tstep .dot{width:20px;height:20px;border-radius:50%;background:var(--bg);border:3px solid var(--line)}
+.tstep.done .dot{background:var(--ink);border-color:var(--ink)}
+.tstep.now{background:var(--lime-soft)}
+.tstep.now .dot{background:var(--lime);border-color:#1F2022}
+.tstep time{font-size:13px;font-weight:700;color:var(--muted)}
+.tstep b{font-size:15px}
+.tip{background:var(--card);border-radius:18px;padding:12px 16px;font-size:13px;line-height:1.55;margin-top:14px;display:flex;gap:10px;align-items:center}
+.tip p{margin:0;flex:1}
+.tip button{font-size:12px;font-weight:800;background:var(--lime);color:#1F2022;border-radius:12px;padding:8px 10px;flex:none}
+.democlock{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 12px;border-radius:15px;background:var(--card);font-size:12px;font-weight:800}
+.democlock button{height:22px;padding:0 8px;border-radius:11px;background:var(--bg);font-size:11px;font-weight:800}
+
+/* ---------- 08 ---------- */
+.racehead{position:absolute;top:14px;left:20px;right:20px;height:52px;background:var(--bg);border-radius:18px;box-shadow:0 2px 12px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:space-between;padding:0 16px 0 8px;z-index:2;font-size:15px;font-weight:800}
+.racehead .l{display:flex;align-items:center;gap:6px}
+.livedot{width:10px;height:10px;border-radius:50%;background:var(--live);box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulse 1.6s infinite}
+.livedot.off{background:var(--faint);animation:none}
+@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.racehead .r{font-variant-numeric:tabular-nums}
+.demo-ctl{position:absolute;left:20px;top:76px;z-index:2}
+.rank{display:grid;grid-template-columns:18px 32px 1fr 120px 44px;gap:10px;align-items:center;height:46px;font-size:14px;font-weight:700}
+.rank .n{font-size:17px;font-weight:900;text-align:center}
+.rank .av{width:32px;height:32px;font-size:12px;border:0}
+.rank .bar{height:6px}
+.rank .bar i{background:var(--lime)}
+.rank .r{text-align:right;font-size:13px}
+.rank.me{background:var(--lime-soft);border-radius:14px;margin:0 -8px;padding:0 8px;grid-template-columns:18px 32px 1fr 120px 44px}
+.badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:10px;background:var(--heart);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 5px}
+.done-banner{background:var(--lime);color:#1F2022;border-radius:18px;padding:14px 16px;font-weight:800;margin-top:6px;font-size:15px}
+
+/* ---------- 09 ---------- */
+.track{background:var(--card);border-radius:18px;padding:16px 24px 10px;position:relative;height:70px;flex:none}
+.track .rail{position:absolute;left:24px;right:24px;top:30px;height:4px;border-radius:2px;background:var(--line)}
+.track .fill{position:absolute;left:24px;top:30px;height:4px;border-radius:2px;background:var(--lime)}
+.track .av{position:absolute;top:19px;width:26px;height:26px;font-size:10px;transform:translateX(-50%);transition:left .3s}
+.track .ends{position:absolute;left:12px;right:12px;bottom:6px;display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:700}
+.chatlog{flex:1;overflow-y:auto;padding:14px 0 8px;display:flex;flex-direction:column;gap:10px;min-height:300px}
+.sys{align-self:center;background:var(--lime-soft);color:var(--ink);font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:12px;text-align:center;max-width:90%}
+.msg{display:flex;gap:8px;max-width:85%}
+.msg .av{width:32px;height:32px;font-size:12px;border:0}
+.msg small{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:4px}
+.bub{background:var(--card);padding:10px 14px;border-radius:4px 16px 16px 16px;font-size:14px;line-height:1.45;font-weight:500}
+.msg.me{align-self:flex-end}
+.msg.me .bub{background:var(--lime);color:#1F2022;border-radius:16px 4px 16px 16px}
+.quick{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:6px 0}
+.quick::-webkit-scrollbar{display:none}
+.quick .chip{height:36px}
+.composer{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:18px;padding:6px 6px 6px 16px;margin-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.composer input{flex:1;border:0;background:none;font-size:15px;height:40px;min-width:0}
+.composer input:focus{outline:none}
+.send{width:40px;height:40px;border-radius:50%;background:var(--btn);color:var(--btn-ink);font-size:18px;font-weight:800}
+.chatwrap{position:sticky;bottom:0;background:var(--bg)}
+
+/* ---------- 10 ---------- */
+.podium{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0 10px}
+.podium .p{background:var(--card);border-radius:16px;height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:800}
+.podium .p .av{width:32px;height:32px;font-size:12px;border:0}
+.podium .p span{font-size:12.5px;font-weight:700}
+.podium .p.last{background:#1F2022;color:#fff}
+.podium .p.first{background:var(--lime);color:#1F2022}
+.wheelbox{position:relative;width:304px;height:304px;margin:26px auto 10px}
+.wheelbox svg.w{width:100%;height:100%;transition:transform 4.2s cubic-bezier(.12,.72,.08,1)}
+.pointer{position:absolute;left:50%;top:-14px;transform:translateX(-50%);z-index:2}
+.go{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:#1F2022;color:#fff;font-weight:900;font-size:16px;z-index:2;border:4px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.verdict{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:60;display:grid;place-items:center;padding:24px}
+.verdict .box{background:var(--lime);color:#1F2022;border-radius:28px;padding:28px 24px;width:100%;max-width:360px;text-align:center;animation:boom .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes boom{from{transform:scale(.6);opacity:0}}
+.verdict .box .av{width:64px;height:64px;font-size:24px;margin:0 auto 12px;border:4px solid #fff}
+.verdict h2{font-size:30px;font-weight:900;margin:6px 0 20px;letter-spacing:-0.04em}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:61;overflow:hidden}
+.confetti i{position:absolute;top:-20px;width:9px;height:14px;border-radius:2px;animation:fall 1.8s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.pen-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.pen-row input{flex:1;height:46px;border-radius:12px;border:0;background:var(--card);padding:0 14px;font-size:15px;font-weight:600}
+.pen-row button{width:46px;height:46px;border-radius:12px;background:var(--card);font-size:18px}
+
+/* ---------- v3: 시간 휠 2열 / 위치 / 초대 / 게스트 ---------- */
+.wheel.two{display:grid;grid-template-columns:1.25fr 1fr}
+.wheel.two .band{left:12px;right:12px}
+.wheel .colon{position:absolute;left:55.5%;top:59px;font-size:22px;font-weight:900;pointer-events:none;z-index:1}
+.timeread{display:flex;justify-content:space-between;align-items:baseline;margin:28px 0 10px}
+.timeread b{font-size:15px}.timeread span{font-size:13px;color:var(--muted);font-weight:600}
+.locsearch{display:flex;gap:8px;align-items:center;background:var(--card);border-radius:14px;padding:0 6px 0 14px;height:52px}
+.locsearch input{flex:1;border:0;background:none;font-size:16px;font-weight:600;min-width:0;height:100%}
+.locsearch input:focus{outline:none}
+.gps{display:flex;align-items:center;gap:8px;width:100%;height:48px;border-radius:14px;background:var(--lime-soft);font-weight:800;font-size:14.5px;padding:0 14px;margin-top:10px;color:var(--ink)}
+.locmap{height:230px;border-radius:20px;overflow:hidden;margin-top:12px;position:relative;background:var(--map-bg)}
+.locmap svg{width:100%;height:100%;display:block}
+.locmap .hint{position:absolute;left:12px;bottom:10px;background:var(--bg);border-radius:10px;padding:5px 10px;font-size:11.5px;font-weight:700;color:var(--muted)}
+.lres{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:12px 2px;border-bottom:1px solid var(--line)}
+.lres .ic{width:34px;height:34px;border-radius:10px;background:var(--card);display:grid;place-items:center;font-size:15px;flex:none}
+.lres b{display:block;font-size:15px}.lres span{font-size:12.5px;color:var(--muted)}
+.picked{background:var(--card);border-radius:18px;padding:14px 16px;margin-top:12px}
+.picked b{font-size:16px}.picked .m{font-size:12.5px;color:var(--muted);margin:3px 0 10px}
+.stpick{display:flex;gap:8px;flex-wrap:wrap}
+.stpick button{border-radius:12px;background:var(--bg);padding:8px 10px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;border:2px solid transparent}
+.stpick button.on{border-color:#1F2022;background:var(--lime)}
+.stpick small{font-weight:600;color:var(--muted)}.stpick button.on small{color:#1F2022;opacity:.7}
+.frow .state{font-size:12px}
+.frow .state.opened{color:var(--lime-deep);font-weight:700}
+.kcard{border-radius:18px;overflow:hidden;background:#fff;color:#1F2022;box-shadow:0 2px 14px rgba(0,0,0,.12);margin:4px 0 14px}
+.kcard .kimg{background:var(--lime);height:110px;position:relative;display:flex;align-items:flex-end;padding:14px;font-size:22px;font-weight:900;letter-spacing:-0.04em}
+.kcard .kbody{padding:12px 14px}.kcard .kbody b{display:block;font-size:14.5px}.kcard .kbody span{font-size:12.5px;color:#707070}
+.kcard .kbtn{border-top:1px solid #eee;text-align:center;padding:12px;font-size:14px;font-weight:700}
+.kakaotag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:#3C1E1E;background:#FEE500;border-radius:8px;padding:3px 8px;margin-bottom:8px}
+.linkrow{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:14px;padding:0 6px 0 14px;height:48px;font-size:13.5px;font-weight:700}
+.linkrow span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.linkrow button{height:36px;padding:0 12px;border-radius:10px;background:var(--bg);font-weight:800;font-size:13px}
+.howto{font-size:12.5px;color:var(--muted);line-height:1.6;margin:12px 0 0;padding:0;list-style:none;counter-reset:h}
+.howto li{counter-increment:h;display:flex;gap:8px;margin-bottom:4px}
+.howto li::before{content:counter(h);width:18px;height:18px;border-radius:50%;background:var(--card);font-size:11px;font-weight:800;display:grid;place-items:center;flex:none;color:var(--ink);margin-top:1px}
+.guestbar{display:flex;align-items:center;justify-content:space-between;height:56px;font-size:12px;color:var(--muted);font-weight:700}
+.invite-hero{background:var(--lime);color:#1F2022;border-radius:28px;padding:22px}
+.invite-hero h2{font-size:28px;font-weight:900;margin:10px 0 14px;letter-spacing:-0.04em;line-height:1.25}
+.invite-hero .kv{display:grid;grid-template-columns:44px 1fr;gap:6px;font-size:14px}
+.invite-hero .kv span{opacity:.6;font-weight:600}
+.demo-note{font-size:11.5px;color:var(--faint);text-align:center;margin:10px 0 0}
+.pdetail .top2{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.pdetail .thumb{width:64px;height:64px}
+.pdetail h3{font-size:20px}
+.kov-av{width:40px;height:40px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;font-weight:800;color:#1F2022;box-shadow:0 2px 6px rgba(0,0,0,.2);font-family:var(--font)}
+.kov-tag{background:#fff;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;margin-top:4px;text-align:center;font-family:var(--font);color:#1F2022}
+.kov-pin{background:#1F2022;color:#fff;border-radius:15px;padding:6px 12px;font-size:13px;font-weight:800;font-family:var(--font);white-space:nowrap}
+.kov-mk{width:32px;height:32px;border-radius:9px;border:3px solid #fff;color:#fff;display:grid;place-items:center;font-weight:800;font-size:12.5px;font-family:var(--font)}
+.srcbadge{font-size:11px;font-weight:800;border-radius:8px;padding:3px 8px;background:var(--card);color:var(--muted)}
+.srcbadge.real{background:var(--lime);color:#1F2022}
+
+/* ---------- 기록/마이 ---------- */
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.statgrid .stat{height:78px}
+.statgrid .stat b{font-size:22px}
+.lb{display:grid;grid-template-columns:22px 32px 1fr auto;gap:12px;align-items:center;padding:8px 0;font-size:14px;font-weight:700}
+.lb .av{width:32px;height:32px;font-size:12px;border:0}
+.lb em{font-style:normal;font-size:12.5px;color:var(--muted);font-weight:600}
+.rec{background:var(--card);border-radius:18px;padding:14px 16px;margin-bottom:8px}
+.rec b{font-size:15px}
+.rec .m{font-size:12.5px;color:var(--muted);margin-top:3px}
+.rec .tags{margin-top:6px}
+.set{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line);font-size:15px;font-weight:700;width:100%;text-align:left}
+.set span{color:var(--muted);font-weight:600;font-size:14px}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:30px;height:30px;border-radius:50%;background:var(--card);font-size:16px;font-weight:800}
+.fun{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;margin-bottom:12px;font-size:14px;font-weight:700}
+.fun .bar{grid-column:1/-1;height:10px;border-radius:5px}
+.fun .bar i{background:var(--lime)}
+.fun small{color:var(--muted);font-weight:600}
+/* ---------- v4: Figma 디테일 정렬 ---------- */
+.noti{background:#1F2022;color:#fff}
+.noti .src,.noti span{color:rgba(255,255,255,.62)}
+.racehead{background:#1F2022;color:#fff}
+.racehead .r{color:#C8F135}
+.racehead .icon-btn{color:#fff}
+.rank .bar i{background:var(--ink)}
+.rank .r.late{color:#E5484D}
+.sys{background:var(--card);color:var(--muted)}
+.send{background:var(--lime);color:#1F2022}
+.go{background:#fff;color:#1F2022;border:4px solid #1F2022}
+.podium .p.first{background:var(--card);color:var(--ink)}
+.podium .p.last{background:#FFD6DE;color:#1F2022}
+.podium .p.last .tagl{color:#E5484D;font-weight:800}
+.day.on{background:var(--lime);color:#1F2022}
+.day.on small{color:#1F2022}
+.day.today:not(.on) b{color:var(--lime-deep)}
+.day.sun small{color:var(--muted)}
+.mecard{background:var(--bg);border:2px solid var(--lime)}
+/* ---------- v4: 신규 화면 ---------- */
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border-radius:14px;padding:4px;margin:-8px 0 22px}
+.seg button{height:40px;border-radius:11px;font-size:14px;font-weight:700;color:var(--muted)}
+.seg button.on{background:var(--bg);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.slots{display:flex;flex-wrap:wrap;gap:8px}
+.slot{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 6px 0 14px;border-radius:18px;background:var(--lime);color:#1F2022;font-size:13.5px;font-weight:700}
+.slot button{width:24px;height:24px;border-radius:50%;background:rgba(31,32,34,.12);font-size:11px}
+.slot-add{border:2px dashed var(--line);background:none}
+.availrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border-radius:16px;padding:14px;margin-bottom:8px;border:2px solid transparent}
+.availrow.on{background:var(--lime-soft);border-color:var(--lime)}
+.availrow .ck{width:24px;height:24px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;font-weight:900;font-size:14px;flex:none;background:var(--bg)}
+.availrow.on .ck{background:#1F2022;border-color:#1F2022;color:var(--lime)}
+.availrow b{flex:1;font-size:15px}
+.availrow small{font-size:12px;color:var(--muted);font-weight:700}
+.tally2{display:grid;grid-template-columns:1fr auto;gap:5px 10px;align-items:center;margin-bottom:12px;font-size:14px;font-weight:700}
+.tally2:last-child{margin-bottom:0}
+.tally2 .bar{grid-column:1/-1;height:8px;border-radius:4px}
+.tally2 .bar i{background:var(--ink)}
+.tally2.best .bar i{background:var(--lime-deep)}
+.tally2 .who{display:flex}.tally2 .who .av{width:20px;height:20px;font-size:9px;border-width:1.5px;margin-left:-5px}
+.best-tag{font-size:11px;font-weight:800;background:var(--lime);color:#1F2022;border-radius:8px;padding:2px 7px;margin-left:6px}
+.deny{background:#FFF1F2;border-radius:18px;padding:16px;margin-top:12px;color:#1F2022}
+.deny b{font-size:16px}.deny p{font-size:13px;line-height:1.6;margin:8px 0 14px;color:#5B5B5B}
+.fb{display:flex;align-items:center;gap:8px;margin-top:16px;font-size:13.5px;font-weight:700;flex-wrap:wrap}
+.fb span{flex:1;min-width:120px}
+.taste.empty{background:var(--card);border:1.5px dashed var(--line)}
+.taste.empty .chip{background:var(--line);color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const LINE={"1":["1","#0052A4"],"2":["2","#00A84D"],"3":["3","#EF7C1C"],"4":["4","#00A5DE"],"5":["5","#996CAC"],"6":["6","#CD7C2F"],"7":["7","#747F00"],"8":["8","#E6186C"],"9":["9","#BDB092"],"S":["신분당","#D4003B"],"B":["수인분당","#F5A200"],"A":["공항","#0090D2"],"K":["경의중앙","#77C4A3"]};
+const RAW=[
+["강남",37.4979,127.0276,"2S",[5,4,5,4,5,5],[2,2,2,3],5],
+["홍대입구",37.5572,126.9245,"2AK",[5,5,5,3,5,4],[2,5,2,3],5,"연남"],
+["합정",37.5496,126.9139,"26",[4,5,4,3,3,3],[3,3,4,4],4],
+["망원",37.5560,126.9101,"6",[4,5,3,3,2,2],[4,4,4,4],3],
+["신촌",37.5552,126.9369,"2",[4,4,5,4,4,3],[2,5,1,3],4],
+["성수",37.5446,127.0559,"2",[5,5,4,3,4,5],[3,2,3,3],5],
+["서울숲",37.5436,127.0446,"B",[3,5,3,3,3,3],[5,2,5,4],3],
+["건대입구",37.5404,127.0701,"27",[5,3,5,3,4,3],[1,5,2,3],5],
+["왕십리",37.5613,127.0371,"25BK",[4,3,4,3,3,4],[3,4,2,3],3],
+["을지로3가",37.5663,126.9912,"23",[5,3,5,2,2,1],[2,3,3,3],4,"을지로"],
+["종각",37.5702,126.9831,"1",[5,3,5,3,3,3],[2,3,2,3],4],
+["종로3가",37.5714,126.9918,"135",[4,2,5,1,2,2],[2,5,1,3],3],
+["광화문",37.5710,126.9768,"5",[4,4,3,4,2,3],[4,2,4,4],4],
+["안국",37.5765,126.9854,"3",[4,5,3,3,3,4],[5,2,4,4],4,"익선동"],
+["혜화",37.5822,127.0019,"4",[4,4,4,4,5,2],[3,4,3,4],4,"대학로"],
+["신용산",37.5292,126.9679,"4",[4,4,4,3,3,4],[3,2,3,3],4,"용리단길"],
+["삼각지",37.5347,126.9730,"46",[4,4,4,2,2,1],[3,3,3,3],3],
+["이태원",37.5345,126.9943,"6",[5,4,5,2,4,3],[2,2,4,3],4],
+["여의도",37.5216,126.9243,"59",[4,4,3,4,3,5],[4,2,5,4],4],
+["영등포",37.5156,126.9073,"1",[4,3,4,3,3,5],[2,4,2,3],4],
+["문래",37.5180,126.8950,"2",[4,4,4,2,2,1],[4,4,3,4],3],
+["노량진",37.5131,126.9425,"19",[3,3,3,5,1,1],[3,5,2,5],2],
+["사당",37.4765,126.9816,"24",[4,3,5,3,3,2],[2,4,1,3],4],
+["서울대입구",37.4812,126.9527,"2",[5,4,4,4,2,2],[3,5,2,4],4,"샤로수길"],
+["신림",37.4842,126.9297,"2",[4,3,5,3,4,2],[1,5,1,3],4],
+["교대",37.4934,127.0140,"23",[4,3,4,4,2,2],[3,3,2,4],3],
+["고속터미널",37.5049,127.0049,"379",[4,4,3,3,3,5],[3,3,3,4],4],
+["신사",37.5164,127.0203,"3S",[4,5,4,3,2,5],[3,1,3,3],4,"가로수길"],
+["압구정로데오",37.5273,127.0405,"B",[4,5,5,2,3,4],[3,1,3,3],4,"도산"],
+["선릉",37.5045,127.0490,"2B",[4,4,4,4,3,2],[3,2,2,4],4],
+["삼성",37.5088,127.0631,"2",[4,4,3,4,5,5],[3,2,4,4],4,"코엑스"],
+["잠실",37.5133,127.1001,"28",[5,4,4,4,5,5],[3,3,5,4],5],
+["잠실새내",37.5116,127.0863,"2",[4,3,5,2,3,2],[2,5,1,3],4],
+["천호",37.5386,127.1236,"58",[4,3,4,3,3,4],[2,4,2,3],3],
+["노원",37.6551,127.0613,"47",[4,3,4,4,4,3],[2,4,1,3],4],
+["수유",37.6380,127.0257,"4",[4,3,4,2,3,2],[2,5,1,3],3],
+["성신여대입구",37.5926,127.0164,"4",[4,4,4,3,3,3],[2,5,2,3],3,"성신여대"],
+["구로디지털단지",37.4852,126.9015,"2",[4,3,4,3,2,2],[2,4,1,3],3,"구디"],
+["신도림",37.5088,126.8913,"12",[3,3,3,3,3,4],[3,3,2,3],3],
+["목동",37.5261,126.8646,"5",[4,4,2,5,3,4],[4,3,2,4],3],
+["마곡나루",37.5667,126.8272,"9A",[4,4,3,4,2,3],[4,3,4,4],3,"마곡"],
+["연신내",37.6190,126.9210,"36",[4,3,4,2,3,3],[2,4,1,3],3],
+["공덕",37.5443,126.9516,"56AK",[5,3,5,3,2,2],[3,4,2,3],3],
+["판교",37.3948,127.1112,"S",[4,4,3,4,3,4],[4,2,3,4],4],
+["정자",37.3670,127.1085,"SB",[4,4,4,3,2,2],[4,3,3,4],3],
+["서현",37.3850,127.1233,"B",[4,3,4,4,4,4],[2,4,1,3],4],
+["수원",37.2660,127.0000,"1B",[4,3,4,3,3,4],[2,4,1,3],4],
+// 출발지 전용 역
+["서울역",37.5547,126.9707,"14AK"],["시청",37.5657,126.9769,"12"],["용산",37.5299,126.9648,"1K"],
+["동대문역사문화공원",37.5652,127.0079,"245"],["동대문",37.5714,127.0098,"14"],["경복궁",37.5757,126.9737,"3"],
+["홍제",37.5890,126.9437,"3"],["이촌",37.5222,126.9740,"4K"],["총신대입구(이수)",37.4863,126.9819,"47"],
+["봉천",37.4825,126.9416,"2"],["낙성대",37.4768,126.9636,"2"],["대림",37.4925,126.8950,"27"],
+["가산디지털단지",37.4816,126.8826,"17"],["청담",37.5193,127.0533,"7"],["강남구청",37.5172,127.0412,"7B"],
+["군자",37.5571,127.0795,"57"],["상봉",37.5965,127.0852,"7K"],["회기",37.5896,127.0580,"1K"],
+["청량리",37.5802,127.0480,"1KB"],["까치산",37.5317,126.8466,"25"],["김포공항",37.5624,126.8013,"59A"],
+["수서",37.4874,127.1017,"3B"],["도곡",37.4910,127.0555,"3B"],["양재",37.4845,127.0343,"3S"],
+["미금",37.3499,127.1089,"SB"],["광교",37.2850,127.0440,"S"],["야탑",37.4114,127.1286,"B"],
+["모란",37.4321,127.1290,"8B"],["범계",37.3897,126.9507,"4"],["부천",37.4841,126.7827,"1"],
+["부평",37.4895,126.7245,"1"],["의정부",37.7386,127.0459,"1"],["정발산",37.6592,126.7733,"3"],
+["백석",37.6431,126.7880,"3"],["DMC",37.5770,126.8990,"6AK"],["상수",37.5478,126.9229,"6"],
+["이대",37.5567,126.9460,"2"],["안암",37.5863,127.0292,"6"],["석계",37.6150,127.0657,"16"],
+["태릉입구",37.6180,127.0750,"67"],["망우",37.5992,127.0921,"K"],["석촌",37.5055,127.1069,"89"],
+["가락시장",37.4927,127.1182,"38"],["오금",37.5021,127.1281,"35"],["길음",37.6033,127.0250,"4"],
+["숙대입구",37.5448,126.9722,"4"],["마포구청",37.5635,126.9033,"6"],["응암",37.5986,126.9155,"6"],
+["당산",37.5343,126.9025,"29"],["신대방",37.4876,126.9133,"2"],["노들",37.5129,126.9535,"9"],
+["중계",37.6448,127.0641,"7"],["도봉산",37.6896,127.0460,"17"],["구파발",37.6368,126.9189,"3"],
+["인천시청",37.4574,126.7022,"1"],["송도(인천대입구)",37.3864,126.6395,"1"],["광명사거리",37.4793,126.8547,"7"],
+];
+const ST=RAW.map(r=>({name:r[0],lat:r[1],lng:r[2],lines:r[3].split(""),hub:!!r[4],cat:r[4],vibe:r[5],scale:r[6],short:r[7]||r[0]}));
+// 서울대 캠퍼스는 셔틀+2호선 기준으로 처리
+const HUBS=ST.filter(s=>s.hub);
+
+/* ============================================================
+   상수
+   ============================================================ */
+const PURPOSES=[["식사","밥","식당"],["카페","커","카페"],["술 한잔","술","술집"],["공부·작업","공","작업"],["놀거리","놀","놀거리"],["쇼핑·산책","쇼","산책"]];
+const VIBES=["조용한","가성비","뷰 맛집","오래 앉기"];
+const AVC=["#C8F135","#FFD86B","#A9D8FF","#FFB5C9","#9FE5CF","#CDB8FF","#FFC08A","#E3E3DC"];
+const CAT_SHORT=["식","카","술","공","놀","쇼"];
+const CAT_COLOR=["#FF9A3D","#B07A4A","#8B6CF0","#3B9EFF","#FF5F8A","#23B08C"];
+const TEMPL={
+ 0:[["파스타집","리뷰 1.2k"],["솥밥집","웨이팅 적음"],["돈카츠","리뷰 860"],["쌀국수","단체석"],["한식 주점","가성비"]],
+ 1:[["로스터리","넓은 좌석"],["디저트 카페","리뷰 2.1k"],["베이커리 카페","2층 창가"],["북카페","조용함"]],
+ 2:[["와인바","2차 추천"],["이자카야","늦게까지"],["수제맥주","단체석"]],
+ 3:[["스터디카페","콘센트 많음"],["작업 카페","와이파이 빠름"],["24시 카페","늦게까지"]],
+ 4:[["보드게임 카페","4인 테이블"],["방탈출","예약 필수"],["코인노래방","가성비"],["볼링장","단체 가능"]],
+ 5:[["소품샵 골목","도보 코스"],["편집숍 거리","주말 붐빔"],["산책로","노을 명소"]]};
+const NB={"홍대입구":["서교동","연남","동교동"],"성수":["성수동","뚝섬","서울숲"],"강남":["역삼","논현","신논현"],"합정":["합정","망원","상수"],"을지로3가":["을지로","힙지로","충무로"],"안국":["익선동","북촌","계동"],"신촌":["신촌","창천동","연세로"],"잠실":["송리단길","석촌호수","잠실"],"신용산":["용리단길","한강로","신용산"],"이태원":["이태원","경리단","한남"]};
+const AREA={"백석":"일산동구 백석동","성수":"성동구 성수동","사당":"동작구 사당동","신도림":"구로구 신도림동","노원":"노원구 상계동","판교":"분당구 삼평동","서울대입구":"관악구 봉천동","잠실":"송파구 잠실동","DMC":"마포구 상암동","부평":"부평구 부평동","강남":"강남구 역삼동","홍대입구":"마포구 동교동","신림":"관악구 신림동","합정":"마포구 합정동","건대입구":"광진구 화양동","왕십리":"성동구 행당동","정자":"분당구 정자동","수원":"팔달구 매산로","서울대(관악캠퍼스)":"관악구 관악로","여의도":"영등포구 여의도동","모란":"성남시 중원구"};
+const FRIENDS=[["지민","성수"],["도윤","사당"],["서아","신도림"],["하준","판교"],["유나","DMC"],["태오","잠실"],["소희","부평"]];
+const STATUS_ME=["씻는중..","화장중..","곧 나감","출발했어요","5분만!!","도착했어요"];
+const PREP_ST=["씻는중..","화장중..","곧 나감","5분만!!"];
+const DEFAULT_PEN=["커피 쏘기","디저트 사기","2차 계산","사진 찍사","노래 한 곡","면제!"];
+const BUFFER=15;
+/* ===== 외부 연동: Vercel 배포 시 채우세요 (README.md 참고). 비어 있으면 자체 지도·추정치로 동작 ===== */
+const CONFIG={
+  KAKAO_JS_KEY:"",                 // 카카오 디벨로퍼스 > 앱 > JavaScript 키 (지도 표시 + 장소 검색)
+  TRANSIT_ENDPOINT:"",             // "/api/transit" → 서버에서 카카오 대중교통 길찾기 API 호출 (REST 키는 서버에만)
+  INVITE_BASE:"https://moilgot.vercel.app/j/",
+  PLACES_URL:"",
+  SUPABASE_URL:"",                 // Supabase > Project Settings > API > Project URL
+  SUPABASE_ANON_KEY:"",            // 같은 화면의 anon public 키 (브라우저에 넣어도 되는 공개 키)                   // 크롤링한 장소 JSON 주소 (예: "/places.json"). 형식은 README 참고
+};
+const LANDMARKS=[["서울대학교",37.4591,126.9520,"관악구 관악로"],["연세대학교",37.5658,126.9386,"서대문구 신촌동"],["고려대학교",37.5895,127.0323,"성북구 안암동"],
+["서강대학교",37.5509,126.9410,"마포구 신수동"],["이화여자대학교",37.5618,126.9468,"서대문구 대현동"],["성균관대학교",37.5877,126.9933,"종로구 명륜동"],
+["한양대학교",37.5575,127.0453,"성동구 사근동"],["건국대학교",37.5408,127.0793,"광진구 화양동"],["홍익대학교",37.5510,126.9255,"마포구 서교동"],
+["중앙대학교",37.5050,126.9571,"동작구 흑석동"],["경희대학교",37.5963,127.0525,"동대문구 회기동"],["숭실대학교",37.4965,126.9575,"동작구 상도동"],
+["서울시립대학교",37.5838,127.0588,"동대문구 전농동"],["국민대학교",37.6110,126.9973,"성북구 정릉동"],["코엑스",37.5116,127.0595,"강남구 삼성동"],
+["여의도 IFC몰",37.5252,126.9258,"영등포구 여의도동"],["판교테크노밸리",37.4020,127.1086,"분당구 삼평동"],["광화문광장",37.5720,126.9769,"종로구 세종로"],
+["롯데월드타워",37.5126,127.1025,"송파구 신천동"],["서울숲",37.5444,127.0374,"성동구 성수동1가"],["DDP 동대문디자인플라자",37.5665,127.0092,"중구 을지로7가"],
+["킨텍스",37.6688,126.7457,"일산서구 대화동"],["일산 호수공원",37.6582,126.7654,"일산동구 장항동"],["상암 누리꿈스퀘어",37.5790,126.8894,"마포구 상암동"],
+["마곡 LG사이언스파크",37.5610,126.8350,"강서구 마곡동"],["가산디지털단지",37.4780,126.8870,"금천구 가산동"],["목동 현대백화점",37.5270,126.8750,"양천구 목동"],
+["노원 롯데백화점",37.6553,127.0610,"노원구 상계동"],["수원 삼성디지털시티",37.2550,127.0460,"영통구 매탄동"],["인하대학교",37.4502,126.6536,"인천 미추홀구"],
+["일산동구 백석동",37.6440,126.7870,"고양시 일산동구"],["분당구 정자동",37.3660,127.1080,"성남시 분당구"],["마포구 망원동",37.5560,126.9030,"서울 마포구"],
+["강남구 역삼동",37.5000,127.0366,"서울 강남구"],["관악구 봉천동",37.4822,126.9420,"서울 관악구"],["송파구 잠실동",37.5080,127.0830,"서울 송파구"]];
+function nearStations(lat,lng,k=3){return ST.map(s=>({s,d:hav({lat,lng},s)})).sort((a,b)=>a.d-b.d).slice(0,k)}
+function accessOf(d){const walk=Math.round(d*1.25/4.5*60);return walk<=20?{min:Math.max(1,walk),mode:"도보"}:{min:Math.round(8+d*4),mode:"버스"}}
+function makeLoc(label,sub,lat,lng,src,stName){const here={lat,lng};const s=stName?byName(stName):nearStations(lat,lng,1)[0].s,a=accessOf(hav(here,s));
+  return {label,sub,lat,lng,src,st:s.name,acc:a.min,accMode:a.mode}}
+function locFromStation(name,src){const s=byName(name);return makeLoc(AREA[name]||`${name}역 근처`,`${name}역`,s.lat+0.0018,s.lng+0.0012,src,name)}
+function setLoc(p,loc){p.loc=loc;p.st=loc.st;p.acc=loc.acc;p.src=loc.src}
+function legOf(p,h){const tr=travel(byName(p.st),h);return {t:tr.t+Math.max(0,(p.acc??3)-3),tr:tr.tr}}
+const ptOf=p=>p.loc?{lat:p.loc.lat,lng:p.loc.lng,name:p.st}:byName(p.st);
+const REAL=new Map(); // 실제 대중교통 소요시간 캐시
+
+/* ============================================================
+   추천 로직
+   ============================================================ */
+function hav(a,b){const R=6371,t=Math.PI/180,dLa=(b.lat-a.lat)*t,dLo=(b.lng-a.lng)*t;
+  const x=Math.sin(dLa/2)**2+Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+// 대중교통 이동시간 추정: 도보·대기 6분 + 거리(×1.3 굴곡)×2분/km + 환승×5분  → 배포 시 ODsay/카카오 API로 교체
+function travel(o,h){
+  if(o.name===h.name) return {t:4,tr:0};
+  const d=hav(o,h)*1.3, shared=o.lines.some(l=>h.lines.includes(l));
+  const tr=shared?0:(d>24?2:1);
+  return {t:Math.round(6+d*2.0+tr*5),tr};
+}
+function recommend(people,purposes,vibes,w,opt={}){const {hubs=HUBS,k=3,leg=legOf}=opt;
+  const pIdx=purposes.length?purposes:[0];
+  return hubs.map(h=>{
+    const legs=people.map(p=>leg(p,h));
+    const ts=legs.map(l=>l.t),avg=ts.reduce((a,b)=>a+b,0)/ts.length,max=Math.max(...ts),min=Math.min(...ts);
+    const spread=max-min,avgTr=legs.reduce((a,l)=>a+l.tr,0)/legs.length;
+    const fit=pIdx.reduce((a,i)=>a+h.cat[i],0)/pIdx.length;
+    const vfit=vibes.length?vibes.reduce((a,i)=>a+h.vibe[i],0)/vibes.length:3;
+    const area=0.6*fit+0.2*vfit+0.2*h.scale, f=w.fair/100, a=w.area/50;
+    const cost=avg+f*(max-avg)*1.5+f*spread*0.5+avgTr*4-(area-3)*6*a;
+    return {hub:h,legs,avg:Math.round(avg),max,spread,avgTr,fit,cost};
+  }).sort((x,y)=>x.cost-y.cost).slice(0,k);
+}
+function reason(r,purposes){
+  const names=(purposes.length?purposes:[0]).map(i=>PURPOSES[i][0]).join("·");
+  const out=[`모두 ${r.max}분 이내로 도착`];
+  out.push(r.spread<=10?`이동 차이 ${r.spread}분으로 공평`:`이동 차이 ${r.spread}분`);
+  if(r.fit>=4.5)out.push(`${names} 가게가 특히 많은 상권`);else if(r.fit>=3.5)out.push(`${names} 하기 괜찮은 상권`);
+  if(r.avgTr===0)out.push("모두 환승 없음");
+  return out.join(" · ");
+}
+
+/* ============================================================
+   저장소 & 상태
+   ============================================================ */
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function track(ev,props){const f=store.get("mg3_funnel",{});f[ev]=(f[ev]||0)+1;store.set("mg3_funnel",f);
+  if(window.SB)SB.from("events").insert({code:(S.guest?.code||S.d?.code||null),device_id:DEVICE,name:ev,props:props||null}).then(()=>{},()=>{});}
+const DEVICE=(()=>{let d=store.get("mg3_device",null);if(!d){d=Math.random().toString(36).slice(2)+Date.now().toString(36);store.set("mg3_device",d)}return d})();
+const ONLINE=()=>!!window.SB;
+const today=new Date();today.setHours(0,0,0,0);
+const DAY=864e5;
+const byName=n=>ST.find(s=>s.name===n);
+const areaOf=s=>AREA[s.name]||`${s.name}역 근처`;
+
+let PROFILE=store.get("mg3_profile",null)||{name:"은수",home:"백석",school:"서울대입구",
+  prep:[["씻기",25],["옷 입기 · 화장",20],["짐 챙기기",7]],lateAvg:12,early:0};
+const saveProfile=()=>store.set("mg3_profile",PROFILE);
+
+function seedIfNeeded(){
+  if(store.get("mg3_seeded",false))return;
+  const ppl=[[PROFILE.name,"백석"],["지민","성수"],["도윤","사당"],["서아","신도림"]];
+  const hub=byName("홍대입구");
+  const mk=(id,name,dayTs,time,hubName,place,people,extra)=>{const h=byName(hubName);
+    const pp=people.map(([n,s],i)=>{const p={name:n};setLoc(p,locFromStation(s,i===0?"현재 위치":"링크"));return p});
+    return {id,name,date:dayTs,time,hub:hubName,place,placeCat:0,purposes:[0,1],vibes:[0],alarm:true,share:true,
+      people:pp,legs:pp.map(p=>legOf(p,h).t),status:"upcoming",...extra}};
+  const up=mk("seed-up","금요일 저녁 모임",today.getTime()+DAY,19*60,"홍대입구","서교동 파스타집",ppl,{});
+  const pastDay=new Date(2026,8,12).getTime()<today.getTime()?new Date(2026,8,12).getTime():today.getTime()-12*DAY;
+  const past=mk("seed-past","스터디 뒤풀이",pastDay,20*60,"합정","합정 이자카야",[[PROFILE.name,"서울대입구"],["지민","성수"],["도윤","DMC"],["서아","신도림"]],
+    {status:"done",result:{order:[2,1,0,3],lateMin:[0,0,0,11],penalty:"커피 쏘기",loser:3}});
+  const past2=mk("seed-past2","동기 점심",pastDay-9*DAY,12*60,"신촌","신촌 솥밥집",[[PROFILE.name,"서울대입구"],["하준","판교"],["유나","DMC"]],
+    {status:"done",result:{order:[2,0,1],lateMin:[0,4,0],penalty:"디저트 사기",loser:1}});
+  store.set("mg3_meetings",[past2,past,up]);store.set("mg3_seeded",true);
+}
+seedIfNeeded();
+const meetings=()=>store.get("mg3_meetings",[]);
+const saveMeetings=l=>store.set("mg3_meetings",l);
+const getMeeting=id=>meetings().find(m=>m.id===id);
+function putMeeting(m){const l=meetings().filter(x=>x.id!==m.id);l.push(m);saveMeetings(l)}
+
+function freshDraft(){
+  const def=new Date(today);const dow=def.getDay();def.setDate(def.getDate()+((5-dow+7)%7||7)); // 다가오는 금요일
+  return {name:"",count:4,purposes:[0,1],vibes:[0],taste:histCount()>=2,mode:"fixed",slots:[],date:def.getTime(),weekStart:null,time:19*60,alarm:true,share:true,
+    people:[(()=>{const p={name:PROFILE.name,state:"done"};setLoc(p,locFromStation(PROFILE.home,"현재 위치"));return p})()],invited:false,code:Math.random().toString(36).slice(2,8)};
+}
+function syncFriends(d){
+  if(ONLINE()){while(d.people.length<d.count){const i=d.people.length;d.people.push({name:`친구 ${i}`,st:null,state:"waiting",placeholder:true})}
+    const real=d.people.filter(p=>!p.placeholder).length;d.count=Math.max(d.count,real);d.people=[...d.people.filter(p=>!p.placeholder),...d.people.filter(p=>p.placeholder)].slice(0,Math.max(d.count,real));return}
+  while(d.people.length<d.count){const i=d.people.length,f=FRIENDS[(i-1)%FRIENDS.length];d.people.push({name:f[0],st:null,sim:f[1],state:"waiting"})}
+  d.people.length=d.count;
+}
+const S={screen:"home",prev:null,d:null,results:null,sel:0,w:{fair:60,area:50},places:null,filter:-1,focus:null,
+  sheet:null,cur:null,race:null,roul:null,verdict:null,chatDraft:"",stationQ:"",loc:null,guest:null,real:false,refining:false};
+
+/* ============================================================
+   유틸
+   ============================================================ */
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const DOW="일월화수목금토";
+const fmtDate=ts=>{const d=new Date(ts);return `${d.getMonth()+1}월 ${d.getDate()}일 (${DOW[d.getDay()]})`};
+const fmtShort=ts=>{const d=new Date(ts);return `${d.getMonth()+1}/${d.getDate()}`};
+const fmtTime=m=>{m=((Math.round(m)%1440)+1440)%1440;const h=Math.floor(m/60),mm=String(m%60).padStart(2,"0");return `${h<12?"오전":"오후"} ${h%12===0?12:h%12}:${mm}`};
+const hhmm=m=>{m=((Math.floor(m)%1440)+1440)%1440;return `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`};
+const initial=n=>String(n||"?").slice(0,1);
+const avc=i=>AVC[i%AVC.length];
+const av=(name,i,cls="",style="")=>`<span class="av ${cls}" style="background:${avc(i)};${style}">${esc(initial(name))}</span>`;
+const lineBadges=s=>`<span class="lines">${s.lines.map(l=>`<span class="ln" style="background:${LINE[l][1]}">${LINE[l][0]}</span>`).join("")}</span>`;
+const lineText=s=>s.lines.map(l=>/\d/.test(LINE[l][0])?LINE[l][0]+"호선":({"공항":"공항철도","경의중앙":"경의중앙선","신분당":"신분당선","수인분당":"수인분당선"})[LINE[l][0]]).join(" · ");
+function seeded(str){let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return()=>{h^=h<<13;h^=h>>>17;h^=h<<5;return((h>>>0)%10000)/10000}}
+let toastT;function toast(msg){document.querySelector(".toast")?.remove();const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),2300)}
+const backBtn=(to,cls="")=>`<button class="icon-btn ${cls}" data-a="go" data-v="${to}" aria-label="뒤로">←</button>`;
+const progress=n=>`<div class="progress">${[1,2,3,4].map(i=>`<i class="${i<=n?"on":""}"></i>`).join("")}</div>`;
+const stepTop=(n,to)=>`<div class="top">${backBtn(to)}<h1 style="text-align:center">새 모임</h1><span style="width:40px;text-align:right;color:var(--muted);font-size:14px;font-weight:700">${n}/4</span></div>${progress(n)}`;
+const ICON={home:'<path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-5v-6h-4v6H5a1 1 0 01-1-1z"/>',cal:'<rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/>',trophy:'<path d="M7 4h10v5a5 5 0 01-10 0zM12 14v4M8 21h8M7 6H4v1a3 3 0 003 3M17 6h3v1a3 3 0 01-3 3"/>',me:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/>'};
+const svgI=(k,active)=>`<svg viewBox="0 0 24 24" fill="${active?"currentColor":"none"}" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${ICON[k]}</svg>`;
+const tabbar=on=>`<nav class="tabbar">${[["home","홈","home"],["mine","내 모임","cal"],["records","기록","trophy"],["my","마이","me"]].map(([k,l,ic])=>`<button class="${on===k?"on":""}" data-a="tab" data-v="${k}">${svgI(ic,on===k)}${l}</button>`).join("")}</nav>`;
+const plus='<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 4v16M4 12h16"/></svg>';
+const minus='<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 12h16"/></svg>';
+function depOf(m,i){return m.time-m.legs[i]-BUFFER-(i===0?PROFILE.early:0)}
+
+/* ============================================================
+   지도
+   ============================================================ */
+const RIVER=[[37.600,126.76],[37.585,126.80],[37.570,126.84],[37.556,126.88],[37.545,126.905],[37.533,126.925],[37.523,126.945],[37.517,126.965],[37.513,126.985],[37.518,127.005],[37.525,127.025],[37.530,127.045],[37.530,127.065],[37.522,127.085],[37.525,127.105],[37.540,127.125],[37.555,127.150],[37.570,127.18]];
+function projector(pts,W,H,pad,minKm){
+  const lat0=pts.reduce((a,p)=>a+p.lat,0)/pts.length,kx=111.32*Math.cos(lat0*Math.PI/180),ky=110.57;
+  const xy=pts.map(p=>[p.lng*kx,-p.lat*ky]);
+  const x0=Math.min(...xy.map(p=>p[0])),x1=Math.max(...xy.map(p=>p[0])),y0=Math.min(...xy.map(p=>p[1])),y1=Math.max(...xy.map(p=>p[1]));
+  const cx=(x0+x1)/2,cy=(y0+y1)/2,rw=Math.max(x1-x0,minKm),rh=Math.max(y1-y0,minKm);
+  const sc=Math.min((W-pad.l-pad.r)/rw,(H-pad.t-pad.b)/rh),ox=pad.l+(W-pad.l-pad.r)/2,oy=pad.t+(H-pad.t-pad.b)/2;
+  return {f:(lat,lng)=>[ox+(lng*kx-cx)*sc,oy+(-lat*ky-cy)*sc],k:sc};
+}
+function mapBase(P,W,H){
+  const river=RIVER.map(([a,b])=>P.f(a,b).map(v=>v.toFixed(1)).join(",")).join(" "),rw=Math.max(10,Math.min(60,P.k*0.9));
+  return `<defs><pattern id="grid" width="66" height="66" patternUnits="userSpaceOnUse"><path d="M0 33H66M33 0V66" stroke="var(--map-road)" stroke-width="7"/><path d="M0 0H66M0 0V66" stroke="var(--map-road)" stroke-width="3"/></pattern></defs>
+  <rect width="${W}" height="${H}" fill="var(--map-bg)"/><rect width="${W}" height="${H}" fill="url(#grid)"/>
+  <rect x="${W*0.6}" y="${H*0.1}" width="130" height="96" rx="18" fill="var(--map-park)"/><rect x="${W*0.06}" y="${H*0.6}" width="96" height="70" rx="16" fill="var(--map-park)"/>
+  <polyline points="${river}" fill="none" stroke="var(--map-water)" stroke-width="${rw}" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+function hubPin(x,y,name){const w=name.length*13.5+26;
+  return `<circle cx="${x}" cy="${y}" r="11" fill="var(--lime)" stroke="#1F2022" stroke-width="4"/><rect x="${x-w/2}" y="${y-50}" width="${w}" height="30" rx="15" fill="#1F2022"/><text x="${x}" y="${y-30}" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">${esc(name)}</text>`}
+function avatarSvg(x,y,r,name,i){return `<circle cx="${x}" cy="${y}" r="${r}" fill="${avc(i)}" stroke="#fff" stroke-width="3"/><text x="${x}" y="${y+r*0.28}" text-anchor="middle" font-size="${r*0.75}" font-weight="800" fill="#1F2022">${esc(initial(name))}</text>`}
+function spreadPts(list){const seen={};return list.map(([x,y,k])=>{seen[k]=(seen[k]||0)+1;return [x+(seen[k]-1)*28,y]})}
+function resultMap(r,people){
+  const W=390,H=520,sts=people.map(ptOf),P=projector([r.hub,...sts],W,H,{l:50,r:50,t:110,b:120},4);
+  const [hx,hy]=P.f(r.hub.lat,r.hub.lng),pos=spreadPts(sts.map(s=>[...P.f(s.lat,s.lng),s.name]));
+  let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${esc(r.hub.name)}역 중심 지도">${mapBase(P,W,H)}<circle cx="${hx}" cy="${hy}" r="75" fill="var(--lime)" opacity=".35"/>`;
+  pos.forEach(([x,y])=>s+=`<line x1="${x}" y1="${y}" x2="${hx}" y2="${hy}" stroke="#1F2022" stroke-width="2.5" stroke-dasharray="3 6" stroke-linecap="round"/>`);
+  pos.forEach(([x,y],i)=>s+=`${avatarSvg(x,y,21,people[i].name,i)}<rect x="${x-19.5}" y="${y+25}" width="39" height="21" rx="10.5" fill="var(--bg)"/><text x="${x}" y="${y+39.5}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${r.legs[i].t}분</text>`);
+  return s+hubPin(hx,hy,r.hub.name+"역")+`</svg>`;
+}
+function placeMap(hub,places,focusId){
+  const W=390,H=440,cx=195,cy=250,R=112,P=projector([hub],W,H,{l:0,r:0,t:60,b:0},2.4);
+  let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${esc(hub.name)}역 주변 장소 지도">${mapBase(P,W,H)}
+  <circle cx="${cx}" cy="${cy}" r="${R+8}" fill="var(--lime)" opacity=".3"/><circle cx="${cx}" cy="${cy}" r="${R+8}" fill="none" stroke="#6F8F00" stroke-width="2" stroke-dasharray="6 6"/>
+  <circle cx="${cx}" cy="${cy}" r="8" fill="#1F2022"/>`;
+  let label="";
+  places.forEach(p=>{const x=cx+Math.cos(p.ang)*p.rad*R,y=cy+Math.sin(p.ang)*p.rad*R,big=p.id===focusId,sz=big?42:32;
+    s+=`<g data-a="focus" data-v="${p.id}" style="cursor:pointer"><rect x="${x-sz/2}" y="${y-sz/2}" width="${sz}" height="${sz}" rx="${sz*0.28}" fill="${CAT_COLOR[p.cat]}" stroke="#fff" stroke-width="3"/><text x="${x}" y="${y+(big?5.5:4.5)}" text-anchor="middle" font-size="${big?15:12.5}" font-weight="800" fill="#fff">${CAT_SHORT[p.cat]}</text></g>`;
+    if(big){const w=p.name.length*12.5+24;label=`<rect x="${Math.max(6,Math.min(W-w-6,x-w/2))}" y="${y-58}" width="${w}" height="28" rx="14" fill="#1F2022"/><text x="${Math.max(6+w/2,Math.min(W-6-w/2,x))}" y="${y-39}" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">${esc(p.name)}</text>`}});
+  return s+label+`</svg>`;
+}
+let PLACES_DB=null;if(CONFIG.PLACES_URL)fetch(CONFIG.PLACES_URL).then(r=>r.json()).then(j=>{PLACES_DB=j}).catch(e=>console.warn("places",e));
+function genPlaces(hub,purposes,vibes,taste){
+  if(PLACES_DB){let cats=purposes.length?[...purposes]:[0,1];if(cats.includes(0)&&!cats.includes(2))cats.push(2);
+    return PLACES_DB.map(p=>({p,c:PURPOSES.findIndex(x=>x[2]===p.category),d:hav(hub,p)})).filter(x=>x.c>=0&&cats.includes(x.c)&&x.d<0.8)
+      .map((x,k)=>{const p=x.p,tagHit=vibes.filter(i=>(p.tags||[]).includes(VIBES[i])).length;
+        return {id:k,cat:x.c,name:p.name,lat:p.lat,lng:p.lng,walk:Math.max(1,Math.round(x.d*1.25/4.5*60)),feat:(p.tags||[])[0]||(p.reviews?`리뷰 ${p.reviews}`:""),
+          fit:Math.min(99,Math.round(60+(p.rating||4)*6+tagHit*5+(taste&&x.c===1?3:0))),ang:Math.atan2(p.lat-hub.lat,(p.lng-hub.lng)*0.8),rad:Math.min(1,x.d/0.7),votes:[],second:x.c===2&&!purposes.includes(2)}})
+      .sort((a,b)=>b.fit-a.fit).slice(0,20)}
+  const rnd=seeded(hub.name+purposes.join("")+vibes.join("")),nb=NB[hub.name]||[hub.short];
+  let cats=purposes.length?[...purposes]:[0,1];if(cats.includes(0)&&!cats.includes(2))cats.push(2);
+  const out=[];let id=0;
+  cats.forEach(c=>TEMPL[c].forEach(([t,feat],k)=>{
+    let fit=Math.round(62+hub.cat[c]*3.5+rnd()*9-k*3+(k===0?7:0)+(taste&&(c===1||t==="와인바")?4:0));
+    out.push({id:id++,cat:c,name:`${nb[c%nb.length]} ${t}`,walk:2+Math.floor(rnd()*8),feat,fit:Math.min(97,fit),ang:0,rad:0,votes:[],second:c===2&&!purposes.includes(2)})}));
+  const off=rnd()*6.28;out.forEach((p,k)=>{p.ang=off+k*2.39996;p.rad=0.3+0.68*Math.sqrt((k+0.5)/out.length)});
+  if(hub.name==="홍대입구"){const f={"서교동 파스타집":[92,4,"리뷰 1.2k"],"연남 로스터리":[88,7,"넓은 좌석"],"동교동 와인바":[85,6,"2차 추천"]};out.forEach(p=>{if(f[p.name]){[p.fit,p.walk,p.feat]=f[p.name]}else p.fit=Math.min(p.fit,84)})}
+  return out.sort((a,b)=>b.fit-a.fit);
+}
+
+/* ============================================================
+   레이스 시뮬레이션 (약속 당일)
+   ============================================================ */
+function makeRace(m){
+  const n=m.people.length,late=n>=4?3:n-1,delays=[0,-6,2,14,4,-3,8,1];
+  const prepTotal=PROFILE.prep.reduce((a,p)=>a+p[1],0),myDep=depOf(m,0);
+  return {mid:m.id,now:myDep-prepTotal,speed:1,running:false,done:false,late,
+    ppl:m.people.map((p,i)=>({dep:i===0?myDep:depOf(m,i)+(i===late?delays[3]:delays[i%8]),travel:m.legs[i],arrived:null,override:null,lastStatus:null})),
+    order:[],chat:[],unread:0,started:false};
+}
+function statusOf(R,i){
+  const p=R.ppl[i];if(p.arrived!=null)return "도착!";
+  if(R.now>=p.dep){const rem=p.dep+p.travel-R.now;if(p.override==="5분만!!")return p.override;return rem<=5?"곧 도착":"지하철 이동중"}
+  if(p.override)return p.override;
+  const d=p.dep-R.now;return d>27?"씻는중..":d>7?"화장중..":"곧 나감";
+}
+function remOf(R,i){const p=R.ppl[i];if(p.arrived!=null)return 0;if(R.now<p.dep)return null;return Math.max(1,Math.ceil(p.dep+p.travel-R.now))}
+function progOf(R,i){const p=R.ppl[i];if(p.arrived!=null)return 1;return Math.max(0,Math.min(1,(R.now-p.dep)/p.travel))}
+function rankOrder(R){const idx=R.ppl.map((_,i)=>i);return idx.sort((a,b)=>{const A=R.ppl[a],B=R.ppl[b];
+  if(A.arrived!=null&&B.arrived!=null)return A.arrived-B.arrived;if(A.arrived!=null)return -1;if(B.arrived!=null)return 1;return (A.dep+A.travel)-(B.dep+B.travel)})}
+function pushChat(R,item){R.chat.push(item);if(S.screen!=="chat")R.unread++}
+function raceTick(dt){
+  const R=S.race,m=getMeeting(R.mid);if(!R||R.done||!R.running)return;
+  R.now+=dt*R.speed;
+  R.ppl.forEach((p,i)=>{
+    const st=statusOf(R,i);
+    if(p.arrived==null&&R.now>=p.dep+p.travel){p.arrived=R.now;R.order.push(i);const k=R.order.length;
+      pushChat(R,{sys:`${i===0?PROFILE.name:m.people[i].name}님이 ${k}등으로 도착했어요`});
+      if(k===1&&i!==0)pushChat(R,{from:i,text:"나 도착~ 2번 출구 앞이야"});
+      if(k===R.ppl.length-1&&R.order.length<R.ppl.length){const w=R.order.find(x=>x!==0)??1;pushChat(R,{from:w,text:"꼴찌 벌칙 뭐로 하지ㅋㅋ"})}
+      if(i===0)toast(`${k}등으로 도착! 🎉`);
+    }
+    if(i!==0&&p.lastStatus&&st!==p.lastStatus&&i===R.late&&st==="곧 나감"){pushChat(R,{sys:`${m.people[i].name}님 상태: ${p.lastStatus} → ${st}`});pushChat(R,{from:i,text:"미안ㅠ 이제 나가는 중"})}
+    if(i!==0&&p.lastStatus&&st!==p.lastStatus&&i===R.late&&st==="지하철 이동중"&&R.order.length>0)pushChat(R,{from:i,text:"5분만!! 거의 다 왔어"});
+    p.lastStatus=st;
+  });
+  if(R.order.length===R.ppl.length){R.done=true;R.running=false;pushChat(R,{sys:"모두 모였어요! 벌칙 룰렛을 돌려볼까요?"});
+    if(["today","race","chat"].includes(S.screen))toast("모두 모였어요! 벌칙 룰렛을 돌려볼까요?")}
+}
+let last=performance.now();
+setInterval(()=>{const now=performance.now(),dt=(now-last)/1000;last=now;
+  if(S.race&&S.race.running){raceTick(dt);if(["today","race","chat"].includes(S.screen))render(true)}},250);
+
+/* ============================================================
+   화면
+   ============================================================ */
+const V={};
+function meetCard(m){
+  const dd=Math.round((m.date-today.getTime())/DAY);
+  return `<button class="meet" data-a="openMeet" data-v="${m.id}"><span class="chip xs on">${dd<=0?"오늘":"D-"+dd}</span><h3>${esc(m.name)}</h3>
+  <div class="m">${fmtDate(m.date)} ${fmtTime(m.time)} · ${esc(m.hub)}역</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><div class="stack">${m.people.map((p,i)=>av(p.name,i)).join("")}</div>
+  <span class="chip sm white">출발 알림 ${hhmm(depOf(m,0))}</span></div></button>`;
+}
+function pastRow(m){const r=m.result,first=r?m.people[r.order[0]].name:"";
+  return `<button class="past" data-a="openRec" data-v="${m.id}"><span class="sq">🏁</span><div><b>${esc(m.name)}</b><span>${fmtShort(m.date)} · ${esc(m.hub)}역 · ${m.people.length}명${first?" · 1등 "+esc(first):""}</span></div></button>`}
+V.home=()=>{
+  const all=meetings(),up=all.filter(m=>m.status==="upcoming").sort((a,b)=>a.date-b.date),past=all.filter(m=>m.status==="done").sort((a,b)=>b.date-a.date);
+  return `<div class="scr">
+  <div class="top" style="justify-content:space-between"><span class="logo">모일곳</span><button class="dotbtn" data-a="bell" aria-label="오늘의 약속 알림"><i></i>${up.length?"<b></b>":""}</button></div>
+  <div class="hero"><svg width="130" height="200" viewBox="0 0 130 200" aria-hidden="true">
+    <path d="M42 36 L64 112 M112 84 L64 112 M72 176 L64 112" stroke="#1F2022" stroke-width="3" stroke-dasharray="3 6" stroke-linecap="round" fill="none"/>
+    <circle cx="64" cy="112" r="9" fill="#C8F135" stroke="#1F2022" stroke-width="4"/>
+    <circle cx="42" cy="34" r="17" fill="#FFD86B" stroke="#fff" stroke-width="3"/><text x="42" y="39" text-anchor="middle" font-size="14" font-weight="800" fill="#1F2022">지</text>
+    <circle cx="112" cy="84" r="17" fill="#A9D8FF" stroke="#fff" stroke-width="3"/><text x="112" y="89" text-anchor="middle" font-size="14" font-weight="800" fill="#1F2022">도</text>
+    <circle cx="72" cy="176" r="17" fill="#FFB5C9" stroke="#fff" stroke-width="3"/><text x="72" y="181" text-anchor="middle" font-size="14" font-weight="800" fill="#1F2022">서</text></svg>
+    <h2>우리 어디서<br>만날까?</h2><p>각자 출발지만 넣으면 딱 중간 지점과 갈 곳을 찾아줘요</p></div>
+  <div style="height:16px"></div><button class="btn" data-a="new">+ 새 모임 만들기</button>
+  ${(()=>{const dr=store.get("mg3_draft",null);if(!dr||Date.now()-dr.ts>2*DAY)return "";const n=dr.d.people.filter(p=>p.st).length;
+    return `<div class="meet" style="margin-top:12px;display:flex;align-items:center;gap:12px"><div style="flex:1"><span class="chip xs on">만드는 중</span><h3>${esc(dr.d.name||"이름 없는 모임")}</h3><div class="m">${n}/${dr.d.count}명 출발지 입력</div></div>
+    <div style="display:flex;flex-direction:column;gap:6px"><button class="chip sm dark" data-a="resume">이어서 하기</button><button class="chip sm" data-a="dropDraft">지우기</button></div></div>`})()}
+  <div class="sec">다가오는 약속</div>
+  ${up.length?up.slice(0,2).map(meetCard).join(""):`<div class="empty">아직 잡힌 약속이 없어요. 새 모임을 만들어 단톡방에 링크를 공유해보세요.</div>`}
+  <div class="sec">지난 모임</div>
+  ${past.length?past.slice(0,2).map(pastRow).join(""):`<div class="empty">약속을 마치면 도착 순위와 벌칙이 여기에 남아요.</div>`}
+  <div class="spacer"></div>${tabbar("home")}</div>`;
+};
+V.mine=()=>{const all=meetings(),up=all.filter(m=>m.status==="upcoming").sort((a,b)=>a.date-b.date),past=all.filter(m=>m.status==="done").sort((a,b)=>b.date-a.date);
+  return `<div class="scr"><div class="top"><span class="logo">내 모임</span></div>
+  <div class="sec" style="margin-top:4px">예정 <small>${up.length}개</small></div>${up.length?up.map(meetCard).join(""):`<div class="empty">예정된 약속이 없어요.</div>`}
+  <div class="sec">지난 모임 <small>${past.length}개</small></div>${past.map(pastRow).join("")}
+  <div class="spacer"></div>${tabbar("mine")}</div>`};
+V.records=()=>{
+  const done=meetings().filter(m=>m.status==="done"&&m.result).sort((a,b)=>b.date-a.date);
+  const me=PROFILE.name;let ranks=[],wins=0,lates=0;const board={};
+  done.forEach(m=>{m.result.order.forEach((pi,k)=>{const n=m.people[pi].name;board[n]=board[n]||{w:0,l:0,c:0};board[n].c++;if(k===0)board[n].w++;if(k===m.result.order.length-1)board[n].l++;
+    if(pi===0){ranks.push(k+1);if(k===0)wins++}});if((m.result.lateMin||[])[0]>0)lates++});
+  const avgR=ranks.length?(ranks.reduce((a,b)=>a+b,0)/ranks.length).toFixed(1):"-";
+  const lb=Object.entries(board).sort((a,b)=>b[1].w-a[1].w||a[1].l-b[1].l).slice(0,6);
+  return `<div class="scr"><div class="top"><span class="logo">기록</span></div>
+  <div class="statgrid"><div class="stat"><small>평균 도착 순위</small><b>${avgR}등</b></div><div class="stat"><small>1등</small><b>${wins}회</b></div><div class="stat"><small>지각</small><b>${lates}회</b></div></div>
+  <div class="sec">친구들 도착 랭킹</div>
+  ${lb.map(([n,v],k)=>`<div class="lb"><span style="font-weight:900;text-align:center">${k+1}</span>${av(n,Object.keys(board).indexOf(n))}<span>${esc(n)}${n===me?" (나)":""}</span><em>1등 ${v.w} · 꼴찌 ${v.l}</em></div>`).join("")||`<div class="empty">레이스 기록이 아직 없어요.</div>`}
+  <div class="sec">레이스 기록</div>
+  ${done.map(m=>`<div class="rec"><b>${esc(m.name)}</b><div class="m">${fmtShort(m.date)} · ${esc(m.hub)}역 · ${esc(m.place)}</div>
+    <div class="tags"><span class="tag fit">1등 ${esc(m.people[m.result.order[0]].name)}</span><span class="tag">꼴찌 ${esc(m.people[m.result.loser].name)}</span><span class="tag">벌칙 ${esc(m.result.penalty)}</span></div></div>`).join("")}
+  <div class="spacer"></div>${tabbar("records")}</div>`};
+V.my=()=>{
+  const f=store.get("mg3_funnel",{}),steps=[["create_start","모임 만들기 시작"],["origins_done","출발지 모두 입력"],["result_view","추천 지점 확인"],["places_view","주변 장소 보기"],["vote_start","투표 시작"],["confirmed","약속 확정"],["race_start","도착 레이스 참가"],["roulette","벌칙 룰렛 완료"]];
+  const top=Math.max(1,f.create_start||0);
+  return `<div class="scr"><div class="top"><span class="logo">마이</span></div>
+  <button class="set" data-a="editName"><b>내 이름</b><span>${esc(PROFILE.name)} ›</span></button>
+  <button class="set" data-a="pickFav" data-v="home"><b>집</b><span>${esc(PROFILE.home)}역 ›</span></button>
+  <button class="set" data-a="pickFav" data-v="school"><b>학교</b><span>${esc(PROFILE.school)}역 ›</span></button>
+  <div class="sec">평소 준비 시간 <small>준비 코칭에 쓰여요</small></div>
+  ${PROFILE.prep.map((p,i)=>`<div class="set"><b>${esc(p[0])}</b><span class="stepper"><button data-a="prep" data-v="${i}:-5" aria-label="줄이기">−</button>${p[1]}분<button data-a="prep" data-v="${i}:5" aria-label="늘리기">+</button></span></div>`).join("")}
+  <div class="sec">가설 검증 지표 <small>이 기기 기준</small></div>
+  ${steps.map(([k,l])=>{const v=f[k]||0;return `<div class="fun"><span>${l}</span><small>${v}회 · ${Math.round(v/top*100)}%</small><div class="bar"><i style="width:${Math.min(100,v/top*100)}%"></i></div></div>`}).join("")}
+  <div class="card" style="font-size:13.5px;line-height:1.6"><b>장소 확정률 ${f.result_view?Math.round((f.confirmed||0)/f.result_view*100):0}%</b><br><span style="color:var(--muted)">추천을 본 모임 중 우리 안에서 가게까지 확정한 비율. 핵심 가설 지표예요.</span></div>
+  <div class="row2" style="margin-top:14px"><button class="btn ghost sm" data-a="resetFunnel">지표 초기화</button><button class="btn ghost sm" data-a="resetAll">데모 데이터 초기화</button></div>
+  <div class="spacer"></div>${tabbar("my")}</div>`};
+
+/* 01 */
+V.s1=()=>{const d=S.d;
+  return `<div class="scr">${stepTop(1,"home")}
+  <h2 class="q">몇 명이서 만나요?</h2><p class="sub">나를 포함한 인원을 골라주세요</p>
+  <div class="counter"><button class="round" data-a="cnt" data-v="-1" aria-label="인원 줄이기" ${d.count<=2?"disabled style='opacity:.4'":""}>${minus}</button>
+    <div class="bign">${d.count}<small>명</small></div><button class="round dark" data-a="cnt" data-v="1" aria-label="인원 늘리기" ${d.count>=8?"disabled style='opacity:.4'":""}>${plus}</button></div>
+  <div class="avrow">${av("나",0)}${Array.from({length:Math.min(d.count-1,5)},()=>`<span class="qbox">?</span>`).join("")}${d.count>6?`<span class="qbox">+${d.count-6}</span>`:""}</div>
+  <div class="chips" style="justify-content:space-between">${[2,3,4,5].map(n=>`<button class="chip ${d.count===n?"on":""}" data-a="setcnt" data-v="${n}">${n}명</button>`).join("")}<button class="chip ${d.count>=6?"on":""}" data-a="setcnt" data-v="6">6명+</button></div>
+  <div class="label" style="margin-top:36px">모임 이름 (선택)</div>
+  <input class="field" id="mname" data-in="mname" placeholder="금요일 저녁 모임" value="${esc(d.name)}" maxlength="20">
+  <div class="spacer"></div><div class="cta-bar"><button class="btn" data-a="go" data-v="s2">다음</button></div></div>`};
+/* 02 */
+V.s2=()=>{const d=S.d;
+  return `<div class="scr">${stepTop(2,"s1")}
+  <h2 class="q">무엇을 하러 만나요?</h2><p class="sub">여러 개 골라도 괜찮아요</p>
+  ${histCount()<2?`<div class="taste empty"><div><span class="chip xs">★ 내 취향 반영</span><p>모임을 ${2-histCount()}번 더 하면 내가 고른 곳을 배워서 추천에 반영해요</p></div><button class="sw" disabled aria-label="내 취향 반영 (아직 사용 불가)" style="opacity:.4"></button></div>`:`
+  <div class="taste ${d.taste?"":"off"}"><div><span class="chip xs on">★ 내 취향 반영</span><p>지난 모임에서 조용한 카페·와인바를 자주 골랐어요</p></div>
+    <button class="sw ${d.taste?"on":""}" data-a="taste" role="switch" aria-checked="${d.taste}" aria-label="내 취향 반영"></button></div>`}
+  <div class="pgrid">${PURPOSES.map((p,i)=>`<button class="pcard ${d.purposes.includes(i)?"on":""}" data-a="purp" data-v="${i}" aria-pressed="${d.purposes.includes(i)}"><span class="ic">${p[1]}</span><b>${p[0]}</b></button>`).join("")}</div>
+  <div class="label">분위기</div>
+  <div class="chips">${VIBES.map((v,i)=>`<button class="chip ${d.vibes.includes(i)?"on":""}" data-a="vibe" data-v="${i}">${v}</button>`).join("")}</div>
+  <div class="spacer"></div><div class="cta-bar"><button class="btn" data-a="go" data-v="s3" ${d.purposes.length?"":"disabled"}>다음</button></div></div>`};
+/* 03 */
+V.s3=()=>{const d=S.d;
+  const sel=new Date(d.date),ws=d.weekStart??(()=>{const x=new Date(sel);x.setDate(x.getDate()-((x.getDay()+6)%7));return x.getTime()})();
+  d.weekStart=ws;const w0=new Date(ws),canPrev=ws>today.getTime(),H=Math.floor(d.time/60),M=d.time%60;
+  return `<div class="scr">${stepTop(3,"s2")}
+  <h2 class="q">언제 만나요?</h2><p class="sub">${d.mode==="poll"?"후보를 2~4개 고르면 친구들이 되는 시간에 체크해요":"날짜와 시간만 고르면 끝!"}</p>
+  <div class="seg"><button class="${d.mode!=="poll"?"on":""}" data-a="tmode" data-v="fixed">날짜 확정</button><button class="${d.mode==="poll"?"on":""}" data-a="tmode" data-v="poll">친구들과 시간 맞추기</button></div>
+  <div class="monthbar"><span>${w0.getFullYear()}년 ${w0.getMonth()+1}월</span><span class="nav"><button data-a="week" data-v="-1" aria-label="이전 주" ${canPrev?"":"disabled"}>←</button><button data-a="week" data-v="1" aria-label="다음 주">→</button></span></div>
+  <div class="week">${Array.from({length:7},(_,k)=>{const t=ws+k*DAY,dt=new Date(t),past=t<today.getTime();
+    return `<button class="day ${t===d.date?"on":""} ${t===today.getTime()?"today":""}" data-a="day" data-v="${t}" ${past?"disabled":""}><small>${"월화수목금토일"[k]}</small><b>${dt.getDate()}</b></button>`}).join("")}</div>
+  <div class="timeread"><b>시간</b><span>${fmtTime(d.time)} · 1분 단위로 조절돼요</span></div>
+  <div class="wheel two"><div class="band"></div><span class="colon">:</span>
+    <div class="list" id="twH" aria-label="시">${Array.from({length:24},(_,h)=>`<button class="opt ${h===H?"on":""}" data-a="setH" data-v="${h}">${h<12?"오전":"오후"} ${h%12||12}시</button>`).join("")}</div>
+    <div class="list" id="twM" aria-label="분">${Array.from({length:60},(_,m)=>`<button class="opt ${m===M?"on":""}" data-a="setM" data-v="${m}">${String(m).padStart(2,"0")}분</button>`).join("")}</div></div>
+  <div class="chips" style="margin-top:16px">${[["점심 12시",720],["저녁 6시",1080],["저녁 7시",1140],["밤 9시",1260]].map(([l,v])=>`<button class="chip ${d.time===v?"on":""}" data-a="settm" data-v="${v}">${l}</button>`).join("")}</div>
+  <div class="toggle-row" style="margin-top:22px"><div><b>지각 방지 알림</b><span>출발 시간 · 준비 시작 시간을 알려드려요</span></div><button class="sw ${d.alarm?"on":""}" data-a="alarm" role="switch" aria-checked="${d.alarm}" aria-label="지각 방지 알림"></button></div>
+  ${d.mode==="poll"?`<div class="label">후보 시간 <small>${d.slots.length}/4</small></div>
+  <div class="slots">${d.slots.map((x,k)=>`<span class="slot">${fmtSlot(x)}<button data-a="slotDel" data-v="${k}" aria-label="후보 삭제">✕</button></span>`).join("")}
+  ${d.slots.length<4?`<button class="chip slot-add" data-a="slotAdd">+ ${fmtSlot({date:d.date,time:d.time})} 추가</button>`:""}</div>`:""}
+  <div class="spacer"></div><div class="cta-bar"><button class="btn" data-a="go" data-v="s4" ${d.mode==="poll"&&d.slots.length<2?"disabled":""}>${d.mode==="poll"&&d.slots.length<2?"후보를 2개 이상 추가해주세요":"다음"}</button></div></div>`};
+/* 04 */
+const STATE_TXT={waiting:"아직 링크를 안 열었어요",opened:"링크 확인 · 입력하는 중..."};
+V.s4=()=>{const d=S.d,me=d.people[0],n=d.people.filter(p=>p.st).length;
+  return `<div class="scr">${stepTop(4,"s3")}
+  <h2 class="q">어디서 출발해요?</h2><p class="sub">친구들은 초대 링크로 각자 입력해요</p>
+  <div class="mecard">${av("나",0)}<div><b>${esc(me.loc.label)} (${esc(me.src)})</b><span>내 출발지 · ${esc(me.st)}역까지 ${me.loc.accMode} ${me.acc}분</span></div><button class="chg" data-a="pick" data-v="0">변경</button></div>
+  <div class="chips" style="margin-top:10px">${["현재 위치","집","학교"].map(s=>`<button class="chip sm ${me.src===s?"on":""}" data-a="src" data-v="${s}">${s}</button>`).join("")}</div>
+  ${d.mode==="poll"?pollCard(d):""}
+  <div class="label" style="margin-top:28px">친구 출발지 <small>${n}/${d.count} 입력 완료</small></div>
+  ${d.people.slice(1).map((p,k)=>{const i=k+1;
+    return `<div class="frow ${p.poked?"poked":""}">${av(p.name||"?",i)}<div data-a="pick" data-v="${i}" style="cursor:pointer"><b>${esc(p.name||"새 친구")}</b><span class="state ${p.st?"":p.state}">${p.st?esc(p.loc.label)+" · "+esc(p.st)+"역":STATE_TXT[p.state]}</span></div>
+    ${p.st?`<span class="chip on">입력 완료</span>`:`<button class="chip poke" data-a="poke" data-v="${i}">콕 찌르기</button>`}</div>`}).join("")}
+  <div class="linkbar"><button class="kakao" data-a="invite">카톡으로 초대</button><button data-a="invite" data-v="link">링크 복사</button></div>
+  <div class="toggle-row"><div><b style="font-size:13.5px">약속 당일 위치 공유 · 도착 레이스 참가</b></div><button class="sw ${d.share?"on":""}" data-a="shareTg" role="switch" aria-checked="${d.share}" aria-label="위치 공유와 도착 레이스 참가"></button></div>
+  <div class="spacer"></div><div class="cta-bar">${ONLINE()&&n>=2&&n<d.count?`<button class="btn" data-a="find">지금 입력한 ${n}명으로 찾기</button><p class="demo-note">${d.count-n}명이 아직이에요. 기다리면 자동으로 채워져요</p>`
+    :`<button class="btn" data-a="find" ${n===d.count?"":"disabled"}>${n===d.count?"중간 지점 찾기":`${d.count-n}명 더 입력하면 찾을 수 있어요`}</button>`}</div></div>`};
+/* 위치 선택 (현위치 · 검색 · 지도) */
+V.loc=()=>{const L=S.loc,who=L.ctx==="fav"?(L.idx==="home"?"집":"학교"):L.ctx==="guest"?"내":L.idx===0?"내":`${S.d.people[L.idx].name}님`;
+  const back=L.ctx==="fav"?"my":L.ctx==="guest"?"g_land":"s4";
+  return `<div class="scr"><div class="top">${backBtn(back)}<h1>${who} 출발 위치</h1><span class="srcbadge ${KMAP.ready?"real":""}">${KMAP.ready?"카카오맵":"데모 지도"}</span></div>
+  <div class="locsearch"><span aria-hidden="true">🔍</span><input id="lq" data-in="lq" placeholder="주소, 장소, 학교, 역 이름 검색" value="${esc(L.q)}" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search" aria-label="출발 위치 검색"><button id="lqx" class="icon-btn" data-a="lqClear" aria-label="지우기" style="width:32px;height:32px;font-size:16px;${L.q?"":"display:none"}">✕</button></div>
+  <div id="locbody">${locBody()}</div>
+  <div class="spacer"></div><div class="cta-bar" id="loccta">${locCta()}</div></div>`};
+function locCta(){const L=S.loc;return `<button class="btn" data-a="lconfirm" ${L.sel?"":"disabled"}>${L.sel?`${esc(L.st)}역 기준으로 출발`:"위치를 골라주세요"}</button>`}
+function locBody(){const L=S.loc,sel=L.sel,q=L.q.trim(),res=q?L.results:[];
+  if(q)return res.length?`<div>${res.slice(0,8).map((r,k)=>`<button class="lres" data-a="lpick" data-v="${k}"><span class="ic">${r.kind==="st"?"🚇":r.kind==="kakao"?"📍":"🏫"}</span><div><b>${esc(r.name)}</b><span>${esc(r.sub)}</span></div></button>`).join("")}</div>`
+    :`<p class="sub" style="margin:14px 2px">${L.searching?"찾는 중...":`"${esc(L.q)}" 검색 결과가 없어요. 동 이름이나 근처 역으로 찾아보세요.`}</p>`;
+  if(L.denied&&!sel)return `<div class="deny"><b>위치 권한이 꺼져 있어요</b><p>검색으로 찾아도 똑같이 정확해요. 현재 위치를 쓰고 싶다면:<br>· 아이폰: 설정 → 개인정보 보호 → 위치 서비스 → 사용 중인 브라우저(카카오톡 안이면 카카오톡) → 앱을 사용하는 동안<br>· 안드로이드: 주소창 왼쪽 자물쇠 → 권한 → 위치 허용</p>
+    <div class="row2"><button class="btn ghost sm" data-a="focusSearch">검색으로 찾기</button><button class="btn sm" data-a="gpsRetry">다시 시도</button></div></div>
+    <p class="sub" style="margin:14px 2px;font-size:13.5px">집·학교·회사 이름이나 동 이름, 가까운 역으로 검색해보세요.</p>`;
+  return `<button class="gps" data-a="gps">📍 현재 위치로 찾기<span style="margin-left:auto;font-weight:600;font-size:12px;color:var(--muted)">위치 권한 필요</span></button>
+  <div class="locmap" id="locmap">${locSvg(sel)}${regLocMap(sel)}${sel?`<span class="hint">${KMAP.ready?"지도를 움직여 위치를 조정할 수 있어요":"가까운 역까지 점선으로 이어져요"}</span>`:""}</div>
+  ${sel?`<div class="picked"><b>${esc(sel.label)}</b><div class="m">${esc(sel.sub)}</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px">어느 역에서 탈까요?</div>
+    <div class="stpick">${nearStations(sel.lat,sel.lng,3).map(({s,d})=>{const a=accessOf(d);return `<button class="${s.name===L.st?"on":""}" data-a="lst" data-v="${esc(s.name)}">${esc(s.name)}역 <small>${a.mode} ${a.min}분</small></button>`}).join("")}</div></div>`
+   :`<p class="sub" style="margin:14px 2px;font-size:13.5px">현재 위치를 쓰거나 집·학교·회사 근처를 검색해주세요. 가까운 역과 걸어가는 시간까지 같이 계산해요.</p>`}`}
+/* 입력 중(특히 한글 조합 중)엔 입력창을 건드리지 않고 주변만 갱신 */
+function refreshLoc(){KSPEC={};const b=document.getElementById("locbody");if(!b)return false;b.innerHTML=locBody();
+  document.getElementById("loccta").innerHTML=locCta();const x=document.getElementById("lqx");if(x)x.style.display=S.loc.q?"":"none";mountMaps();return true}
+function refreshChat(){const tmp=document.createElement("div");tmp.innerHTML=V.chat();const log=document.getElementById("chatlog");
+  const stick=!log||log.scrollHeight-log.scrollTop-log.clientHeight<40;
+  for(const sel of [".top",".track","#chatlog",".quick"]){const o=app.querySelector(sel),n=tmp.querySelector(sel);if(o&&n)o.replaceWith(n)}
+  const l2=document.getElementById("chatlog");if(l2&&stick)l2.scrollTop=l2.scrollHeight;return true}
+function regResultMap(r,people){if(!KMAP.ready)return "";const pts=people.map(ptOf);
+  KSPEC.rmap={center:[r.hub.lat,r.hub.lng],fit:[[r.hub.lat,r.hub.lng],...pts.map(p=>[p.lat,p.lng])],pad:[110,50,140,50],circle:[r.hub.lat,r.hub.lng,900],
+    lines:pts.map(p=>[[p.lat,p.lng],[r.hub.lat,r.hub.lng]]),
+    overlays:[{lat:r.hub.lat,lng:r.hub.lng,y:1.3,html:`<div class="kov-pin">${esc(r.hub.name)}역</div>`},
+      ...pts.map((p,i)=>({lat:p.lat,lng:p.lng,y:.4,html:`<div style="display:flex;flex-direction:column;align-items:center"><div class="kov-av" style="background:${avc(i)}">${esc(initial(people[i].name))}</div><div class="kov-tag">${r.legs[i].t}분</div></div>`}))]};return ""}
+function placePos(hub,p){if(p.lat)return [p.lat,p.lng];return [hub.lat+Math.sin(p.ang)*p.rad*0.0055,hub.lng+Math.cos(p.ang)*p.rad*0.0068]}
+function regPlaceMap(hub,places,focus){if(!KMAP.ready)return "";
+  KSPEC.pmap={center:[hub.lat-0.0025,hub.lng],level:4,circle:[hub.lat,hub.lng,650],
+    overlays:places.map(p=>{const [a,b]=placePos(hub,p);return {lat:a,lng:b,click:["placeOpen",p.id],html:`<div class="kov-mk" style="background:${CAT_COLOR[p.cat]};${p.id===focus?"transform:scale(1.3)":""}">${CAT_SHORT[p.cat]}</div>`}})};return ""}
+function regLocMap(sel){if(!KMAP.ready||!sel)return "";const ns=nearStations(sel.lat,sel.lng,3);
+  KSPEC.locmap={center:[sel.lat,sel.lng],level:4,pick:true,
+    overlays:[{lat:sel.lat,lng:sel.lng,y:1,html:`<div style="font-size:30px;line-height:1">📍</div>`},...ns.map(({s})=>({lat:s.lat,lng:s.lng,html:`<div class="kov-pin" style="font-size:11px;padding:4px 8px;${s.name===S.loc.st?"background:#C8F135;color:#1F2022":""}">${esc(s.name)}</div>`}))]};return ""}
+function locSvg(sel){const W=390,H=230;
+  if(!sel){const P=projector([{lat:37.5665,lng:126.978}],W,H,{l:0,r:0,t:0,b:0},18);
+    return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${mapBase(P,W,H)}</svg>`}
+  const ns=nearStations(sel.lat,sel.lng,3),P=projector([sel,...ns.map(x=>x.s)],W,H,{l:60,r:60,t:50,b:40},1.2),[x,y]=P.f(sel.lat,sel.lng);
+  let g=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="선택한 위치 지도">${mapBase(P,W,H)}`;
+  ns.forEach(({s})=>{const [sx,sy]=P.f(s.lat,s.lng),on=s.name===S.loc.st;
+    if(on)g+=`<line x1="${x}" y1="${y}" x2="${sx}" y2="${sy}" stroke="#1F2022" stroke-width="2.5" stroke-dasharray="3 6" stroke-linecap="round"/>`;
+    g+=`<circle cx="${sx}" cy="${sy}" r="${on?9:7}" fill="${on?"#C8F135":"#fff"}" stroke="#1F2022" stroke-width="3"/><text x="${sx}" y="${sy+24}" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--ink)">${esc(s.name)}</text>`});
+  return g+`<circle cx="${x}" cy="${y}" r="26" fill="var(--lime)" opacity=".35"/><path d="M${x} ${y+2}c-10-12-14-18-14-24a14 14 0 0128 0c0 6-4 12-14 24z" fill="#1F2022"/><circle cx="${x}" cy="${y-22}" r="5" fill="#C8F135"/></svg>`}
+/* 게스트(초대받은 친구) 화면 */
+V.g_land=()=>{const d=S.d,g=S.guest,p=d.people[g.idx],done=d.people.filter(x=>x.st).length,host=d.people[0].name;
+  return `<div class="scr"><div class="guestbar"><span class="logo" style="font-size:20px">모일곳</span><span>설치 없이 웹에서 참여 중</span></div>
+  <div class="invite-hero"><span class="chip xs dark">${esc(host)}님의 초대</span><h2>${esc(d.name.trim()||"우리 모임")}에<br>같이 가요!</h2>
+    <div class="kv"><span>언제</span><b>${d.mode==="poll"&&!(g.meeting&&g.meeting.status==="confirmed")?`후보 ${d.slots.length}개 중 투표 중`:`${fmtDate(d.date)} ${fmtTime(d.time)}`}</b><span>뭐해</span><b>${(d.purposes.length?d.purposes:[0]).map(i=>PURPOSES[i][0]).join(" · ")}</b><span>누구</span><b style="display:flex;align-items:center;gap:8px"><span class="stack">${d.people.filter(x=>!x.placeholder).map((x,i)=>av(x.name||"?",i)).join("")}</span><span style="font-weight:700">${done}/${d.count}명 입력</span></b></div></div>
+  ${d.mode==="poll"?`<div class="label" style="margin-top:24px">되는 시간 모두 골라주세요 <small>여러 개 가능</small></div>
+  ${d.slots.map((x,k)=>{const on=(p.avail||[]).includes(k),c=d.people.filter((q,j)=>j!==g.idx&&!q.placeholder&&(q.is_host||j===0||(q.avail||[]).includes(k))).length+(on?1:0);
+    return `<button class="availrow ${on?"on":""}" data-a="avail" data-v="${k}" aria-pressed="${on}"><span class="ck">${on?"✓":""}</span><b>${fmtSlot(x)}</b><small>${c}명 가능</small></button>`}).join("")}`:""}
+  <div class="label" style="margin-top:26px">내 이름</div>
+  <input class="field" id="gname" data-in="gname" value="${esc(p.name)}" placeholder="친구들이 알아볼 이름" maxlength="6" aria-label="내 이름">
+  <p class="sub" style="font-size:13px;margin:12px 2px 0">출발 위치만 알려주면 모두에게 공평한 만날 곳을 찾아드려요. 정확한 위치는 저장하지 않고 가까운 역과 동네 이름만 공유돼요.</p>
+  <div class="spacer"></div><div class="cta-bar"><button class="btn" data-a="gstart">내 출발지 입력하기</button>${g.online?"":`<p class="demo-note">데모: 친구가 카톡 링크를 눌렀을 때 보는 화면이에요 · <button data-a="gexit" style="text-decoration:underline;font-size:11.5px;color:var(--faint)">방장 화면으로</button></p>`}</div></div>`};
+V.g_wait=()=>{const d=S.d,g=S.guest,p=d.people[g.idx],host=d.people[0].name,cf=g.meeting&&g.meeting.status==="confirmed"?g.meeting:null;
+  if(cf){const leg=(cf.legs||{})[p.id],dep=leg!=null?d.time-leg-BUFFER:null,hub=byName(cf.hub);
+    return `<div class="scr"><div class="guestbar"><span class="logo" style="font-size:20px">모일곳</span><span>${esc(d.name||"우리 모임")}</span></div>
+    <div class="ticket"><span class="chip xs dark">약속 확정!</span><h2>${esc(cf.hub)}역<br>${esc(cf.place)}</h2>
+      <div class="kv"><span>언제</span><b>${fmtDate(d.date)} ${fmtTime(d.time)}</b><span>출발</span><b>${dep!=null?`${hhmm(dep)} (${esc(p.st)}역에서 ${leg}분)`:"-"}</b><span>누구</span><b>${d.people.filter(x=>!x.placeholder).map(x=>esc(x.name)).join(", ")}</b></div></div>
+    <div class="row2" style="margin-top:14px"><a class="btn ghost sm" style="text-decoration:none" href="https://map.kakao.com/link/to/${encodeURIComponent(cf.place)},${hub?.lat},${hub?.lng}" target="_blank" rel="noopener">카카오맵 길찾기</a><button class="btn ghost sm" data-a="ics">캘린더에 추가</button></div>
+    <div class="card" style="margin-top:22px;background:var(--lime-soft)"><b style="font-size:16px">다음 약속은 내가 잡아볼까?</b><p style="font-size:13px;color:var(--muted);margin:6px 0 12px">다른 단톡방 약속도 링크 하나로 정해보세요.</p><button class="btn sm" data-a="gNext">새 모임 만들기</button></div>
+    <div class="spacer"></div><div class="cta-bar"><button class="btn ghost" data-a="gHome">모일곳 홈으로</button></div></div>`}
+  return `<div class="scr"><div class="guestbar"><span class="logo" style="font-size:20px">모일곳</span><span>${esc(d.name.trim()||"우리 모임")}</span></div>
+  <div class="ticket"><span class="chip xs dark">입력 완료!</span><h2>${esc(p.name)}님은<br>${esc(p.st)}역에서 출발해요</h2>
+    <div style="font-size:13.5px;font-weight:600;opacity:.75">${esc(p.loc?.label||"")} · 역까지 ${p.loc?.accMode||"도보"} ${p.acc}분</div></div>
+  <div class="label">친구들 입력 현황 <small>${d.people.filter(x=>x.st).length}/${d.count}</small></div>
+  ${d.people.map((x,i)=>`<div class="frow">${av(x.name||"?",i)}<div><b>${esc(x.name||"새 친구")}${i===0?" (방장)":""}${i===g.idx?" (나)":""}</b><span>${x.st?esc(x.st)+"역":STATE_TXT[x.state]||""}</span></div>${x.st?`<span class="chip on">완료</span>`:`<span class="chip">대기</span>`}</div>`).join("")}
+  <div class="toggle-row" style="margin-top:6px"><div><b>도착 레이스 참가</b><span>약속 당일 출발 후에만 위치를 공유해요</span></div><button class="sw ${p.race!==false?"on":""}" data-a="gRace" role="switch" aria-checked="${p.race!==false}" aria-label="도착 레이스 참가"></button></div>
+  <div class="toggle-row" style="margin-top:8px"><div><b>출발 알림 받기</b><span>장소가 정해지면 출발 시간을 알려드려요</span></div><button class="sw ${p.push!==false?"on":""}" data-a="gPush" role="switch" aria-checked="${p.push!==false}" aria-label="출발 알림 받기"></button></div>
+  <p class="sub" style="font-size:13px;margin:14px 2px 0">모두 입력하면 ${esc(host)}님이 만날 곳을 정해요. 확정되면 이 링크를 다시 열었을 때 결과와 내 출발 시간이 보여요.</p>
+  <div class="spacer"></div><div class="cta-bar">${g.online?`<button class="btn ghost" data-a="gstart">출발지 바꾸기</button>`:`<button class="btn ghost" data-a="gexit">방장 화면으로 돌아가기 (데모)</button>`}</div></div>`};
+/* 05 */
+V.result=()=>{const d=S.d,r=S.results[S.sel],mx=Math.max(...r.legs.map(l=>l.t));
+  return `<div class="scr">
+  <div class="mapwrap" id="rmap" style="height:520px">${resultMap(r,d.people)}${regResultMap(r,d.people)}<div class="mapbtns">${backBtn("s4","float-btn")}<button class="icon-btn float-btn" data-a="shareResult" aria-label="결과 공유">↗</button></div></div>
+  <div class="bsheet"><div class="grab"></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start"><span class="eyebrow">${S.sel===0?"추천 만날 지점":`후보 ${S.sel+1}`}</span><button class="chip sm" data-a="cands">${S.sel===0?`다른 후보 ${S.results.length-1}곳`:"후보 비교"}</button></div>
+  <div class="hub-name">${esc(r.hub.name)}역</div><div style="font-size:13px;color:var(--muted);font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${lineText(r.hub)}</span><span class="srcbadge ${S.real?"real":""}">${S.refining?"실제 경로 계산 중...":S.real?"실시간 대중교통 기준":"이동시간 추정치"}</span></div>
+  <div class="stats"><div class="stat"><small>평균 이동</small><b>${r.avg}분</b></div><div class="stat"><small>최대 차이</small><b>${r.spread}분</b></div><div class="stat"><small>환승</small><b>${Math.round(r.avgTr*10)/10||0}회</b></div></div>
+  <div class="bars">${r.legs.map((l,i)=>`<span>${i===0?"나":esc(d.people[i].name)}</span><div class="bar"><i style="width:${l.t/mx*100}%;background:${avc(i)}"></i></div><span class="r">${l.t}분</span>`).join("")}</div>
+  <div class="fb">${S.fb==null?`<span>이 추천 어때요?</span><button class="chip sm" data-a="fb" data-v="1">👍 괜찮아요</button><button class="chip sm" data-a="fb" data-v="0">👎 별로예요</button>`
+    :S.fb?`<span>고마워요! 다음 추천에 반영할게요</span>`:`<span>어떤 점이 아쉬웠어요?</span><button class="chip sm" data-a="fbWhy" data-v="멀어요">누군가 너무 멀어요</button><button class="chip sm" data-a="fbWhy" data-v="동네">동네가 별로예요</button><button class="chip sm dark" data-a="cands">다른 후보 보기</button>`}</div>
+  <div class="spacer"></div><div class="cta-bar"><button class="btn" data-a="places">여기 주변 장소 보기</button></div></div></div>`};
+/* 06 */
+V.places=()=>{const d=S.d,hub=S.results[S.sel].hub;
+  const cats=[...new Set(S.places.map(p=>p.cat))],shown=S.places.filter(p=>S.filter<0||p.cat===S.filter),focus=S.focus??shown[0]?.id;
+  const title=(d.name.trim()||"우리 모임")+" 추천 리스트",ps=(d.purposes.length?d.purposes:[0]).map(i=>PURPOSES[i][0]);
+  return `<div class="scr">
+  <div class="mapwrap" id="pmap" style="height:440px">${placeMap(hub,shown,focus)}${regPlaceMap(hub,shown,focus)}
+    <div class="pill-head"><button class="icon-btn" data-a="go" data-v="result" aria-label="뒤로">←</button><span class="ttl">${esc(hub.name)}역 주변 · ${ps.join(" · ")}</span></div></div>
+  <div class="bsheet"><div class="grab"></div>
+  <div class="listhead"><span class="star">★</span><div><h2>${esc(title)}</h2><p>장소 ${S.places.length} · ${ps.join("·")}${d.vibes.length?" · "+d.vibes.map(i=>VIBES[i]).join("·")+" 분위기":""}</p></div><button class="icon-btn" style="background:var(--card)" data-a="shareList" aria-label="리스트 공유">↗</button></div>
+  <div class="chips" style="margin-bottom:12px"><button class="chip sm ${S.filter<0?"on":""}" data-a="filter" data-v="-1" style="height:32px">전체 ${S.places.length}</button>${cats.map(c=>`<button class="chip sm ${S.filter===c?"on":""}" data-a="filter" data-v="${c}" style="height:32px">${PURPOSES[c][2]} ${S.places.filter(p=>p.cat===c).length}</button>`).join("")}</div>
+  ${shown.map(p=>{const mine=p.votes.includes(0);
+    return `<div class="place" data-a="placeOpen" data-v="${p.id}" style="cursor:pointer"><button class="thumb" data-a="placeOpen" data-v="${p.id}" aria-label="${esc(p.name)} 자세히 보기"><i style="background:${CAT_COLOR[p.cat]}"></i>${CAT_SHORT[p.cat]}</button>
+    <div class="info"><h4>${esc(p.name)}</h4><div class="m">${PURPOSES[p.cat][2]} · 도보 ${p.walk}분 · ${esc(p.feat)}</div>
+    <span class="tag fit">취향 ${p.fit}%</span>${p.second?`<span class="tag">2차</span>`:d.vibes.slice(0,1).map(i=>`<span class="tag">${VIBES[i]}</span>`).join("")}</div>
+    <button class="heart ${p.votes.length?"has":""} ${mine?"mine":""}" data-a="heart" data-v="${p.id}" aria-pressed="${mine}" aria-label="${esc(p.name)} 찜">${mine||p.votes.length?"♥":"♡"} ${p.votes.length}</button></div>`}).join("")}
+  <p class="sample">가게를 누르면 투표 없이 바로 정할 수도 있어요 · 예시 장소는 크롤링 데이터로 교체돼요</p></div>
+  <button class="fab" data-a="startVote">투표로 정하기</button></div>`};
+/* 확정 */
+V.done=()=>{const m=getMeeting(S.cur);
+  const text=shareText(m);
+  return `<div class="scr"><div class="top">${backBtn("home")}<h1 style="text-align:center">약속 확정</h1><span style="width:40px"></span></div>
+  <div class="ticket"><span class="chip xs dark">확정!</span><h2>${esc(m.name)}</h2>
+    <div class="kv"><span>언제</span><b>${fmtDate(m.date)} ${fmtTime(m.time)}</b><span>어디</span><b>${esc(m.hub)}역 · ${esc(m.place)}</b><span>결정</span><b>${m.solo?"방장이 바로 확정":(m.votes||0)+"표로 1위"}</b></div>
+    <div class="perf"></div><div style="font-weight:800;font-size:14px;margin-bottom:10px">각자 출발 시간 <span style="font-weight:600;opacity:.6">(${BUFFER}분 여유 포함)</span></div>
+    ${m.people.map((p,i)=>`<div class="dep">${av(p.name,i)}<span>${i===0?"나":esc(p.name)} <em>${esc(p.st)}역 · ${m.legs[i]}분</em></span><b>${hhmm(depOf(m,i))}</b></div>`).join("")}</div>
+  <div class="label">단톡방에 보낼 메시지</div><textarea class="share" readonly id="sharetxt">${esc(text)}</textarea>
+  <div class="spacer"></div><div class="cta-bar"><div class="row2"><button class="btn ghost" data-a="copyShare">메시지 복사</button><button class="btn" data-a="openMeet" data-v="${m.id}">약속 당일 미리보기</button></div>${ONLINE()?"":`<p class="demo-note"><button data-a="guestDemo" style="text-decoration:underline;font-size:12px;color:var(--muted)">친구 폰에서는 이렇게 보여요 (데모)</button></p>`}</div></div>`};
+function shareText(m){return `📍 ${m.name} 확정!\n${fmtDate(m.date)} ${fmtTime(m.time)}\n${m.hub}역 · ${m.place}\n\n출발 시간 (${BUFFER}분 여유)\n${m.people.map((p,i)=>`${i===0?PROFILE.name:p.name} ${hhmm(depOf(m,i))} 출발 · ${p.st}역 ${m.legs[i]}분`).join("\n")}\n\n당일엔 모일곳에서 도착 레이스 🏁`}
+
+/* 07 */
+V.today=()=>{const m=getMeeting(S.cur),R=S.race,dep=depOf(m,0),left=Math.ceil(dep-R.now),arr=dep+m.legs[0];
+  let t=dep;const steps=[];for(let k=PROFILE.prep.length-1;k>=0;k--){t-=PROFILE.prep[k][1];steps.unshift({at:t,name:PROFILE.prep[k][0],dur:PROFILE.prep[k][1]})}
+  const cur=steps.findIndex((s,k)=>R.now>=s.at&&R.now<(steps[k+1]?.at??dep));
+  const tipAct=["지금 씻으러 가면 딱 맞아요","지금 옷 입기 시작하면 딱 맞아요","짐 챙기고 바로 나가면 돼요"][Math.max(0,cur)]||"지금 나가면 딱 맞아요";
+  const rows=[...steps.map((s,k)=>({at:s.at,name:s.name,chip:`${s.dur}분`,st:R.now>=(steps[k+1]?.at??dep)?"done":k===cur?"now":""})),
+    {at:dep,name:"출발!",chip:`지하철 ${m.legs[0]}분`,st:R.now>=dep?"done":cur<0&&R.now>=dep-1?"now":""},
+    {at:arr,name:`${m.hub}역 도착`,chip:`여유 ${m.time-arr}분`,st:R.ppl[0].arrived!=null?"done":""}];
+  return `<div class="scr"><div class="top">${backBtn("home")}<h1>오늘의 약속</h1>${demoClock()}</div>
+  <div class="noti"><div class="src"><i>모</i>모일곳 · 지금</div><b>${hhmm(dep)}에 출발해야 늦지 않아요!</b><span>${tipAct} · ${esc(m.name)}</span></div>
+  <div class="count"><div><small>출발까지</small><div class="big">${left>0?left+"분":"지금!"}</div></div><span class="chip on">도착 예정 ${hhmm(arr)}</span></div>
+  <div class="label" style="margin-top:18px">준비 코칭 <small>평소 준비 패턴 기반</small></div>
+  <div class="tl">${rows.map(r=>`<div class="tstep ${r.st}"><span class="dot"></span><time>${hhmm(r.at)}</time><b>${esc(r.name)}</b><span class="chip xs ${r.st==="now"?"on":""}" style="${r.st==="now"?"":"background:var(--card)"}">${r.chip}</span></div>`).join("")}</div>
+  <div class="tip"><p>지난 3번 약속엔 준비가 평균 ${PROFILE.lateAvg}분 더 걸렸어요. 오늘은 10분 일찍 시작해볼까요?</p>${PROFILE.early?`<button data-a="early" data-v="0">원래대로</button>`:`<button data-a="early" data-v="10">10분 당기기</button>`}</div>
+  <div class="spacer"></div><div class="cta-bar">${R.started?`<button class="btn" data-a="go" data-v="race">도착 레이스 보기</button>`:`<button class="btn" data-a="startPrep">준비 시작 · 친구들에게 상태 공유</button>`}</div></div>`};
+function demoClock(){const R=S.race;return `<span class="democlock" title="데모용 시간">🕐 ${hhmm(R.now)}<button data-a="speed">${R.running?(R.speed>1?"▶▶ ×"+R.speed:"▶ ×1"):"⏸"}</button></span>`}
+/* 08 */
+V.race=()=>{const m=getMeeting(S.cur),R=S.race,W=390,H=560;
+  const sts=m.people.map(ptOf),hub=byName(m.hub),P=projector([hub,...sts],W,H,{l:56,r:56,t:140,b:110},4);
+  const [hx,hy]=P.f(hub.lat,hub.lng),origins=spreadPts(sts.map(s=>[...P.f(s.lat,s.lng),s.name]));
+  let svg=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="도착 레이스 지도">${mapBase(P,W,H)}`;
+  origins.forEach(([x,y])=>svg+=`<line x1="${x}" y1="${y}" x2="${hx}" y2="${hy}" stroke="#1F2022" stroke-width="2.5" stroke-dasharray="3 6" stroke-linecap="round" opacity=".55"/>`);
+  svg+=hubPin(hx,hy,m.hub+"역");
+  const order=rankOrder(R);
+  origins.forEach(([ox,oy],i)=>{const pr=progOf(R,i),x=ox+(hx-ox)*pr*0.9,y=oy+(hy-oy)*pr*0.9,st=statusOf(R,i),w=st.length*11+22,rk=order.indexOf(i)+1;
+    svg+=`<g>${avatarSvg(x,y,23,i===0?PROFILE.name:m.people[i].name,i)}<rect x="${x-w/2}" y="${y-58}" width="${w}" height="26" rx="13" fill="${PREP_ST.includes(st)?"#FFD6DE":"#FFFFFF"}" stroke="#1F2022" stroke-opacity=".08"/><text x="${x}" y="${y-40.5}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#1F2022">${esc(st)}</text>
+    <rect x="${x+13}" y="${y-28}" width="22" height="22" rx="7" fill="#1F2022"/><text x="${x+24}" y="${y-12.5}" text-anchor="middle" font-size="12" font-weight="900" fill="#fff">${rk}</text></g>`});
+  svg+=`</svg>`;
+  const left=m.time-R.now,mm=Math.max(0,Math.floor(left)),ss=Math.max(0,Math.floor((left-Math.floor(left))*60));
+  return `<div class="scr"><div class="mapwrap" style="height:560px">${svg}
+    <div class="racehead"><span class="l">${backBtn("today")}<i class="livedot ${R.running?"":"off"}" style="animation-delay:-${((performance.now()/1000)%1.6).toFixed(2)}s"></i>도착 레이스</span><span class="r">${left<=0?`약속 시간 ${hhmm(m.time)}`:mm>=60?`약속까지 ${Math.floor(mm/60)}시간 ${mm%60}분`:`약속까지 ${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}`}</span></div>
+    <div class="demo-ctl">${demoClock()}</div></div>
+  <div class="bsheet"><div class="grab"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b style="font-size:17px">실시간 순위</b><button class="chip sm" data-a="statusSheet">내 상태: ${esc(statusOf(R,0))} ▼</button></div>
+  ${order.map((i,k)=>{const rem=remOf(R,i);return `<div class="rank ${i===0?"me":""}"><span class="n">${k+1}</span>${av(i===0?PROFILE.name:m.people[i].name,i)}<span>${i===0?esc(PROFILE.name)+" (나)":esc(m.people[i].name)}</span><div class="bar"><i style="width:${progOf(R,i)*100}%"></i></div><span class="r ${R.ppl[i].arrived==null&&rem==null?"late":""}">${R.ppl[i].arrived!=null?"도착":rem==null?"출발 전":rem+"분"}</span></div>`}).join("")}
+  ${R.done?`<div class="done-banner">🎉 모두 모였어요! 꼴찌 ${esc(m.people[R.order[R.order.length-1]].name)}님, 룰렛 돌릴 시간이에요</div>`:""}
+  <div class="spacer"></div><div class="cta-bar">${R.done?`<div class="row2" style="grid-template-columns:120px 1fr"><button class="btn ghost" data-a="go" data-v="chat" style="position:relative">채팅${R.unread?`<span class="badge">${R.unread}</span>`:""}</button><button class="btn lime" data-a="toRoulette">벌칙 룰렛 돌리기</button></div>`
+   :`<div class="row2" style="grid-template-columns:120px 1fr"><button class="btn ghost" data-a="go" data-v="chat" style="position:relative;height:52px">채팅${R.unread?`<span class="badge">${R.unread}</span>`:""}</button><button class="btn" data-a="statusSheet" style="height:52px">상태 바꾸기</button></div>`}</div></div></div>`};
+/* 09 */
+V.chat=()=>{const m=getMeeting(S.cur),R=S.race;R.unread=0;
+  const lead=Math.max(...R.ppl.map((_,i)=>progOf(R,i)));
+  return `<div class="scr"><div class="top">${backBtn("race")}<div style="flex:1"><h1>${esc(m.name)}</h1><div class="sub2">${m.people.length}명 · ${R.done?"레이스 종료":"레이스 진행 중"}</div></div>${demoClock()}</div>
+  <div class="track"><div class="rail"></div><div class="fill" style="width:calc((100% - 48px) * ${lead})"></div>
+    ${R.ppl.map((_,i)=>`<span class="av" style="left:calc(24px + (100% - 48px) * ${progOf(R,i)});background:${avc(i)};z-index:${10-i}">${esc(initial(i===0?PROFILE.name:m.people[i].name))}</span>`).join("")}
+    <div class="ends"><span>출발</span><span>도착</span></div></div>
+  <div class="chatlog" id="chatlog">${R.chat.length?R.chat.map(c=>c.sys?`<div class="sys">${esc(c.sys)}</div>`:c.from===0?`<div class="msg me"><div class="bub">${esc(c.text)}</div></div>`:
+    `<div class="msg">${av(m.people[c.from].name,c.from)}<div><small>${esc(m.people[c.from].name)}</small><div class="bub">${esc(c.text)}</div></div></div>`).join(""):`<div class="sys">레이스가 시작되면 도착 소식이 여기에 올라와요</div>`}</div>
+  <div class="chatwrap"><div class="quick">${(R.done?["룰렛 돌리자","벌칙 뭐 나올까ㅋㅋ","다들 고생했어"]:["곧 도착","5분만","먼저 들어가 있어"]).map(q=>`<button class="chip" data-a="quick" data-v="${q}">${q}</button>`).join("")}</div>
+  <div class="composer"><input id="chatin" data-in="chat" placeholder="메시지 보내기" value="${esc(S.chatDraft)}" autocomplete="off" aria-label="메시지 입력"><button class="send" data-a="send" aria-label="보내기">↑</button></div></div></div>`};
+/* 10 */
+V.roulette=()=>{const m=getMeeting(S.cur),R=S.race,rl=S.roul,order=R.order,loser=order[order.length-1];
+  const items=rl.mode==="last"?rl.pens:m.people.map((p,i)=>i===0?PROFILE.name:p.name);
+  const n=items.length,cols=["#C8F135","#1F2022","#F2F2EE"],c=150,r=148;
+  const pt=a=>[c+r*Math.sin(a*Math.PI/180),c-r*Math.cos(a*Math.PI/180)];
+  let slices="";items.forEach((t,k)=>{const a0=k*360/n,a1=(k+1)*360/n,[x0,y0]=pt(a0),[x1,y1]=pt(a1),mid=(a0+a1)/2;
+    slices+=`<path d="M${c} ${c}L${x0} ${y0}A${r} ${r} 0 ${a1-a0>180?1:0} 1 ${x1} ${y1}Z" fill="${n%3===1&&k===n-1&&n>1?"#FFFFFF":cols[k%3]}" stroke="#1F2022" stroke-width="2"/>
+    <text x="${c}" y="${c-r*0.64}" text-anchor="middle" font-size="${t.length>5?12:13.5}" font-weight="800" fill="${k%3===1&&!(n%3===1&&k===n-1)?"#FFFFFF":"#1F2022"}" transform="rotate(${mid} ${c} ${c})">${esc(t)}</text>`});
+  const lname=m.people[loser].name,nm=i=>i===0?PROFILE.name:m.people[i].name;
+  return `<div class="scr"><div class="top">${backBtn("race")}<h1>벌칙 룰렛</h1></div>
+  <h2 class="q" style="margin-top:6px">모두 모였어요!</h2><p class="sub" style="margin:0">${rl.mode==="last"?`꼴찌 ${esc(lname)}님이 룰렛을 돌려주세요`:"전원 참여! 걸린 사람이 한턱내요"}</p>
+  <div class="podium">${order.map((i,k)=>`<div class="p ${k===order.length-1?"last":k===0?"first":""}">${k===order.length-1?`<span class="tagl">꼴찌</span>`:(k+1)+"등"}${av(nm(i),i)}<span>${esc(nm(i))}</span></div>`).join("")}</div>
+  <div class="wheelbox"><svg class="pointer" width="30" height="26" viewBox="0 0 30 26"><path d="M15 26L2 3a2 2 0 012-3h22a2 2 0 012 3z" fill="#1F2022"/></svg>
+    <svg class="w" id="wheel" viewBox="0 0 300 300" style="transform:rotate(${rl.rot}deg)"><circle cx="150" cy="150" r="149" fill="#1F2022"/>${slices}</svg>
+    <button class="go" data-a="spin" ${rl.spinning?"disabled":""}>GO</button></div>
+  <div class="chips" style="margin-top:14px"><button class="chip sm" data-a="penEdit" style="height:34px">벌칙 직접 편집</button><button class="chip sm ${rl.mode==="last"?"on":""}" data-a="mode" style="height:34px">${rl.mode==="last"?"꼴찌만 돌리기":"전원 참여 중"}</button></div>
+  <div class="spacer"></div><div class="cta-bar"><button class="btn" data-a="spin" ${rl.spinning?"disabled":""}>${rl.spinning?"두구두구...":"룰렛 돌리기"}</button></div></div>`};
+
+/* ============================================================
+   시트
+   ============================================================ */
+function sheetHTML(){
+  const sh=S.sheet;if(!sh)return "";
+  let inner="";
+  if(sh.type==="station"){const isMe=sh.idx===0&&sh.ctx==="draft";const p=sh.ctx==="draft"?S.d.people[sh.idx]:null;
+    inner=`<h3>${sh.ctx==="fav"?(sh.idx==="home"?"집":"학교")+" 역":isMe?"내 출발지":`${esc(p.name)} 출발지`}</h3><p class="desc">${sh.ctx==="draft"&&!isMe?"친구가 링크로 입력하기 전에 대신 넣을 수도 있어요":"가까운 지하철역을 골라주세요"}</p>
+    ${sh.ctx==="draft"&&!isMe?`<input class="field" id="fname" data-in="fname" value="${esc(p.name)}" placeholder="이름" maxlength="6" style="margin-bottom:8px">`:""}
+    <input class="field" id="sq" data-in="sq" placeholder="역 이름 검색 (예: 성수, 판교)" autocomplete="off" value="${esc(S.stationQ)}"><div class="slist" id="slist">${stationList(S.stationQ)}</div>`}
+  if(sh.type==="cands"){const d=S.d;
+    inner=`<h3>후보 비교</h3><p class="desc">이동 시간, 공평함, 상권을 함께 따져서 골랐어요</p>
+    ${S.results.map((c,i)=>`<button class="cand ${i===S.sel?"on":""}" data-a="cand" data-v="${i}"><div class="h"><span>${i+1}. ${esc(c.hub.name)}역</span><span style="font-size:13px;color:var(--muted)">평균 ${c.avg}분 · 차이 ${c.spread}분</span></div><p>${reason(c,d.purposes)}</p></button>`).join("")}
+    <div class="card" style="margin-top:6px"><b style="font-size:14px">추천 기준</b>
+    <div class="slider"><input type="range" min="0" max="100" value="${S.w.fair}" data-in="fair" aria-label="빠름과 공평함 사이"><div class="ends"><span>다 같이 빨리</span><span>한 명도 멀지 않게</span></div></div>
+    <div class="slider"><input type="range" min="0" max="100" value="${S.w.area}" data-in="area" aria-label="상권 중요도"><div class="ends"><span>이동 시간만</span><span>놀 곳 많은 동네</span></div></div></div>
+    <p class="note" style="font-size:12px;color:var(--faint);margin:10px 0 0">이동 시간은 역 간 거리·환승으로 추정한 값이에요. 배포 버전에선 실시간 대중교통 경로로 계산해요.</p>`}
+  if(sh.type==="vote"){const d=S.d,total=d.people.length,voted=new Set(S.places.flatMap(p=>p.votes)).size,top=[...S.places].filter(p=>p.votes.length).sort((a,b)=>b.votes.length-a.votes.length||b.fit-a.fit);
+    inner=`<h3>투표 중 · ${voted}/${total}명 참여</h3><p class="desc">${S.places.some(p=>p.votes.includes(0))?"친구들 표가 실시간으로 들어오고 있어요":"먼저 리스트에서 ♡로 마음에 드는 곳을 골라주세요"}</p>
+    ${top.slice(0,5).map(p=>`<div class="tally"><span>${esc(p.name)}</span><span class="who">${p.votes.map(v=>av(v===0?"나":d.people[v].name,v)).join("")}</span><div class="bar"><i style="width:${p.votes.length/total*100}%"></i></div></div>`).join("")||`<div class="empty" style="margin-bottom:12px">아직 표가 없어요</div>`}
+    <div class="row2" style="margin-top:8px"><button class="btn ghost sm" data-a="closeSheet">리스트로</button><button class="btn sm" data-a="confirm" ${top.length?"":"disabled"}>${top.length?"투표 마감 · 확정":"표를 기다리는 중"}</button></div>`}
+  if(sh.type==="status"){const cur=statusOf(S.race,0);
+    inner=`<h3>내 상태 바꾸기</h3><p class="desc">GPS 없이 버튼으로 알려요 · 친구들 지도와 채팅에 바로 보여요</p>${STATUS_ME.map(s=>`<button class="opt-row ${s===cur?"on":""}" data-a="setStatus" data-v="${s}"><span>${s}</span>${s===cur?"✓":""}</button>`).join("")}`}
+  if(sh.type==="pen"){inner=`<h3>벌칙 직접 편집</h3><p class="desc">2~8개까지 넣을 수 있어요</p>
+    ${S.roul.pens.map((p,i)=>`<div class="pen-row"><input id="pen${i}" data-in="pen" data-i="${i}" value="${esc(p)}" maxlength="10" aria-label="벌칙 ${i+1}"><button data-a="penDel" data-v="${i}" aria-label="삭제" ${S.roul.pens.length<=2?"disabled":""}>−</button></div>`).join("")}
+    <div class="row2" style="margin-top:6px"><button class="btn ghost sm" data-a="penAdd" ${S.roul.pens.length>=8?"disabled":""}>+ 추가</button><button class="btn sm" data-a="closeSheet">완료</button></div>`}
+  if(sh.type==="invite"){const d=S.d,url=inviteUrl(),title=d.name.trim()||"우리 모임";
+    inner=`<h3>친구 초대하기</h3><p class="desc">단톡방에 이렇게 보여요</p>
+    <div class="kcard"><div class="kimg"><span>우리 어디서<br>만날까?</span><svg width="90" height="90" viewBox="0 0 130 130" style="position:absolute;right:10px;top:10px" aria-hidden="true"><path d="M30 25L60 70M110 55L60 70M65 115L60 70" stroke="#1F2022" stroke-width="4" stroke-dasharray="3 7" stroke-linecap="round"/><circle cx="60" cy="70" r="10" fill="#C8F135" stroke="#1F2022" stroke-width="5"/><circle cx="30" cy="25" r="15" fill="#FFD86B" stroke="#fff" stroke-width="3"/><circle cx="110" cy="55" r="15" fill="#A9D8FF" stroke="#fff" stroke-width="3"/><circle cx="65" cy="115" r="15" fill="#FFB5C9" stroke="#fff" stroke-width="3"/></svg></div>
+      <div class="kbody"><b>${esc(PROFILE.name)}님이 '${esc(title)}'에 초대했어요</b><span>${fmtDate(d.date)} ${fmtTime(d.time)} · 출발지만 입력하면 끝</span></div><div class="kbtn">내 출발지 입력하기</div></div>
+    <div class="linkrow"><span>${esc(url)}</span><button data-a="copyInvite">복사</button></div>
+    <div class="row2" style="margin-top:12px"><button class="btn sm" style="background:#FEE500;color:#191600" data-a="shareInvite">카톡으로 보내기</button><button class="btn ghost sm" data-a="guestPreview">친구 화면 미리보기</button></div>
+    <ol class="howto"><li>링크를 받은 친구는 앱 설치·가입 없이 브라우저에서 열어요</li><li>이름과 출발 위치(현재 위치 또는 검색)만 넣으면 끝</li><li>입력하는 순간 이 화면 목록이 실시간으로 채워져요</li><li>안 연 친구는 콕 찌르기로 카톡 알림을 한 번 더 보내요</li></ol>`}
+  if(sh.type==="place"){const p=S.places.find(x=>x.id===sh.id),mine=p.votes.includes(0);
+    inner=`<div class="pdetail"><div class="top2"><span class="thumb" style="background:${CAT_COLOR[p.cat]};color:#fff">${CAT_SHORT[p.cat]}</span><div><h3>${esc(p.name)}</h3><div class="m" style="font-size:13px;color:var(--muted)">${PURPOSES[p.cat][2]} · 도보 ${p.walk}분 · ${esc(p.feat)}</div></div></div>
+    <span class="tag fit">취향 ${p.fit}%</span><span class="tag">♥ ${p.votes.length}표</span>${p.second?`<span class="tag">2차 추천</span>`:""}
+    <p class="desc" style="margin:14px 0">방장이 바로 정하면 투표 없이 확정되고, 친구들에게 결과가 공유돼요.</p>
+    <div class="row2"><button class="btn ghost sm" data-a="heart" data-v="${p.id}">${mine?"♥ 후보에서 빼기":"♡ 투표 후보에 담기"}</button><button class="btn sm" data-a="confirm" data-v="${p.id}">여기로 바로 확정</button></div></div>`}
+  if(sh.type==="name"){inner=`<h3>내 이름</h3><p class="desc">친구들에게 보이는 이름이에요</p><input class="field" id="myname" data-in="myname" value="${esc(PROFILE.name)}" maxlength="6"><div style="height:12px"></div><button class="btn sm" data-a="closeSheet">저장</button>`}
+  const anim=sh._shown?' style="animation:none"':'';sh._shown=true;
+  return `<div class="dim" data-a="closeSheet"><div class="sheet" role="dialog" data-stop="1"${anim}><div class="grab"></div>${inner}</div></div>`;
+}
+function stationList(q){q=(q||"").trim();
+  const list=ST.filter(s=>!q||s.name.includes(q)).sort((a,b)=>(q&&b.name.startsWith(q))-(q&&a.name.startsWith(q))||a.name.localeCompare(b.name,"ko"));
+  return list.length?list.map(s=>`<button class="sitem" data-a="setst" data-v="${esc(s.name)}"><span>${esc(s.name)}역</span>${lineBadges(s)}</button>`).join(""):
+    `<p class="desc" style="padding:16px 4px">"${esc(q)}"역을 찾지 못했어요. 지금은 수도권 주요 역 ${ST.length}곳만 있어요.</p>`}
+
+/* ============================================================
+   렌더
+   ============================================================ */
+const app=document.getElementById("app");let lastScreen=null;
+function render(keep){
+  const fe=document.activeElement?.id,same=lastScreen===S.screen&&!S.sheet&&!S.verdict;
+  if(same&&S.screen==="loc"&&fe==="lq"&&refreshLoc())return;
+  if(same&&S.screen==="chat"&&fe==="chatin"&&refreshChat())return;
+  const ae=document.activeElement,fid=ae&&ae.id,sel=fid&&ae.selectionStart;
+  const chat=document.getElementById("chatlog"),stick=!chat||chat.scrollHeight-chat.scrollTop-chat.clientHeight<40;
+  const slist=document.getElementById("slist"),sTop=slist?slist.scrollTop:0;
+  const y=window.scrollY,changed=lastScreen!==S.screen;lastScreen=S.screen;
+  if(S.d&&!S.guest&&["s1","s2","s3","s4","result","places"].includes(S.screen))store.set("mg3_draft",{d:S.d,screen:["result","places"].includes(S.screen)?"s4":S.screen,ts:Date.now()});
+  KSPEC={};app.innerHTML=V[S.screen]()+sheetHTML()+(S.verdict?verdictHTML():"");
+  if(fid){const n=document.getElementById(fid);if(n){n.focus({preventScroll:true});try{n.setSelectionRange(sel,sel)}catch(e){}}}
+  const c2=document.getElementById("chatlog");if(c2&&(stick||changed))c2.scrollTop=c2.scrollHeight;
+  const s2=document.getElementById("slist");if(s2&&!changed)s2.scrollTop=sTop;
+  const tH=document.getElementById("twH"),tM=document.getElementById("twM");if(tH){tH.scrollTop=Math.floor(S.d.time/60)*50;tM.scrollTop=(S.d.time%60)*50}
+  mountMaps();
+  window.scrollTo(0,changed&&!keep?0:y);
+}
+function go(s){S.screen=s;S.sheet=null;render();if(s==="s4"&&ONLINE()&&S.d&&!S.guest)hostSync()}
+function verdictHTML(){const v=S.verdict;
+  return `<div class="verdict"><div class="box">${av(v.name,v.idx)}<div style="font-weight:800;font-size:15px">${esc(v.name)}님 ${v.mode==="last"?"벌칙은":"당첨!"}</div><h2>${esc(v.pen)}</h2>
+  <div class="row2"><button class="btn" data-a="shareVerdict" style="background:#1F2022;color:#fff">채팅에 공유</button><button class="btn" data-a="finish" style="background:#fff;color:#1F2022">모임 마치기</button></div></div></div>
+  <div class="confetti">${Array.from({length:40},(_,i)=>`<i style="left:${(i*37)%100}%;background:${AVC[i%6]};animation-delay:${(i%10)*0.08}s"></i>`).join("")}</div>`}
+
+/* ============================================================
+   액션
+   ============================================================ */
+function runRecommend(){const d=S.d;S.results=recommend(d.people,d.purposes,d.vibes,S.w);
+  if(S.real){const hubs=S.realHubs;S.results=recommend(d.people,d.purposes,d.vibes,S.w,{hubs,leg:realLeg})}}
+function resetUrl(){try{if(location.pathname.startsWith("/j/")||location.hash.startsWith("#/j/"))history.replaceState(null,"","/")}catch(e){}}
+function histCount(){return meetings().filter(m=>m.status==="done").length}
+function fmtSlot(x){const d=new Date(x.date);return `${d.getMonth()+1}/${d.getDate()}(${DOW[d.getDay()]}) ${fmtTime(x.time)}`}
+function pollTally(d){const counts=d.slots.map((_,k)=>d.people.filter((p,i)=>!p.placeholder&&(i===0||p.is_host||(p.avail||[]).includes(k))).length);
+  let best=0;counts.forEach((c,k)=>{if(c>counts[best])best=k});return {counts,best,resp:d.people.filter((p,i)=>i>0&&!p.placeholder&&(p.avail||[]).length).length}}
+function pollCard(d){const t=pollTally(d),tot=d.people.filter(p=>!p.placeholder).length;
+  return `<div class="label" style="margin-top:24px">시간 투표 <small>친구 ${t.resp}명 응답 · 가장 많은 시간으로 정해요</small></div><div class="card">${d.slots.map((x,k)=>{const who=d.people.map((p,i)=>({p,i})).filter(({p,i})=>!p.placeholder&&(i===0||(p.avail||[]).includes(k)));
+    return `<div class="tally2 ${k===t.best&&t.resp?"best":""}"><span>${fmtSlot(x)}${k===t.best&&t.resp?`<span class="best-tag">가장 많이 돼요</span>`:""}</span><span class="who">${who.map(({p,i})=>av(i===0?"나":p.name,i)).join("")}</span><div class="bar"><i style="width:${t.counts[k]/Math.max(1,tot)*100}%"></i></div></div>`}).join("")}</div>`}
+function openLoc(ctx,idx){const p=ctx==="fav"?null:S.d.people[idx];const sel=p&&p.loc?{...p.loc}:null;
+  S.loc={ctx,idx,q:"",results:[],sel,st:sel?sel.st:null,searching:false};S.sheet=null;go("loc");setTimeout(()=>document.getElementById("lq")?.focus(),60)}
+function inviteUrl(){return ONLINE()?`${location.origin}/j/${S.d.code}`:CONFIG.INVITE_BASE+S.d.code}
+function startInviteSim(){if(ONLINE())return;const d=S.d;if(d.invited)return;d.invited=true;const last=d.people.length-1;
+  d.people.forEach((p,i)=>{if(i>0&&!p.st&&i!==last)simJoin(i,800+i*700,2600+i*1300)})}
+/* ============================================================
+   온라인 모드 (Supabase): 모임·참여자 저장 + 실시간 반영
+   ============================================================ */
+window.SB=null;
+function loadSupabase(){if(!CONFIG.SUPABASE_URL||!CONFIG.SUPABASE_ANON_KEY)return Promise.resolve(false);
+  return new Promise(res=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";
+    sc.onload=()=>{try{window.SB=supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY);res(true)}catch(e){console.warn(e);res(false)}};
+    sc.onerror=()=>{console.warn("Supabase SDK 로드 실패 → 오프라인 데모로 동작");res(false)};document.head.appendChild(sc)})}
+// 정확한 좌표는 저장하지 않고 역·동네 이름·접근 시간만 공유
+const locRow=p=>({st:p.st,acc:p.acc,loc:{label:p.loc?.label||`${p.st}역 근처`,accMode:p.loc?.accMode||"도보"}});
+function rowToPerson(r){const st=r.st&&byName(r.st);
+  return {id:r.id,device:r.device_id,name:r.name||"",st:r.st||null,acc:r.acc??3,state:r.st?"done":(r.state||"opened"),race:r.race,push:r.push,is_host:r.is_host,avail:r.avail||[],
+    loc:st?{label:r.loc?.label||`${r.st}역 근처`,sub:`${r.st}역`,lat:st.lat,lng:st.lng,accMode:r.loc?.accMode||"도보",src:"링크"}:null,src:"링크"}}
+async function hostSync(){const d=S.d;if(!d||!ONLINE())return;
+  const row={code:d.code,host_name:PROFILE.name,name:d.name.trim()||null,date_ts:d.date,time_min:d.time,mode:d.mode||"fixed",slots:d.slots||[],purposes:d.purposes,vibes:d.vibes,count:d.count};
+  const {error}=await SB.from("meetings").upsert(row,{onConflict:"code"});if(error){toast("모임 저장 실패: "+error.message);return}
+  const me=d.people[0];
+  const {data:hp,error:e2}=await SB.from("participants").upsert({code:d.code,device_id:DEVICE,name:PROFILE.name,is_host:true,state:"done",...locRow(me)},{onConflict:"code,device_id"}).select().single();
+  if(e2){toast("참여자 저장 실패: "+e2.message);return}me.id=hp.id;
+  if(!d.synced){d.synced=true;track("meeting_created");hostSubscribe(d.code)}}
+async function proxySave(idx,p){const {data,error}=await SB.from("participants").upsert({code:S.d.code,device_id:`proxy-${S.d.code}-${idx}`,name:p.name,state:"done",...locRow(p)},{onConflict:"code,device_id"}).select().single();
+  if(error)toast("저장 실패: "+error.message);else p.id=data.id}
+let CH=null;
+function hostSubscribe(code){if(CH)SB.removeChannel(CH);
+  const refresh=async()=>{const {data}=await SB.from("participants").select("*").eq("code",code).order("created_at");if(!data||!S.d||S.d.code!==code)return;
+    const before=S.d.people.filter(p=>p.st).length,host=data.find(r=>r.device_id===DEVICE),others=data.filter(r=>r!==host);
+    const me=S.d.people[0];S.d.people=[me,...others.map(rowToPerson)];S.d.people[0].id=host?.id;S.d.count=Math.max(S.d.count,S.d.people.length);syncFriends(S.d);
+    const after=S.d.people.filter(p=>p.st).length;if(after>before&&S.screen==="s4"){const last=[...others].reverse().find(r=>r.st);toast(`${last?.name||"친구"}님이 출발지를 입력했어요`)}
+    if(["s4","loc"].includes(S.screen))render(true)};
+  CH=SB.channel("host-"+code).on("postgres_changes",{event:"*",schema:"public",table:"participants",filter:`code=eq.${code}`},refresh).subscribe();refresh()}
+async function guestBoot(code){S.screen="boot";render();
+  const {data:m,error}=await SB.from("meetings").select("*").eq("code",code).maybeSingle();
+  if(error||!m){S.screen="gone";render();return}
+  let {data:rows}=await SB.from("participants").select("*").eq("code",code).order("created_at");
+  const host=rows.find(r=>r.is_host);
+  if(host&&host.device_id===DEVICE){toast("내가 만든 모임이에요. 방장 화면으로 이어갈게요");resetUrl();const dr=store.get("mg3_draft",null);
+    if(dr&&dr.d.code===code){A.resume()}else go("home");return}
+  if(!rows.find(r=>r.device_id===DEVICE)){const {error:e}=await SB.from("participants").insert({code,device_id:DEVICE,name:"",state:"opened"});if(e)console.warn(e);track("guest_opened",{code});}
+  S.guest={online:true,code,meeting:m,idx:0};await guestRefresh();
+  const me=S.d.people[S.guest.idx];S.screen=me.st?"g_wait":"g_land";render();
+  SB.channel("guest-"+code).on("postgres_changes",{event:"*",schema:"public",table:"participants",filter:`code=eq.${code}`},()=>guestRefresh(true))
+    .on("postgres_changes",{event:"UPDATE",schema:"public",table:"meetings",filter:`code=eq.${code}`},p=>{S.guest.meeting=p.new;guestRefresh(true);if(p.new.status==="confirmed"){saveGuestMeeting();toast("약속이 확정됐어요!")}}).subscribe();
+  if(m.status==="confirmed")saveGuestMeeting()}
+async function guestRefresh(rerender){const g=S.guest,m=g.meeting;const {data:rows}=await SB.from("participants").select("*").eq("code",g.code).order("created_at");
+  const host=rows.find(r=>r.is_host),others=rows.filter(r=>r!==host),ppl=[...(host?[host]:[]),...others].map(rowToPerson);
+  const typedName=S.d&&S.d.people[g.idx]?.name,typedAvail=S.d&&S.d.people[g.idx]?.avail;
+  S.d={code:g.code,name:m.name||"",date:+m.date_ts,time:m.time_min,purposes:m.purposes||[],vibes:m.vibes||[],count:Math.max(m.count,ppl.length),people:ppl};
+  g.idx=Math.max(0,ppl.findIndex(p=>p.device===DEVICE));if(typedName&&!ppl[g.idx].st)ppl[g.idx].name=typedName;if(typedAvail&&!ppl[g.idx].st)ppl[g.idx].avail=typedAvail;
+  S.d.mode=m.mode||"fixed";S.d.slots=m.slots||[];
+  while(S.d.people.length<S.d.count)S.d.people.push({name:"",st:null,state:"waiting",placeholder:true});
+  if(rerender&&["g_land","g_wait"].includes(S.screen)&&document.activeElement?.id!=="gname")render(true)}
+async function guestSave(fields){const g=S.guest;const {error}=await SB.from("participants").update(fields).eq("code",g.code).eq("device_id",DEVICE);
+  if(error)toast("저장 실패: "+error.message);else if(fields.state==="done")track("guest_done",{code:g.code})}
+function saveGuestMeeting(){const g=S.guest,m=g.meeting,d=S.d;if(!m||m.status!=="confirmed")return;const me=d.people[g.idx];
+  const order=[me,...d.people.filter((p,i)=>i!==g.idx&&!p.placeholder)];
+  putMeeting({id:"c-"+g.code,code:g.code,name:m.name||"우리 모임",date:+m.date_ts,time:m.time_min,hub:m.hub,place:m.place,placeCat:m.place_cat||0,purposes:m.purposes,vibes:m.vibes,
+    people:order.map((p,i)=>({name:i===0?PROFILE.name:p.name,st:p.st,acc:p.acc,loc:p.loc})),legs:order.map(p=>(m.legs||{})[p.id]??legOf(p,byName(m.hub)).t),status:"upcoming",solo:!!m.solo})}
+function downloadIcs(){const g=S.guest,m=g?.meeting,d=S.d;if(!m)return;const me=d.people[g.idx],leg=(m.legs||{})[me.id]||30;
+  const dt=new Date(+m.date_ts+m.time_min*6e4),pad=n=>String(n).padStart(2,"0"),f=x=>`${x.getFullYear()}${pad(x.getMonth()+1)}${pad(x.getDate())}T${pad(x.getHours())}${pad(x.getMinutes())}00`;
+  const end=new Date(dt.getTime()+2*36e5),alarm=leg+BUFFER;
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//moilgot//KO","BEGIN:VEVENT",`UID:${g.code}-${DEVICE}@moilgot`,`DTSTART:${f(dt)}`,`DTEND:${f(end)}`,
+    `SUMMARY:${m.name||"모임"} @ ${m.place}`,`LOCATION:${m.hub}역 ${m.place}`,`DESCRIPTION:${me.st}역에서 ${leg}분. ${hhmm(m.time_min-leg-BUFFER)}에 출발하세요`,
+    "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:지금 출발하면 딱 맞아요",`TRIGGER:-PT${alarm}M`,"END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));a.download="moilgot.ics";document.body.appendChild(a);a.click();a.remove();track("ics")}
+V.boot=()=>`<div class="scr" style="justify-content:center;align-items:center"><span class="logo">모일곳</span><p class="sub" style="margin-top:10px">초대장을 여는 중...</p></div>`;
+V.gone=()=>`<div class="scr" style="justify-content:center"><span class="logo">모일곳</span><h2 class="q" style="margin-top:16px">초대 링크를 찾을 수 없어요</h2><p class="sub">링크가 잘못됐거나 모임이 삭제됐어요. 초대한 친구에게 링크를 다시 받아주세요.</p><button class="btn" data-a="gHome">모일곳 홈으로</button></div>`;
+/* ---- 위치 검색: 카카오 장소검색(키 있을 때) → 없으면 역·주요 장소 목록 ---- */
+let lqT;function searchLoc(q){const L=S.loc;q=q.trim();if(!q){L.results=[];return render(true)}
+  const local=[...LANDMARKS.filter(l=>l[0].includes(q)||l[3].includes(q)).map(l=>({kind:"lm",name:l[0],sub:l[3],lat:l[1],lng:l[2]})),
+    ...ST.filter(s=>s.name.includes(q)).map(s=>({kind:"st",name:s.name+"역",sub:lineText(s),lat:s.lat,lng:s.lng,st:s.name}))];
+  if(KMAP.ready&&window.kakao?.maps?.services){L.searching=true;
+    new kakao.maps.services.Places().keywordSearch(q,(data,status)=>{L.searching=false;
+      const kr=status===kakao.maps.services.Status.OK?data.slice(0,8).map(x=>({kind:"kakao",name:x.place_name,sub:x.road_address_name||x.address_name,lat:+x.y,lng:+x.x})):[];
+      L.results=[...kr,...local.filter(l=>l.kind==="st")].slice(0,10);if(S.screen==="loc")render(true)});
+  }else L.results=local;render(true)}
+function regionName(lat,lng){return new Promise(res=>{if(!(KMAP.ready&&window.kakao?.maps?.services))return res(null);
+  new kakao.maps.services.Geocoder().coord2RegionCode(lng,lat,(r,st)=>{if(st!==kakao.maps.services.Status.OK||!r.length)return res(null);const x=r.find(v=>v.region_type==="H")||r[0];res(`${x.region_2depth_name} ${x.region_3depth_name}`.trim())})})}
+/* ---- 실제 대중교통 시간 (서버 프록시 /api/transit → 카카오 대중교통 길찾기) ---- */
+function realLeg(p,h){const k=`${p.loc?p.loc.lat.toFixed(4):p.st}|${p.loc?p.loc.lng.toFixed(4):""}|${h.name}`;const v=REAL.get(k);return v?{t:v.minutes,tr:v.transfers}:legOf(p,h)}
+async function refineWithTransit(){if(!CONFIG.TRANSIT_ENDPOINT)return;const d=S.d;
+  const top=recommend(d.people,d.purposes,d.vibes,S.w,{k:6}).map(r=>r.hub);S.refining=true;render(true);
+  try{await Promise.all(top.flatMap(h=>d.people.map(async p=>{const o=ptOf(p),k=`${p.loc?p.loc.lat.toFixed(4):p.st}|${p.loc?p.loc.lng.toFixed(4):""}|${h.name}`;if(REAL.has(k))return;
+      const r=await fetch(`${CONFIG.TRANSIT_ENDPOINT}?sx=${o.lng}&sy=${o.lat}&ex=${h.lng}&ey=${h.lat}`);if(r.ok)REAL.set(k,await r.json())})));
+    S.real=true;S.realHubs=top;S.sel=0;runRecommend()}catch(e){console.warn("transit",e)}
+  S.refining=false;if(S.screen==="result")render(true)}
+/* ---- 카카오 지도 어댑터: 키가 있으면 SVG 대신 실제 지도를 마운트 ---- */
+const KMAP={ready:false,loading:null};let KSPEC={};
+function loadKakao(){if(!CONFIG.KAKAO_JS_KEY)return Promise.resolve(false);if(KMAP.loading)return KMAP.loading;
+  KMAP.loading=new Promise(res=>{const sc=document.createElement("script");sc.src=`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${CONFIG.KAKAO_JS_KEY}&libraries=services&autoload=false`;
+    sc.onload=()=>kakao.maps.load(()=>{KMAP.ready=true;res(true);render(true)});sc.onerror=()=>{console.warn("카카오 지도 SDK를 불러오지 못해 데모 지도로 표시해요");res(false)};document.head.appendChild(sc)});return KMAP.loading}
+function mountMaps(){if(!KMAP.ready)return;for(const [id,spec] of Object.entries(KSPEC)){const el=document.getElementById(id);if(!el)continue;
+  const holder=document.createElement("div");holder.style.cssText="position:absolute;inset:0";el.querySelector("svg")?.remove();el.prepend(holder);
+  const LL=(a,b)=>new kakao.maps.LatLng(a,b),map=new kakao.maps.Map(holder,{center:LL(...spec.center),level:spec.level||7});
+  (spec.lines||[]).forEach(([a,b])=>new kakao.maps.Polyline({map,path:[LL(...a),LL(...b)],strokeWeight:3,strokeColor:"#1F2022",strokeOpacity:.7,strokeStyle:"shortdash"}));
+  if(spec.circle)new kakao.maps.Circle({map,center:LL(spec.circle[0],spec.circle[1]),radius:spec.circle[2],strokeWeight:2,strokeColor:"#6F8F00",strokeStyle:"dash",fillColor:"#C8F135",fillOpacity:.3});
+  (spec.overlays||[]).forEach(o=>{const ov=new kakao.maps.CustomOverlay({map,position:LL(o.lat,o.lng),content:o.html,yAnchor:o.y??0.5,clickable:!!o.click});
+    if(o.click){const n=document.createElement("div");n.innerHTML=o.html;n.firstChild.addEventListener("click",()=>A[o.click[0]](o.click[1]));ov.setContent(n.firstChild)}});
+  if(spec.fit&&spec.fit.length>1){const bd=new kakao.maps.LatLngBounds();spec.fit.forEach(p=>bd.extend(LL(...p)));map.setBounds(bd,...(spec.pad||[90,50,120,50]))}
+  if(spec.pick){kakao.maps.event.addListener(map,"idle",async()=>{const c=map.getCenter(),lat=c.getLat(),lng=c.getLng(),L=S.loc;if(!L||!L.sel)return;
+    if(Math.abs(lat-L.sel.lat)<1e-5&&Math.abs(lng-L.sel.lng)<1e-5)return;const label=await regionName(lat,lng)||"지도에서 고른 위치";
+    L.sel=makeLoc(label,"지도에서 직접 고른 위치",lat,lng,"지도");L.st=L.sel.st;render(true)})}}}
+loadKakao();
+function simJoin(i,openDelay,doneDelay){
+  setTimeout(()=>{const p=S.d?.people[i];if(!p||p.st)return;p.state="opened";if(S.screen==="s4")render(true)},openDelay);
+  setTimeout(()=>{const p=S.d?.people[i];if(!p||p.st)return;const lm=LANDMARKS.find(l=>nearStations(l[1],l[2],1)[0].s.name===p.sim);
+    setLoc(p,lm?makeLoc(lm[0],lm[3],lm[1],lm[2],"링크"):locFromStation(p.sim,"링크"));p.state="done";
+    if(S.d.mode==="poll"){const r=seeded(p.name+S.d.slots.length);p.avail=S.d.slots.map((_,k)=>k).filter(()=>r()>0.4);if(!p.avail.length)p.avail=[0]}
+    if(S.screen==="s4"){toast(`${p.name}님이 출발지를 입력했어요`);render(true)}},doneDelay)}
+function startRaceFor(m){if(!S.race||S.race.mid!==m.id)S.race=makeRace(m)}
+const A={
+  go:v=>go(v),
+  tab:v=>go(v),
+  new:()=>{S.d=freshDraft();syncFriends(S.d);track("create_start");go("s1")},
+  cnt:v=>{S.d.count=Math.max(2,Math.min(8,S.d.count+ +v));syncFriends(S.d);render(true)},
+  setcnt:v=>{S.d.count=+v;syncFriends(S.d);render(true)},
+  taste:()=>{S.d.taste=!S.d.taste;if(S.d.taste&&!S.d.vibes.includes(0))S.d.vibes.push(0);render(true)},
+  purp:v=>{v=+v;const p=S.d.purposes;S.d.purposes=p.includes(v)?p.filter(x=>x!==v):[...p,v];render(true)},
+  vibe:v=>{v=+v;const p=S.d.vibes;S.d.vibes=p.includes(v)?p.filter(x=>x!==v):[...p,v];render(true)},
+  week:v=>{S.d.weekStart+= +v*7*DAY;render(true)},
+  day:v=>{S.d.date=+v;render(true)},
+  settm:v=>{S.d.time=+v;render(true)},
+  tmode:v=>{S.d.mode=v;if(v==="poll"&&!S.d.slots.length)S.d.slots=[{date:S.d.date,time:S.d.time}];render(true)},
+  slotAdd:()=>{const d=S.d;if(d.slots.some(x=>x.date===d.date&&x.time===d.time)){toast("이미 추가한 시간이에요");return}d.slots.push({date:d.date,time:d.time});d.slots.sort((a,b)=>a.date-b.date||a.time-b.time);render(true)},
+  slotDel:v=>{S.d.slots.splice(+v,1);render(true)},
+  avail:v=>{const p=S.d.people[S.guest.idx],k=+v;p.avail=p.avail||[];p.avail=p.avail.includes(k)?p.avail.filter(x=>x!==k):[...p.avail,k];render(true)},
+  fb:v=>{S.fb=v==="1";track("rec_feedback",{good:S.fb,hub:S.results[S.sel].hub.name});render(true)},
+  fbWhy:v=>{track("rec_feedback_why",{why:v});toast("알려줘서 고마워요");A.cands()},
+  focusSearch:()=>{document.getElementById("lq")?.focus()},
+  gpsRetry:()=>{S.loc.denied=false;A.gps()},
+  guestDemo:()=>{const m=getMeeting(S.cur);const ppl=m.people.map((p,i)=>({...p,id:"p"+i,device:"d"+i,state:"done",is_host:i===0}));const legs={};ppl.forEach((p,i)=>legs[p.id]=m.legs[i]);
+    S.d={code:"demo",name:m.name,date:m.date,time:m.time,purposes:m.purposes||[],vibes:[],count:ppl.length,people:ppl,mode:"fixed",slots:[]};
+    S.guest={idx:Math.min(1,ppl.length-1),demo:true,meeting:{status:"confirmed",hub:m.hub,place:m.place,legs,name:m.name,date_ts:m.date,time_min:m.time}};go("g_wait")},
+  setH:v=>{S.d.time=+v*60+S.d.time%60;render(true)},
+  setM:v=>{S.d.time=Math.floor(S.d.time/60)*60+ +v;render(true)},
+  alarm:()=>{S.d.alarm=!S.d.alarm;render(true)},
+  shareTg:()=>{S.d.share=!S.d.share;render(true)},
+  src:v=>{const me=S.d.people[0];
+    if(v==="집"){setLoc(me,{...locFromStation(PROFILE.home,"집")});render(true)}
+    else if(v==="학교"){setLoc(me,{...locFromStation(PROFILE.school,"학교")});render(true)}
+    else{openLoc("draft",0);A.gps()}},
+  pick:v=>openLoc("draft",+v),
+  pickFav:v=>openLoc("fav",v),
+  lqClear:()=>{S.loc.q="";S.loc.results=[];const i=document.getElementById("lq");if(i){i.value="";i.focus()}refreshLoc()},
+  lpick:v=>{const r=S.loc.results[+v];S.loc.sel=makeLoc(r.name,r.sub,r.lat,r.lng,"검색",r.kind==="st"?r.st:null);S.loc.st=S.loc.sel.st;S.loc.q="";S.loc.results=[];render(true)},
+  lst:v=>{const L=S.loc;L.st=v;L.sel=makeLoc(L.sel.label,L.sel.sub,L.sel.lat,L.sel.lng,L.sel.src,v);render(true)},
+  gps:()=>{if(!navigator.geolocation){toast("이 기기에선 위치를 쓸 수 없어요. 검색으로 찾아주세요");return}
+    toast("현재 위치를 찾는 중...");
+    navigator.geolocation.getCurrentPosition(async pos=>{const lat=pos.coords.latitude,lng=pos.coords.longitude;
+      const label=await regionName(lat,lng)||`${nearStations(lat,lng,1)[0].s.name}역 근처`;
+      S.loc.sel=makeLoc(label,"현재 위치 · 정확도 약 "+Math.round(pos.coords.accuracy)+"m",lat,lng,"현재 위치");S.loc.st=S.loc.sel.st;render(true)},
+      ()=>{S.loc.denied=true;track("gps_denied");render(true)},{timeout:8000,enableHighAccuracy:true})},
+  lconfirm:()=>{const L=S.loc,loc={...L.sel,src:L.sel.src};
+    if(L.ctx==="fav"){PROFILE[L.idx]=loc.st;saveProfile();S.loc=null;go("my");return}
+    const p=S.d.people[L.idx];setLoc(p,loc);if(L.ctx==="draft"&&L.idx>0)p.src="대신 입력";if(L.idx>0)p.state="done";
+    if(ONLINE()){if(L.ctx==="guest")guestSave({name:(p.name||"").trim()||"친구",state:"done",avail:p.avail||[],...locRow(p)});
+      else if(L.idx===0)hostSync();else proxySave(L.idx,p)}
+    S.loc=null;if(L.ctx==="guest"){toast("입력 완료! 방장 화면에 바로 떠요");go("g_wait")}else go("s4")},
+  poke:v=>{const i=+v,p=S.d.people[i];if(ONLINE()){p.poked=true;render(true);setTimeout(()=>{p.poked=false},500);
+      toast(p.state==="opened"?`${p.name}님이 입력하는 중이에요. 카톡으로 한 번 더 알려주세요`:"아직 링크를 안 연 친구가 있어요. 단톡방에 다시 보내주세요");setTimeout(A.shareInvite,700);return}p.poked=true;toast(p.state==="opened"?`${p.name}님에게 푸시 알림을 보냈어요 👉`:`${p.name}님에게 카톡으로 한 번 더 보냈어요 👉`);render(true);setTimeout(()=>{p.poked=false},500);simJoin(i,900,2200)},
+  invite:v=>{S.sheet={type:"invite"};render(true);if(v==="link")A.copyInvite()},
+  copyInvite:()=>{copyText(inviteUrl(),"초대 링크를 복사했어요");startInviteSim()},
+  shareInvite:()=>{const d=S.d,url=inviteUrl(),text=`${PROFILE.name}님이 '${d.name.trim()||"우리 모임"}'에 초대했어요. 출발지만 입력해줘!`;
+    if(navigator.share){navigator.share({title:"모일곳 초대",text,url}).then(()=>{toast("보냈어요! 친구가 입력하면 여기 떠요");startInviteSim()}).catch(()=>{})}
+    else{copyText(`${text}\n${url}`,"카톡에 붙여넣어 보내주세요");startInviteSim()}},
+  guestPreview:()=>{if(ONLINE()){window.open(inviteUrl(),"_blank");return}const i=S.d.people.findIndex((p,k)=>k>0&&!p.st);if(i<0){toast("모두 입력했어요");return}S.guest={idx:i};S.d.people[i].state="opened";S.sheet=null;go("g_land")},
+  gstart:()=>openLoc("guest",S.guest.idx),
+  gexit:()=>{S.guest=null;go("s4")},
+  gRace:()=>{const p=S.d.people[S.guest.idx];p.race=p.race===false;render(true);if(ONLINE())guestSave({race:p.race!==false})},
+  gPush:()=>{const p=S.d.people[S.guest.idx];p.push=p.push===false;render(true);if(ONLINE())guestSave({push:p.push!==false})},
+  resume:()=>{const dr=store.get("mg3_draft",null);if(!dr)return;S.d=dr.d;S.guest=null;if(ONLINE()&&S.d.synced)hostSubscribe(S.d.code);go(dr.screen)},
+  dropDraft:()=>{store.set("mg3_draft",null);render(true)},
+  gNext:()=>{track("guest_to_host");S.guest=null;resetUrl();A.new()},
+  gHome:()=>{S.guest=null;resetUrl();go("home")},
+  ics:()=>downloadIcs(),
+  placeOpen:v=>{S.focus=+v;S.sheet={type:"place",id:+v};render(true)},
+  find:()=>{if(ONLINE()){S.d.people=S.d.people.filter(p=>p.st);S.d.count=S.d.people.length}S.fb=null;
+    if(S.d.mode==="poll"&&S.d.slots.length){const t=pollTally(S.d),b=t.best;S.d.date=S.d.slots[b].date;S.d.time=S.d.slots[b].time;toast(`${fmtSlot(S.d.slots[b])}로 정했어요 · ${t.counts[b]}/${S.d.people.length}명 가능`);track("time_poll_decided",{slots:S.d.slots.length})}
+    track("origins_done");S.sel=0;S.real=false;runRecommend();track("result_view");go("result");refineWithTransit()},
+  cands:()=>{S.sheet={type:"cands"};render(true)},
+  cand:v=>{S.sel=+v;S.sheet=null;render(true)},
+  shareResult:()=>{const r=S.results[S.sel];copyText(`[모일곳] 우리 ${r.hub.name}역에서 만나자! 평균 ${r.avg}분, 최대 차이 ${r.spread}분`)},
+  places:()=>{const d=S.d;S.places=genPlaces(S.results[S.sel].hub,d.purposes,d.vibes,d.taste);S.filter=-1;S.focus=null;track("places_view");go("places")},
+  filter:v=>{S.filter=+v;S.focus=null;render(true)},
+  focus:v=>{S.focus=+v;render(true)},
+  heart:v=>{const p=S.places.find(x=>x.id===+v);p.votes.includes(0)?p.votes=p.votes.filter(x=>x!==0):p.votes.push(0);S.focus=p.id;render(true)},
+  shareList:()=>{copyText(S.places.slice(0,5).map((p,i)=>`${i+1}. ${p.name} (${PURPOSES[p.cat][2]}, 도보 ${p.walk}분)`).join("\n"),"추천 리스트를 복사했어요")},
+  startVote:()=>{track("vote_start");S.sheet={type:"vote"};render(true);
+    if(S.voteSim)return;if(!S.places.some(p=>p.votes.includes(0)))return;
+    S.voteSim=true;const d=S.d,rnd=seeded(d.people.map(p=>p.name).join());
+    d.people.slice(1).forEach((p,k)=>setTimeout(()=>{if(!S.places)return;const i=k+1;
+      const pool=[...S.places].sort((a,b)=>(b.fit+b.votes.length*5+rnd()*30)-(a.fit+a.votes.length*5+rnd()*30));
+      if(!pool[0].votes.includes(i))pool[0].votes.push(i);if(S.screen==="places")render(true)},900+k*1100))},
+  confirm:v=>{const d=S.d,r=S.results[S.sel],win=v!=null?S.places.find(x=>x.id===+v):[...S.places].sort((a,b)=>b.votes.length-a.votes.length||b.fit-a.fit)[0];if(v!=null)track("solo_pick");
+    const name=d.name.trim()||`${DOW[new Date(d.date).getDay()]}요일 모임`;
+    const m={id:"m"+Date.now(),name,date:d.date,time:d.time,hub:r.hub.name,place:win.name,placeCat:win.cat,votes:win.votes.length,purposes:d.purposes,vibes:d.vibes,alarm:d.alarm,share:d.share,
+      people:d.people.map((p,i)=>({name:i===0?PROFILE.name:p.name,st:p.st,acc:p.acc,loc:p.loc})),legs:r.legs.map(l=>l.t),status:"upcoming",solo:v!=null};
+    if(ONLINE()&&d.synced){m.id="c-"+d.code;m.code=d.code;const legs={};d.people.forEach((p,i)=>{if(p.id)legs[p.id]=r.legs[i].t});
+      SB.from("meetings").update({status:"confirmed",date_ts:d.date,time_min:d.time,hub:r.hub.name,place:win.name,place_cat:win.cat,legs,solo:v!=null}).eq("code",d.code).then(({error})=>{if(error)toast("저장 실패: "+error.message)})}
+    store.set("mg3_draft",null);putMeeting(m);S.cur=m.id;S.voteSim=false;S.places=null;track("confirmed",{solo:v!=null});go("done")},
+  copyShare:()=>copyText(shareText(getMeeting(S.cur))),
+  openMeet:v=>{const m=getMeeting(v);S.cur=v;startRaceFor(m);go(S.race.started?"race":"today")},
+  bell:()=>{const up=meetings().filter(m=>m.status==="upcoming").sort((a,b)=>a.date-b.date)[0];if(!up){toast("다가오는 약속이 없어요");return}A.openMeet(up.id)},
+  openRec:v=>{const m=getMeeting(v);toast(m.result?`1등 ${m.people[m.result.order[0]].name} · 벌칙 ${m.result.penalty} (${m.people[m.result.loser].name})`:"기록이 없어요")},
+  early:v=>{PROFILE.early=+v;saveProfile();const m=getMeeting(S.cur);if(!S.race.started){S.race=makeRace(m)}render(true)},
+  startPrep:()=>{const R=S.race,m=getMeeting(S.cur);R.started=true;R.running=true;R.ppl[0].override="씻는중..";
+    pushChat(R,{sys:`${PROFILE.name}님이 준비를 시작했어요 · 상태: 씻는중..`});track("race_start");toast("친구들에게 상태를 공유했어요. 레이스 시작!");go("race")},
+  speed:()=>{const R=S.race;if(!R.started){toast("준비 시작을 누르면 시간이 흘러요");return}if(R.done)return;
+    if(!R.running){R.running=true;R.speed=1}else if(R.speed===1)R.speed=5;else if(R.speed===5)R.speed=15;else{R.running=false;R.speed=1}render(true)},
+  statusSheet:()=>{if(!S.race.started){toast("먼저 준비를 시작해주세요");return}S.sheet={type:"status"};render(true)},
+  setStatus:v=>{const R=S.race,p=R.ppl[0],prev=statusOf(R,0);
+    if(v==="출발했어요"){if(R.now<p.dep)p.dep=R.now;p.override=null}
+    else if(v==="도착했어요"){if(p.arrived!=null)return;if(R.now<p.dep)p.dep=R.now;p.travel=Math.max(0.05,R.now-p.dep+0.01);p.override=null;if(!R.running&&!R.done)R.running=true}
+    else if(v==="5분만!!"){p.override=v}
+    else{if(R.now>=p.dep){toast("이미 출발했어요");return}p.override=v}
+    pushChat(R,{sys:`${PROFILE.name}님 상태: ${prev} → ${v}`});S.sheet=null;render(true)},
+  quick:v=>sendChat(v),
+  send:()=>{const t=S.chatDraft.trim();if(t){S.chatDraft="";const i=document.getElementById("chatin");if(i)i.value="";sendChat(t)}},
+  toRoulette:()=>{S.roul=S.roul&&S.roul.mid===S.cur?S.roul:{mid:S.cur,pens:[...DEFAULT_PEN],mode:"last",rot:0,spinning:false};go("roulette")},
+  mode:()=>{if(S.roul.spinning)return;S.roul.mode=S.roul.mode==="last"?"all":"last";S.roul.rot=0;render(true)},
+  penEdit:()=>{if(S.roul.mode!=="last"){toast("꼴찌만 돌리기 모드에서 벌칙을 편집할 수 있어요");return}S.sheet={type:"pen"};render(true)},
+  penAdd:()=>{S.roul.pens.push("새 벌칙");render(true)},
+  penDel:v=>{S.roul.pens.splice(+v,1);render(true)},
+  spin:()=>{const rl=S.roul,R=S.race,m=getMeeting(S.cur);if(rl.spinning)return;
+    const items=rl.mode==="last"?rl.pens:m.people.map((p,i)=>i===0?PROFILE.name:p.name),n=items.length,k=Math.floor(Math.random()*n);
+    const mid=(k+0.5)*360/n,jit=(Math.random()-0.5)*(300/n)*0.8,base=Math.ceil(rl.rot/360)*360;
+    rl.rot=base+360*5+(360-mid)+jit;rl.spinning=true;
+    const w=document.getElementById("wheel");if(w){void w.getBoundingClientRect();w.style.transform=`rotate(${rl.rot}deg)`}
+    document.querySelectorAll("[data-a=spin]").forEach(b=>{b.disabled=true});const cb=document.querySelector(".cta-bar .btn");if(cb)cb.textContent="두구두구...";
+    setTimeout(()=>{rl.spinning=false;const loser=R.order[R.order.length-1];
+      S.verdict=rl.mode==="last"?{idx:loser,name:loser===0?PROFILE.name:m.people[loser].name,pen:items[k],mode:"last"}:{idx:k,name:items[k],pen:"오늘 커피 쏘기",mode:"all"};
+      track("roulette");render(true)},4300)},
+  shareVerdict:()=>{const v=S.verdict;pushChat(S.race,{sys:`🎯 룰렛 결과: ${v.name}님 → ${v.pen}`});S.verdict=null;go("chat")},
+  finish:()=>{const v=S.verdict,R=S.race,m=getMeeting(S.cur);
+    m.status="done";m.result={order:[...R.order],lateMin:R.ppl.map(p=>Math.max(0,Math.round(p.arrived-m.time))),penalty:v.pen,loser:v.mode==="last"?R.order[R.order.length-1]:v.idx};
+    if(m.result.lateMin[0]>0)PROFILE.lateAvg=Math.round((PROFILE.lateAvg*2+m.result.lateMin[0])/3);saveProfile();
+    putMeeting(m);S.verdict=null;S.race=null;S.roul=null;toast("기록에 저장했어요");go("records")},
+  editName:()=>{S.sheet={type:"name"};render(true)},
+  prep:v=>{const [i,dx]=v.split(":").map(Number);PROFILE.prep[i][1]=Math.max(0,Math.min(90,PROFILE.prep[i][1]+dx));saveProfile();render(true)},
+  resetFunnel:()=>{store.set("mg3_funnel",{});render(true);toast("지표를 초기화했어요")},
+  resetAll:()=>{["mg3_funnel","mg3_meetings","mg3_seeded","mg3_profile"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});location.reload()},
+  closeSheet:(v,el,e)=>{if(e&&e.target.closest("[data-stop]")&&el.classList.contains("dim"))return;
+    if(S.sheet?.type==="name")saveProfile();S.sheet=null;render(true)},
+};
+function sendChat(t){const R=S.race,m=getMeeting(S.cur);pushChat(R,{from:0,text:t});
+  const others=m.people.map((_,i)=>i).filter(i=>i>0&&R.ppl[i].arrived!=null);const who=others[0]??1;
+  const reply=R.done?"ㅋㅋㅋ 돌려돌려":/5분|곧/.test(t)?"ㅇㅋ 천천히 와~":/먼저/.test(t)?"자리 잡아둘게!":"👍";
+  setTimeout(()=>{pushChat(R,{from:who,text:reply});if(S.screen==="chat")render(true)},1100);render(true)}
+function copyText(t,msg="복사했어요. 단톡방에 붙여넣어 주세요"){
+  const ok=()=>toast(msg);
+  const fb=()=>{const ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok()}catch(e){toast("길게 눌러 직접 복사해주세요")}ta.remove()};
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(t).then(ok,fb);else fb();
+}
+document.addEventListener("click",e=>{const el=e.target.closest("[data-a]");if(!el||el.disabled)return;
+  if(el.dataset.a==="closeSheet"&&el.classList.contains("dim")&&e.target.closest("[data-stop]"))return;
+  A[el.dataset.a]?.(el.dataset.v,el,e)});
+document.addEventListener("input",e=>{const t=e.target,k=t.dataset.in;if(!k)return;
+  if(k==="mname")S.d.name=t.value;
+  if(k==="lq"){S.loc.q=t.value;clearTimeout(lqT);lqT=setTimeout(()=>searchLoc(t.value),KMAP.ready?250:60)}
+  if(k==="gname")S.d.people[S.guest.idx].name=t.value;
+  if(k==="sq"){S.stationQ=t.value;const l=document.getElementById("slist");if(l)l.innerHTML=stationList(t.value);}
+  if(k==="fname"){S.d.people[S.sheet.idx].name=t.value;}
+  if(k==="chat")S.chatDraft=t.value;
+  if(k==="pen")S.roul.pens[+t.dataset.i]=t.value;
+  if(k==="myname"){PROFILE.name=t.value.trim()||"나";}
+  if(k==="fair"||k==="area")S.w[k]=+t.value;
+});
+document.addEventListener("change",e=>{const k=e.target.dataset.in;if(k==="fair"||k==="area"){const prev=S.results[S.sel].hub.name;runRecommend();S.sel=0;render(true);
+  if(S.results[0].hub.name!==prev)toast(`기준을 바꾸니 ${S.results[0].hub.name}역이 1순위예요`)}
+  if(k==="fname"&&S.screen==="s4")render(true)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.sheet){S.sheet=null;render(true)}
+  if(e.key==="Enter"&&e.target.id==="chatin"&&!e.isComposing&&e.keyCode!==229){e.preventDefault();A.send()}});
+// 시간 휠(시/분): 스크롤이 멈추면 가운데 값 선택
+let wheelT;document.addEventListener("scroll",e=>{const id=e.target.id;if((id!=="twH"&&id!=="twM")||!S.d)return;clearTimeout(wheelT);
+  wheelT=setTimeout(()=>{if(!S.d||S.screen!=="s3")return;const i=Math.round(e.target.scrollTop/50),H=Math.floor(S.d.time/60),M=S.d.time%60;
+    const t=id==="twH"?Math.max(0,Math.min(23,i))*60+M:H*60+Math.max(0,Math.min(59,i));if(t!==S.d.time){S.d.time=t;render(true)}},140)},true);
+// 초대 링크: /j/코드 (Vercel rewrite) 또는 #/j/코드
+const INVITE_CODE=(location.pathname.match(/^\/j\/([a-z0-9]+)/i)||location.hash.match(/^#\/j\/([a-z0-9]+)/i)||[])[1];
+(async()=>{const online=await loadSupabase();
+  if(INVITE_CODE&&online){guestBoot(INVITE_CODE);return}
+  if(S.screen==="boot")S.screen="home";
+  if(INVITE_CODE){S.d=freshDraft();syncFriends(S.d);S.d.name="금요일 저녁 모임";S.guest={idx:1};S.d.people[1].state="opened";S.screen="g_land"}
+  render()})();
+if(INVITE_CODE&&CONFIG.SUPABASE_URL)S.screen="boot";render();
+</script>
+</body>
+</html>
