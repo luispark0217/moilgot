@@ -566,8 +566,8 @@ const DEFAULT_PEN=["커피 쏘기","디저트 사기","2차 계산","사진 찍�
 const BUFFER=15;
 /* ===== 외부 연동: Vercel 배포 시 채우세요 (README.md 참고). 비어 있으면 자체 지도·추정치로 동작 ===== */
 const CONFIG={
-  KAKAO_JS_KEY:"",                 // 카카오 디벨로퍼스 > 앱 > JavaScript 키 (지도 표시 + 장소 검색)
-  TRANSIT_ENDPOINT:"",             // "/api/transit" → 서버에서 카카오 대중교통 길찾기 API 호출 (REST 키는 서버에만)
+  KAKAO_JS_KEY:"e0a530a98a5d7e646f5b62a2a896a45a",                 // 카카오 디벨로퍼스 > 앱 > JavaScript 키 (지도 표시 + 장소 검색)
+  TRANSIT_ENDPOINT:"/api/transit",             // "/api/transit" → 서버에서 카카오 대중교통 길찾기 API 호출 (REST 키는 서버에만)
   INVITE_BASE:"https://moilgot.vercel.app/j/",
   PLACES_URL:"",
   SUPABASE_URL:"https://ttbsimsvicukpksilheb.supabase.co",                 // Supabase > Project Settings > API > Project URL
@@ -643,12 +643,12 @@ const DAY=864e5;
 const byName=n=>ST.find(s=>s.name===n);
 const areaOf=s=>AREA[s.name]||`${s.name}역 근처`;
 
-let PROFILE=store.get("mg3_profile",null)||{name:"은수",home:"백석",school:"서울대입구",
+let PROFILE=store.get("mg3_profile",null)||{name:CONFIG.SUPABASE_URL?"":"은수",home:"백석",school:"서울대입구",
   prep:[["씻기",25],["옷 입기 · 화장",20],["짐 챙기기",7]],lateAvg:12,early:0};
 const saveProfile=()=>store.set("mg3_profile",PROFILE);
 
 function seedIfNeeded(){
-  if(store.get("mg3_seeded",false))return;
+  if(store.get("mg3_seeded",false)||CONFIG.SUPABASE_URL)return;
   const ppl=[[PROFILE.name,"백석"],["지민","성수"],["도윤","사당"],["서아","신도림"]];
   const hub=byName("홍대입구");
   const mk=(id,name,dayTs,time,hubName,place,people,extra)=>{const h=byName(hubName);
@@ -1163,7 +1163,7 @@ function sheetHTML(){
     <span class="tag fit">취향 ${p.fit}%</span><span class="tag">♥ ${p.votes.length}표</span>${p.second?`<span class="tag">2차 추천</span>`:""}
     <p class="desc" style="margin:14px 0">방장이 바로 정하면 투표 없이 확정되고, 친구들에게 결과가 공유돼요.</p>
     <div class="row2"><button class="btn ghost sm" data-a="heart" data-v="${p.id}">${mine?"♥ 후보에서 빼기":"♡ 투표 후보에 담기"}</button><button class="btn sm" data-a="confirm" data-v="${p.id}">여기로 바로 확정</button></div></div>`}
-  if(sh.type==="name"){inner=`<h3>내 이름</h3><p class="desc">친구들에게 보이는 이름이에요</p><input class="field" id="myname" data-in="myname" value="${esc(PROFILE.name)}" maxlength="6"><div style="height:12px"></div><button class="btn sm" data-a="closeSheet">저장</button>`}
+  if(sh.type==="name"){inner=`<h3>${sh.then?"먼저 이름을 알려주세요":"내 이름"}</h3><p class="desc">${sh.then?"친구들이 받는 초대장에 이 이름이 보여요":"친구들에게 보이는 이름이에요"}</p><input class="field" id="myname" data-in="myname" value="${esc(PROFILE.name)}" placeholder="예: 민석" maxlength="6"><div style="height:12px"></div><button class="btn sm" data-a="closeSheet">저장</button>`}
   const anim=sh._shown?' style="animation:none"':'';sh._shown=true;
   return `<div class="dim" data-a="closeSheet"><div class="sheet" role="dialog" data-stop="1"${anim}><div class="grab"></div>${inner}</div></div>`;
 }
@@ -1298,9 +1298,9 @@ function regionName(lat,lng){return new Promise(res=>{if(!(KMAP.ready&&window.ka
 function realLeg(p,h){const k=`${p.loc?p.loc.lat.toFixed(4):p.st}|${p.loc?p.loc.lng.toFixed(4):""}|${h.name}`;const v=REAL.get(k);return v?{t:v.minutes,tr:v.transfers}:legOf(p,h)}
 async function refineWithTransit(){if(!CONFIG.TRANSIT_ENDPOINT)return;const d=S.d;
   const top=recommend(d.people,d.purposes,d.vibes,S.w,{k:6}).map(r=>r.hub);S.refining=true;render(true);
-  try{await Promise.all(top.flatMap(h=>d.people.map(async p=>{const o=ptOf(p),k=`${p.loc?p.loc.lat.toFixed(4):p.st}|${p.loc?p.loc.lng.toFixed(4):""}|${h.name}`;if(REAL.has(k))return;
-      const r=await fetch(`${CONFIG.TRANSIT_ENDPOINT}?sx=${o.lng}&sy=${o.lat}&ex=${h.lng}&ey=${h.lat}`);if(r.ok)REAL.set(k,await r.json())})));
-    S.real=true;S.realHubs=top;S.sel=0;runRecommend()}catch(e){console.warn("transit",e)}
+  const n0=REAL.size;try{await Promise.all(top.flatMap(h=>d.people.map(async p=>{const o=ptOf(p),k=`${p.loc?p.loc.lat.toFixed(4):p.st}|${p.loc?p.loc.lng.toFixed(4):""}|${h.name}`;if(REAL.has(k))return;
+      const r=await fetch(`${CONFIG.TRANSIT_ENDPOINT}?sx=${o.lng}&sy=${o.lat}&ex=${h.lng}&ey=${h.lat}`);if(r.ok)REAL.set(k,await r.json())})).map(pr=>pr.catch(()=>{})));
+    if(REAL.size>n0){S.real=true;S.realHubs=top;S.sel=0;runRecommend()}}catch(e){console.warn("transit",e)}
   S.refining=false;if(S.screen==="result")render(true)}
 /* ---- 카카오 지도 어댑터: 키가 있으면 SVG 대신 실제 지도를 마운트 ---- */
 const KMAP={ready:false,loading:null};let KSPEC={};
@@ -1329,7 +1329,7 @@ function startRaceFor(m){if(!S.race||S.race.mid!==m.id)S.race=makeRace(m)}
 const A={
   go:v=>go(v),
   tab:v=>go(v),
-  new:()=>{S.d=freshDraft();syncFriends(S.d);track("create_start");go("s1")},
+  new:()=>{if(!PROFILE.name){S.sheet={type:"name",then:"new"};render(true);setTimeout(()=>document.getElementById("myname")?.focus(),60);return}S.d=freshDraft();syncFriends(S.d);track("create_start");go("s1")},
   cnt:v=>{S.d.count=Math.max(2,Math.min(8,S.d.count+ +v));syncFriends(S.d);render(true)},
   setcnt:v=>{S.d.count=+v;syncFriends(S.d);render(true)},
   taste:()=>{S.d.taste=!S.d.taste;if(S.d.taste&&!S.d.vibes.includes(0))S.d.vibes.push(0);render(true)},
@@ -1458,7 +1458,7 @@ const A={
   resetFunnel:()=>{store.set("mg3_funnel",{});render(true);toast("지표를 초기화했어요")},
   resetAll:()=>{["mg3_funnel","mg3_meetings","mg3_seeded","mg3_profile"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});location.reload()},
   closeSheet:(v,el,e)=>{if(e&&e.target.closest("[data-stop]")&&el.classList.contains("dim"))return;
-    if(S.sheet?.type==="name")saveProfile();S.sheet=null;render(true)},
+    if(S.sheet?.type==="name"){const th=S.sheet.then;if(!PROFILE.name.trim()){if(el&&el.classList.contains("dim")){S.sheet=null;render(true);return}toast("이름을 입력해주세요");return}saveProfile();S.sheet=null;if(th){A[th]();return}}S.sheet=null;render(true)},
 };
 function sendChat(t){const R=S.race,m=getMeeting(S.cur);pushChat(R,{from:0,text:t});
   const others=m.people.map((_,i)=>i).filter(i=>i>0&&R.ppl[i].arrived!=null);const who=others[0]??1;
@@ -1480,7 +1480,7 @@ document.addEventListener("input",e=>{const t=e.target,k=t.dataset.in;if(!k)retu
   if(k==="fname"){S.d.people[S.sheet.idx].name=t.value;}
   if(k==="chat")S.chatDraft=t.value;
   if(k==="pen")S.roul.pens[+t.dataset.i]=t.value;
-  if(k==="myname"){PROFILE.name=t.value.trim()||"나";}
+  if(k==="myname"){PROFILE.name=t.value.trim();}
   if(k==="fair"||k==="area")S.w[k]=+t.value;
 });
 document.addEventListener("change",e=>{const k=e.target.dataset.in;if(k==="fair"||k==="area"){const prev=S.results[S.sel].hub.name;runRecommend();S.sel=0;render(true);
