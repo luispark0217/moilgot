@@ -267,7 +267,8 @@ textarea.share{width:100%;height:124px;border-radius:16px;border:0;background:va
 .noti span{font-size:12.5px;color:var(--muted)}
 .count{display:flex;justify-content:space-between;align-items:flex-end;margin:24px 0 8px}
 .count small{font-size:14px;color:var(--muted);font-weight:700}
-.count .big{font-size:50px;font-weight:900;letter-spacing:-0.04em;line-height:1.05}
+.count .big{font-size:50px;font-weight:900;letter-spacing:-0.04em;line-height:1.05;white-space:nowrap}
+.count>div:first-child{min-width:0}
 .tl{position:relative;margin-top:14px}
 .tl::before{content:"";position:absolute;left:21px;top:14px;bottom:14px;width:3px;background:var(--line);border-radius:2px}
 .tstep{display:grid;grid-template-columns:20px 44px 1fr auto;gap:12px;align-items:center;height:52px;padding:0 12px;border-radius:16px;position:relative}
@@ -672,7 +673,7 @@ function putMeeting(m){const l=meetings().filter(x=>x.id!==m.id);l.push(m);saveM
 function freshDraft(){
   const def=new Date(today);const dow=def.getDay();def.setDate(def.getDate()+((5-dow+7)%7||7)); // 다가오는 금요일
   return {name:"",count:4,purposes:[0,1],vibes:[0],taste:histCount()>=2,mode:"fixed",slots:[],date:def.getTime(),weekStart:null,time:19*60,alarm:true,share:true,
-    people:[(()=>{const p={name:PROFILE.name,state:"done"};setLoc(p,locFromStation(PROFILE.home,"현재 위치"));return p})()],invited:false,code:Math.random().toString(36).slice(2,8)};
+    people:[(()=>{const p={name:PROFILE.name,state:"done"};if(!CONFIG.SUPABASE_URL)setLoc(p,locFromStation(PROFILE.home,"현재 위치"));else if(PROFILE.homeSet&&PROFILE.home)setLoc(p,locFromStation(PROFILE.home,"집"));else{p.st=null;p.loc=null;p.acc=null;p.src=null}return p})()],invited:false,code:Math.random().toString(36).slice(2,8)};
 }
 function syncFriends(d){
   if(ONLINE()){while(d.people.length<d.count){const i=d.people.length;d.people.push({name:`친구 ${i}`,st:null,state:"waiting",placeholder:true})}
@@ -791,8 +792,15 @@ const liveOf=(R,i)=>i===0?R.me:R.others[i];
 const nameOf=(m,i)=>i===0?PROFILE.name:(m.people[i].name||"친구");
 function saveMine(R){store.set("mg3_live_"+R.mid,{...R.me,startDist:R.startDist})}
 function rankScore(L){return L.phase==="moving"?L.progress:L.phase==="prep"?-0.5:-1}
+/* 이동 중인 사람끼리는 '예상 도착 시각'으로 비교 → 모든 기기에서 같은 순위 */
+function predArr(R,m,i){const L=liveOf(R,i);return L.gps&&L.eta!=null?Date.now()+L.eta*6e4:(L.dep||Date.now())+Math.max(1,m.legs[i]||30)*6e4}
 function rankOrder(R,m){return m.people.map((_,i)=>i).sort((a,b)=>{const A=liveOf(R,a),B=liveOf(R,b);
-  if(A.arr&&B.arr)return A.arr-B.arr;if(A.arr)return -1;if(B.arr)return 1;return rankScore(B)-rankScore(A)})}
+  if(A.arr&&B.arr)return A.arr-B.arr;if(A.arr)return -1;if(B.arr)return 1;
+  if(A.phase==="moving"&&B.phase==="moving")return predArr(R,m,a)-predArr(R,m,b)||a-b;return rankScore(B)-rankScore(A)||a-b})}
+const ROUL_RE=/^🎯 룰렛 결과: (.+?)님 → (.+)$/;
+/* 룰렛 결과는 채팅(DB)에 처음 올라온 것 하나만 인정 → 모든 기기에 같은 결과 */
+function sharedVerdict(R,m){const x=R&&R.chat.find(c=>c.sys&&ROUL_RE.test(c.text));if(!x)return null;const [,name,pen]=x.text.match(ROUL_RE);
+  const idx=Math.max(0,m.people.findIndex((_,i)=>nameOf(m,i)===name));return {idx,name,pen,mode:pen==="오늘 커피 쏘기"?"all":"last",shared:true,by:x.name}}
 function allArrived(R,m){return m.people.every((_,i)=>liveOf(R,i).arr)}
 function arrivedCount(R,m){return m.people.filter((_,i)=>liveOf(R,i).arr).length}
 function remText(L){if(L.arr)return "도착";if(L.phase==="moving")return L.eta!=null?`${Math.max(1,L.eta)}분`:`${Math.round(L.progress*100)}%`;if(L.phase==="prep")return "준비 중";return "출발 전"}
@@ -803,13 +811,17 @@ async function pushMine(R,force){if(!ONLINE()||!R.code)return;const now=Date.now
 async function loadLive(R,m){if(!ONLINE()||!R.code)return;
   const [{data:rows},{data:msgs}]=await Promise.all([SB.from("participants").select("*").eq("code",R.code),SB.from("messages").select("*").eq("code",R.code).order("id")]);
   if(!S.race||S.race!==R)return;
+  /* 확정 후 늦게 들어온 친구도 레이스에 추가 */
+  let grew=false;(rows||[]).forEach(r=>{if(r.st&&r.device_id!==DEVICE&&!m.people.some(p=>p.id===r.id)){const pp=rowToPerson(r);m.people.push({id:r.id,name:r.name||"친구",st:r.st,acc:r.acc,loc:pp.loc});m.legs.push(legOf(pp,byName(m.hub)).t);R.others.push(blankLive());grew=true}});if(grew)putMeeting(m);
   const prevArr=m.people.map((_,i)=>!!liveOf(R,i).arr);
   (rows||[]).forEach(r=>{const i=m.people.findIndex(p=>p.id&&p.id===r.id);if(i>0)R.others[i]=rowLive(r);
     if(i===0&&R.me.phase==="idle"&&r.phase&&r.phase!=="idle")R.me=rowLive(r)});
   if(msgs){const before=R.chat.length;R.chat=msgs.map(x=>({id:x.id,sys:x.sys,text:x.text,name:x.name,mine:x.device_id===DEVICE}));
     if(R.loaded&&S.screen!=="chat")R.unread+=Math.max(0,R.chat.length-before);}
   if(R.loaded)m.people.forEach((_,i)=>{if(i>0&&!prevArr[i]&&R.others[i].arr&&["today","race"].includes(S.screen))toast(`${nameOf(m,i)}님이 도착했어요`)});
-  R.loaded=true;if(["today","race","chat","roulette"].includes(S.screen))tickRender()}
+  R.loaded=true;
+  if(S.screen==="roulette"&&S.roul&&!S.roul.spinning&&!S.verdict){const sv=sharedVerdict(R,m);if(sv){S.verdict=sv;if(sv.by!==PROFILE.name)toast(`${sv.by}님이 룰렛을 돌렸어요`);render(true);return}}
+  if(["today","race","chat","roulette"].includes(S.screen))tickRender()}
 function liveSubscribe(R,m){if(!ONLINE()||!R.code)return;if(window.__liveCh)SB.removeChannel(window.__liveCh);
   window.__liveCh=SB.channel("live-"+R.code)
     .on("postgres_changes",{event:"UPDATE",schema:"public",table:"participants",filter:`code=eq.${R.code}`},()=>loadLive(R,m))
@@ -837,6 +849,7 @@ function stopGps(R){if(R&&R.watch!=null&&navigator.geolocation){navigator.geoloc
 /* 1초마다: 실제 시계로 화면 갱신, 위치가 없으면 예상시간으로 진행 */
 setInterval(()=>{const R=S.race;if(!R)return;const m=getMeeting(R.mid);if(!m)return;const L=R.me;
   if(L.phase==="moving"&&!L.gps){const el=(Date.now()-L.dep)/6e4;L.progress=Math.min(0.95,el/Math.max(1,m.legs[0]));L.eta=Math.max(1,Math.ceil(m.legs[0]-el));L.status=L.eta<=5?"곧 도착":"이동중";saveMine(R);pushMine(R,false)}
+  R.others.forEach((O,i)=>{if(i>0&&O.phase==="moving"&&!O.gps&&O.dep&&!O.arr){const leg=Math.max(1,m.legs[i]||30),el=(Date.now()-O.dep)/6e4;O.progress=Math.max(O.progress,Math.min(0.95,el/leg));O.eta=Math.max(1,Math.ceil(leg-el))}});
   if(["today","race"].includes(S.screen))tickRender()},1000);
 
 /* ============================================================
@@ -848,7 +861,7 @@ function meetCard(m){
   return `<button class="meet" data-a="openMeet" data-v="${m.id}"><span class="chip xs on">${dd<=0?"오늘":"D-"+dd}</span><h3>${esc(m.name)}</h3>
   <div class="m">${fmtDate(m.date)} ${fmtTime(m.time)} · ${esc(m.hub)}역</div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><div class="stack">${m.people.map((p,i)=>av(p.name,i)).join("")}</div>
-  <span class="chip sm white">출발 알림 ${hhmm(depOf(m,0))}</span></div></button>`;
+  <span class="chip sm white">${(()=>{const L=store.get("mg3_live_"+m.id,null)||{};return L.arr?"도착 완료 · 룰렛 남음":L.phase==="moving"?"이동 중":L.phase==="prep"?"준비 중":`출발 알림 ${hhmm(depOf(m,0))}`})()}</span></div></button>`;
 }
 function pastRow(m){const r=m.result,first=r?m.people[r.order[0]].name:"";
   return `<button class="past" data-a="openRec" data-v="${m.id}"><span class="sq">🏁</span><div><b>${esc(m.name)}</b><span>${fmtShort(m.date)} · ${esc(m.hub)}역 · ${m.people.length}명${first?" · 1등 "+esc(first):""}</span></div></button>`}
@@ -898,8 +911,8 @@ V.my=()=>{
   const top=Math.max(1,f.create_start||0);
   return `<div class="scr"><div class="top"><span class="logo">마이</span></div>
   <button class="set" data-a="editName"><b>내 이름</b><span>${esc(PROFILE.name)} ›</span></button>
-  <button class="set" data-a="pickFav" data-v="home"><b>집</b><span>${esc(PROFILE.home)}역 ›</span></button>
-  <button class="set" data-a="pickFav" data-v="school"><b>학교</b><span>${esc(PROFILE.school)}역 ›</span></button>
+  <button class="set" data-a="pickFav" data-v="home"><b>집</b><span>${PROFILE.home&&(PROFILE.homeSet||!CONFIG.SUPABASE_URL)?esc(PROFILE.home)+"역":"등록하기"} ›</span></button>
+  <button class="set" data-a="pickFav" data-v="school"><b>학교</b><span>${PROFILE.school&&(PROFILE.schoolSet||!CONFIG.SUPABASE_URL)?esc(PROFILE.school)+"역":"등록하기"} ›</span></button>
   <div class="sec">평소 준비 시간 <small>준비 코칭에 쓰여요</small></div>
   ${PROFILE.prep.map((p,i)=>`<div class="set"><b>${esc(p[0])}</b><span class="stepper"><button data-a="prep" data-v="${i}:-5" aria-label="줄이기">−</button>${p[1]}분<button data-a="prep" data-v="${i}:5" aria-label="늘리기">+</button></span></div>`).join("")}
   <div class="sec">가설 검증 지표 <small>이 기기 기준</small></div>
@@ -955,7 +968,8 @@ const STATE_TXT={waiting:"아직 링크를 안 열었어요",opened:"링크 확�
 V.s4=()=>{const d=S.d,me=d.people[0],n=d.people.filter(p=>p.st).length;
   return `<div class="scr">${stepTop(4,"s3")}
   <h2 class="q">어디서 출발해요?</h2><p class="sub">친구들은 초대 링크로 각자 입력해요</p>
-  <div class="mecard">${av("나",0)}<div><b>${esc(me.loc.label)} (${esc(me.src)})</b><span>내 출발지 · ${esc(me.st)}역까지 ${me.loc.accMode} ${me.acc}분</span></div><button class="chg" data-a="pick" data-v="0">변경</button></div>
+  ${me.st&&me.loc?`<div class="mecard">${av("나",0)}<div><b>${esc(me.loc.label)} (${esc(me.src)})</b><span>내 출발지 · ${esc(me.st)}역까지 ${me.loc.accMode} ${me.acc}분</span></div><button class="chg" data-a="pick" data-v="0">변경</button></div>`
+    :`<div class="mecard" data-a="pick" data-v="0" style="cursor:pointer;box-shadow:inset 0 0 0 2px var(--lime-deep)">${av("나",0)}<div><b>내 출발지를 먼저 알려주세요</b><span>현재 위치 또는 검색으로 찾아요</span></div><button class="chg" data-a="pick" data-v="0" style="color:#1F2022">입력</button></div>`}
   <div class="chips" style="margin-top:10px">${["현재 위치","집","학교"].map(s=>`<button class="chip sm ${me.src===s?"on":""}" data-a="src" data-v="${s}">${s}</button>`).join("")}</div>
   ${d.mode==="poll"?pollCard(d):""}
   <div class="label" style="margin-top:28px">친구 출발지 <small>${n}/${d.count} 입력 완료</small></div>
@@ -964,7 +978,7 @@ V.s4=()=>{const d=S.d,me=d.people[0],n=d.people.filter(p=>p.st).length;
     ${p.st?`<span class="chip on">입력 완료</span>`:`<button class="chip poke" data-a="poke" data-v="${i}">콕 찌르기</button>`}</div>`}).join("")}
   <div class="linkbar"><button class="kakao" data-a="invite">카톡으로 초대</button><button data-a="invite" data-v="link">링크 복사</button></div>
   <div class="toggle-row"><div><b style="font-size:13.5px">약속 당일 위치 공유 · 도착 레이스 참가</b></div><button class="sw ${d.share?"on":""}" data-a="shareTg" role="switch" aria-checked="${d.share}" aria-label="위치 공유와 도착 레이스 참가"></button></div>
-  <div class="spacer"></div><div class="cta-bar">${ONLINE()&&n>=2&&n<d.count?`<button class="btn" data-a="find">지금 입력한 ${n}명으로 찾기</button><p class="demo-note">${d.count-n}명이 아직이에요. 기다리면 자동으로 채워져요</p>`
+  <div class="spacer"></div><div class="cta-bar">${!me.st?`<button class="btn" data-a="pick" data-v="0">내 출발지 입력하기</button>`:ONLINE()&&n>=2&&n<d.count?`<button class="btn" data-a="find">지금 입력한 ${n}명으로 찾기</button><p class="demo-note">${d.count-n}명이 아직이에요. 기다리면 자동으로 채워져요</p>`
     :`<button class="btn" data-a="find" ${n===d.count?"":"disabled"}>${n===d.count?"중간 지점 찾기":`${d.count-n}명 더 입력하면 찾을 수 있어요`}</button>`}</div></div>`};
 /* 위치 선택 (현위치 · 검색 · 지도) */
 V.loc=()=>{const L=S.loc,who=L.ctx==="fav"?(L.idx==="home"?"집":"학교"):L.ctx==="guest"?"내":L.idx===0?"내":`${S.d.people[L.idx].name}님`;
@@ -1019,15 +1033,16 @@ V.g_land=()=>{const d=S.d,g=S.guest,p=d.people[g.idx],done=d.people.filter(x=>x.
   return `<div class="scr"><div class="guestbar"><span class="logo" style="font-size:20px">모일곳</span><span>설치 없이 웹에서 참여 중</span></div>
   <div class="invite-hero"><span class="chip xs dark">${esc(host)}님의 초대</span><h2>${esc(d.name.trim()||"우리 모임")}에<br>같이 가요!</h2>
     <div class="kv"><span>언제</span><b>${d.mode==="poll"&&!(g.meeting&&g.meeting.status==="confirmed")?`후보 ${d.slots.length}개 중 투표 중`:`${fmtDate(d.date)} ${fmtTime(d.time)}`}</b><span>뭐해</span><b>${(d.purposes.length?d.purposes:[0]).map(i=>PURPOSES[i][0]).join(" · ")}</b><span>누구</span><b style="display:flex;align-items:center;gap:8px"><span class="stack">${d.people.filter(x=>!x.placeholder).map((x,i)=>av(x.name||"?",i)).join("")}</span><span style="font-weight:700">${done}/${d.count}명 입력</span></b></div></div>
-  ${d.mode==="poll"?`<div class="label" style="margin-top:24px">되는 시간 모두 골라주세요 <small>여러 개 가능</small></div>
+  ${d.mode==="poll"&&!(g.meeting&&g.meeting.status==="confirmed")?`<div class="label" style="margin-top:24px">되는 시간 모두 골라주세요 <small>여러 개 가능</small></div>
   ${d.slots.map((x,k)=>{const on=(p.avail||[]).includes(k),c=d.people.filter((q,j)=>j!==g.idx&&!q.placeholder&&(q.is_host||j===0||(q.avail||[]).includes(k))).length+(on?1:0);
     return `<button class="availrow ${on?"on":""}" data-a="avail" data-v="${k}" aria-pressed="${on}"><span class="ck">${on?"✓":""}</span><b>${fmtSlot(x)}</b><small>${c}명 가능</small></button>`}).join("")}`:""}
+  ${g.meeting&&g.meeting.status==="confirmed"?`<div class="card" style="margin-top:16px;background:var(--lime-soft)"><b style="font-size:14px">약속이 이미 ${esc(g.meeting.hub)}역 · ${esc(g.meeting.place)}로 정해졌어요</b><p style="font-size:12.5px;color:var(--muted);margin:4px 0 0">출발지를 넣으면 내 출발 시간과 도착 레이스에 같이 참여할 수 있어요</p></div>`:""}
   <div class="label" style="margin-top:26px">내 이름</div>
   <input class="field" id="gname" data-in="gname" value="${esc(p.name)}" placeholder="친구들이 알아볼 이름" maxlength="6" aria-label="내 이름">
   <p class="sub" style="font-size:13px;margin:12px 2px 0">출발 위치만 알려주면 모두에게 공평한 만날 곳을 찾아드려요. 정확한 위치는 저장하지 않고 가까운 역과 동네 이름만 공유돼요.</p>
   <div class="spacer"></div><div class="cta-bar"><button class="btn" data-a="gstart">내 출발지 입력하기</button>${g.online?"":`<p class="demo-note">데모: 친구가 카톡 링크를 눌렀을 때 보는 화면이에요 · <button data-a="gexit" style="text-decoration:underline;font-size:11.5px;color:var(--faint)">방장 화면으로</button></p>`}</div></div>`};
 V.g_wait=()=>{const d=S.d,g=S.guest,p=d.people[g.idx],host=d.people[0].name,cf=g.meeting&&g.meeting.status==="confirmed"?g.meeting:null;
-  if(cf){const leg=(cf.legs||{})[p.id],dep=leg!=null?d.time-leg-BUFFER:null,hub=byName(cf.hub);
+  if(cf){const leg=(cf.legs||{})[p.id]??(p.st?legOf(p,byName(cf.hub)).t:null),dep=leg!=null?d.time-leg-BUFFER:null,hub=byName(cf.hub);
     return `<div class="scr"><div class="guestbar"><span class="logo" style="font-size:20px">모일곳</span><span>${esc(d.name||"우리 모임")}</span></div>
     <div class="ticket"><span class="chip xs dark">약속 확정!</span><h2>${esc(cf.hub)}역<br>${esc(cf.place)}</h2>
       <div class="kv"><span>언제</span><b>${fmtDate(d.date)} ${fmtTime(d.time)}</b><span>출발</span><b>${dep!=null?`${hhmm(dep)} (${esc(p.st)}역에서 ${leg}분)`:"-"}</b><span>누구</span><b>${d.people.filter(x=>!x.placeholder).map(x=>esc(x.name)).join(", ")}</b></div></div>
@@ -1072,7 +1087,7 @@ V.places=()=>{const d=S.d,hub=S.results[S.sel].hub;
     <span class="tag fit">취향 ${p.fit}%</span>${p.second?`<span class="tag">2차</span>`:d.vibes.slice(0,1).map(i=>`<span class="tag">${VIBES[i]}</span>`).join("")}</div>
     <button class="heart ${p.votes.length?"has":""} ${mine?"mine":""}" data-a="heart" data-v="${p.id}" aria-pressed="${mine}" aria-label="${esc(p.name)} 찜">${mine||p.votes.length?"♥":"♡"} ${p.votes.length}</button></div>`}).join("")}
   <p class="sample">가게를 누르면 투표 없이 바로 정할 수도 있어요 · 예시 장소는 크롤링 데이터로 교체돼요</p></div>
-  <button class="fab" data-a="startVote">투표로 정하기</button></div>`};
+  <button class="fab" data-a="startVote">${ONLINE()?"♡ 후보 모아보기":"투표로 정하기"}</button></div>`};
 /* 확정 */
 V.done=()=>{const m=getMeeting(S.cur);
   const text=shareText(m);
@@ -1101,7 +1116,7 @@ V.today=()=>{const m=getMeeting(S.cur),R=S.race,L=R.me,plan=prepPlan(m),dep=depM
     :L.phase==="prep"?{b:L.step<plan.length?`지금은 ${plan[L.step].name} 차례예요`:"준비 끝! 출발하면 레이스가 시작돼요",s:`${hmMs(dep)} 출발 목표 · ${esc(m.name)}`}
     :L.phase==="moving"?{b:`${m.hub}역으로 이동 중 · 약 ${Math.max(1,L.eta??m.legs[0])}분 남았어요`,s:L.gps?"위치로 진행률을 계산 중 · 좌표는 공유되지 않아요":"위치 권한이 없어 예상 이동시간으로 진행 중"}
     :{b:`${hmMs(L.arr)}에 도착했어요!`,s:`친구들이 오는 모습은 도착 레이스에서 볼 수 있어요`};
-  const big=L.phase==="moving"?{k:"도착까지",v:`${Math.max(1,L.eta??m.legs[0])}분`}:L.phase==="arrived"?{k:"도착 시간",v:hmMs(L.arr)}:{k:"출발까지",v:left>0?(left>=60?`${Math.floor(left/60)}시간 ${left%60}분`:`${left}분`):left===0?"지금!":`${-left}분 지남`};
+  const big=L.phase==="moving"?{k:"도착까지",v:`${Math.max(1,L.eta??m.legs[0])}분`}:L.phase==="arrived"?{k:"도착 시간",v:hmMs(L.arr)}:{k:left<0?"출발 시간 지남":"출발까지",v:left>0?(left>=60?`${Math.floor(left/60)}시간 ${left%60}분`:`${left}분`):left===0?"지금!":`+${-left}분`};
   return `<div class="scr"><div class="top">${backBtn("home")}<h1>오늘의 약속</h1><span class="chip sm">${fmtShort(m.date)} ${hmMs(meetStart(m))}</span></div>
   <div class="noti"><div class="src"><i>모</i>모일곳 · 지금</div><b>${head.b}</b><span>${head.s}</span></div>
   <div class="count"><div><small>${big.k}</small><div class="big"><span data-tick>${big.v}</span></div></div><span class="chip on">도착 예정 <span data-tick>${hmMs(L.phase==="moving"&&L.eta!=null?now+L.eta*6e4:arrPlan)}</span></span></div>
@@ -1120,15 +1135,15 @@ V.race=()=>{const m=getMeeting(S.cur),R=S.race,W=390,H=560,now=Date.now();
   svg+=hubPin(hx,hy,m.hub+"역");
   const order=rankOrder(R,m);let ai=0;
   origins.forEach(([ox,oy],i)=>{const L=liveOf(R,i);let x,y;
-    if(L.arr){const a=(ai++)*1.3+0.6;x=hx+Math.cos(a)*34;y=hy+22+Math.sin(a)*14}else{const pr=L.phase==="moving"?Math.min(0.9,L.progress):0;x=ox+(hx-ox)*pr;y=oy+(hy-oy)*pr}
-    const st=L.arr?"도착!":L.status,w=st.length*11+22,rk=order.indexOf(i)+1,fill=L.arr?"#C8F135":L.phase==="prep"?"#FFD6DE":L.phase==="idle"?"#F2F2EE":"#FFFFFF";
-    svg+=`<g>${avatarSvg(x,y,23,nameOf(m,i),i)}<rect x="${x-w/2}" y="${y-58}" width="${w}" height="26" rx="13" fill="${fill}" stroke="#1F2022" stroke-opacity=".08"/><text x="${x}" y="${y-40.5}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#1F2022">${esc(st)}</text>
+    if(L.arr){const a=(ai++)*1.25+0.5;x=hx+Math.cos(a)*44;y=hy+30+Math.sin(a)*16}else{const pr=L.phase==="moving"?Math.min(0.9,L.progress):0;x=ox+(hx-ox)*pr;y=oy+(hy-oy)*pr}
+    const st=L.arr?"":L.status,w=st.length*11+22,rk=order.indexOf(i)+1,fill=L.arr?"#C8F135":L.phase==="prep"?"#FFD6DE":L.phase==="idle"?"#F2F2EE":"#FFFFFF";
+    svg+=`<g>${avatarSvg(x,y,23,nameOf(m,i),i)}${st?`<rect x="${x-w/2}" y="${y-58}" width="${w}" height="26" rx="13" fill="${fill}" stroke="#1F2022" stroke-opacity=".08"/><text x="${x}" y="${y-40.5}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#1F2022">${esc(st)}</text>`:""}
     <rect x="${x+13}" y="${y-28}" width="22" height="22" rx="7" fill="#1F2022"/><text x="${x+24}" y="${y-12.5}" text-anchor="middle" font-size="12" font-weight="900" fill="#fff">${rk}</text></g>`});
   svg+=`</svg>`;
   const left=meetStart(m)-now,mm=Math.floor(Math.max(0,left)/6e4),ss=Math.floor((Math.max(0,left)%6e4)/1000),live=m.people.some((_,i)=>liveOf(R,i).phase==="moving");
   const done=allArrived(R,m),canRoul=done||arrivedCount(R,m)>=2&&now>=meetStart(m);
-  return `<div class="scr"><div class="mapwrap" style="height:560px">${svg}
-    <div class="racehead"><span class="l">${backBtn("today")}<i class="livedot ${live?"":"off"}"></i>도착 레이스</span><span class="r"><span data-tick>${left<=0?`약속 시간 ${hmMs(meetStart(m))}`:mm>=60?`약속까지 ${Math.floor(mm/60)}시간 ${mm%60}분`:`약속까지 ${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}`}</span></span></div></div>
+  return `<div class="scr"><div class="mapwrap" style="height:${done?480:560}px">${svg}
+    <div class="racehead"><span class="l">${backBtn("today")}<i class="livedot ${live?"":"off"}"></i>도착 레이스</span><span class="r"><span data-tick>${left<=0?`약속 시간 ${hmMs(meetStart(m))}`:mm>=1440?`약속 ${Math.floor(mm/1440)}일 전`:mm>=60?`약속까지 ${Math.floor(mm/60)}시간 ${mm%60}분`:`약속까지 ${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}`}</span></span></div></div>
   <div class="bsheet"><div class="grab"></div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b style="font-size:17px">실시간 순위</b><button class="chip sm" data-a="statusSheet">내 상태: ${esc(R.me.arr?"도착!":R.me.status)} ▼</button></div>
   ${order.map((i,k)=>{const L=liveOf(R,i),t=remText(L);return `<div class="rank ${i===0?"me":""}"><span class="n">${k+1}</span>${av(nameOf(m,i),i)}<span>${i===0?esc(PROFILE.name)+" (나)":esc(nameOf(m,i))}</span><div class="bar"><i style="width:${(L.arr?1:L.phase==="moving"?L.progress:0)*100}%"></i></div><span class="r ${t==="출발 전"&&now>depMs(m)?"late":""}">${t}</span></div>`}).join("")}
@@ -1181,12 +1196,13 @@ function sheetHTML(){
     <div class="slider"><input type="range" min="0" max="100" value="${S.w.area}" data-in="area" aria-label="상권 중요도"><div class="ends"><span>이동 시간만</span><span>놀 곳 많은 동네</span></div></div></div>
     <p class="note" style="font-size:12px;color:var(--faint);margin:10px 0 0">이동 시간은 역 간 거리·환승으로 추정한 값이에요. 배포 버전에선 실시간 대중교통 경로로 계산해요.</p>`}
   if(sh.type==="vote"){const d=S.d,total=d.people.length,voted=new Set(S.places.flatMap(p=>p.votes)).size,top=[...S.places].filter(p=>p.votes.length).sort((a,b)=>b.votes.length-a.votes.length||b.fit-a.fit);
-    inner=`<h3>투표 중 · ${voted}/${total}명 참여</h3><p class="desc">${S.places.some(p=>p.votes.includes(0))?"친구들 표가 실시간으로 들어오고 있어요":"먼저 리스트에서 ♡로 마음에 드는 곳을 골라주세요"}</p>
+    inner=ONLINE()?`<h3>후보 ${top.length}곳</h3><p class="desc">${top.length?"♡ 담은 곳 중 한 곳으로 확정해요 · 친구들이 같이 투표하는 기능은 곧 붙여요":"먼저 리스트에서 ♡로 후보를 담아주세요"}</p>`:`<h3>투표 중 · ${voted}/${total}명 참여</h3><p class="desc">${S.places.some(p=>p.votes.includes(0))?"친구들 표가 실시간으로 들어오고 있어요":"먼저 리스트에서 ♡로 마음에 드는 곳을 골라주세요"}</p>`;inner+=`
     ${top.slice(0,5).map(p=>`<div class="tally"><span>${esc(p.name)}</span><span class="who">${p.votes.map(v=>av(v===0?"나":d.people[v].name,v)).join("")}</span><div class="bar"><i style="width:${p.votes.length/total*100}%"></i></div></div>`).join("")||`<div class="empty" style="margin-bottom:12px">아직 표가 없어요</div>`}
-    <div class="row2" style="margin-top:8px"><button class="btn ghost sm" data-a="closeSheet">리스트로</button><button class="btn sm" data-a="confirm" ${top.length?"":"disabled"}>${top.length?"투표 마감 · 확정":"표를 기다리는 중"}</button></div>`}
+    <div class="row2" style="margin-top:8px"><button class="btn ghost sm" data-a="closeSheet">리스트로</button><button class="btn sm" data-a="confirm" ${top.length?"":"disabled"}>${top.length?(ONLINE()?"1순위 후보로 확정":"투표 마감 · 확정"):(ONLINE()?"후보를 담아주세요":"표를 기다리는 중")}</button></div>`}
   if(sh.type==="status"){const m=getMeeting(S.cur),R=S.race,L=R.me,act=myAction(R,m);
     inner=`<h3>내 상태: ${esc(L.arr?"도착!":L.status)}</h3><p class="desc">${L.phase==="moving"?(L.gps?"위치로 진행률을 계산하고 있어요 · 정확한 위치는 공유되지 않아요":"위치 권한이 없어 예상 이동시간으로 진행 중이에요"):"누르는 순간 친구들 화면에 바로 반영돼요"}</p>
     ${act?`<button class="btn" data-a="${act.a}">${act.t}</button>`:`<div class="empty">도착 완료! 친구들을 기다리는 중이에요</div>`}
+    ${act&&act.a!=="arrive"&&!L.arr?`<button class="btn ghost sm" data-a="arrive" style="margin-top:8px">벌써 도착했어요</button>`:""}
     <div class="label" style="margin-top:20px">채팅으로 한마디 <small>누를 때만 보내져요</small></div><div class="chips">${["5분만!!","조금 늦어요","먼저 들어가 있어","거의 다 왔어"].map(q=>`<button class="chip" data-a="quick" data-v="${q}">${q}</button>`).join("")}</div>`}
   if(sh.type==="pen"){inner=`<h3>벌칙 직접 편집</h3><p class="desc">2~8개까지 넣을 수 있어요</p>
     ${S.roul.pens.map((p,i)=>`<div class="pen-row"><input id="pen${i}" data-in="pen" data-i="${i}" value="${esc(p)}" maxlength="10" aria-label="벌칙 ${i+1}"><button data-a="penDel" data-v="${i}" aria-label="삭제" ${S.roul.pens.length<=2?"disabled":""}>−</button></div>`).join("")}
@@ -1245,7 +1261,8 @@ function render(keep){
 function go(s){S.screen=s;S.sheet=null;render();if(s==="s4"&&ONLINE()&&S.d&&!S.guest)hostSync()}
 function verdictHTML(){const v=S.verdict;
   return `<div class="verdict"><div class="box">${av(v.name,v.idx)}<div style="font-weight:800;font-size:15px">${esc(v.name)}님 ${v.mode==="last"?"벌칙은":"당첨!"}</div><h2>${esc(v.pen)}</h2>
-  <div class="row2"><button class="btn" data-a="shareVerdict" style="background:#1F2022;color:#fff"${S.verdict.shared?" disabled":""}>${S.verdict.shared?"공유 완료 ✓":"채팅에 공유"}</button><button class="btn" data-a="finish" style="background:#fff;color:#1F2022">모임 마치기</button></div></div></div>
+  <p style="font-size:12.5px;font-weight:600;opacity:.7;margin:-4px 0 14px">${v.by&&v.by!==PROFILE.name?`${esc(v.by)}님이 돌린 결과 · `:""}모두의 화면과 채팅에 같은 결과가 떠요</p>
+  <div class="row2"><button class="btn" data-a="shareVerdict" style="background:#1F2022;color:#fff">채팅 보기</button><button class="btn" data-a="finish" style="background:#fff;color:#1F2022">모임 마치기</button></div></div></div>
   <div class="confetti">${Array.from({length:40},(_,i)=>`<i style="left:${(i*37)%100}%;background:${AVC[i%6]};animation-delay:${(i%10)*0.08}s"></i>`).join("")}</div>`}
 
 /* ============================================================
@@ -1275,7 +1292,7 @@ function loadSupabase(){if(!CONFIG.SUPABASE_URL||!CONFIG.SUPABASE_ANON_KEY)retur
     sc.onload=()=>{try{window.SB=supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY);res(true)}catch(e){console.warn(e);res(false)}};
     sc.onerror=()=>{console.warn("Supabase SDK 로드 실패 → 오프라인 데모로 동작");res(false)};document.head.appendChild(sc)})}
 // 정확한 좌표는 저장하지 않고 역·동네 이름·접근 시간만 공유
-const locRow=p=>({st:p.st,acc:p.acc,loc:{label:p.loc?.label||`${p.st}역 근처`,accMode:p.loc?.accMode||"도보"}});
+const locRow=p=>({st:p.st||null,acc:p.st?p.acc:null,loc:p.st?{label:p.loc?.label||`${p.st}역 근처`,accMode:p.loc?.accMode||"도보"}:null});
 function rowToPerson(r){const st=r.st&&byName(r.st);
   return {id:r.id,device:r.device_id,name:r.name||"",st:r.st||null,acc:r.acc??3,state:r.st?"done":(r.state||"opened"),race:r.race,push:r.push,is_host:r.is_host,avail:r.avail||[],
     loc:st?{label:r.loc?.label||`${r.st}역 근처`,sub:`${r.st}역`,lat:st.lat,lng:st.lng,accMode:r.loc?.accMode||"도보",src:"링크"}:null,src:"링크"}}
@@ -1321,10 +1338,10 @@ async function guestRefresh(rerender){const g=S.guest;if(!g||!g.meeting)return;c
   if(rerender&&["g_land","g_wait"].includes(S.screen)&&document.activeElement?.id!=="gname")tickRender()}
 async function guestSave(fields){const g=S.guest;const {error}=await SB.from("participants").update(fields).eq("code",g.code).eq("device_id",DEVICE);
   if(error)toast("저장 실패: "+error.message);else if(fields.state==="done")track("guest_done",{code:g.code})}
-function saveGuestMeeting(){const g=S.guest,m=g.meeting,d=S.d;if(!m||m.status!=="confirmed")return;const me=d.people[g.idx];
+function saveGuestMeeting(){const g=S.guest,m=g&&g.meeting,d=S.d;if(!m||m.status!=="confirmed"||!d)return;const me=d.people[g.idx];if(!me||!me.st)return;
   const order=[me,...d.people.filter((p,i)=>i!==g.idx&&!p.placeholder)];
   putMeeting({id:"c-"+g.code,code:g.code,name:m.name||"우리 모임",date:+m.date_ts,time:m.time_min,hub:m.hub,place:m.place,placeCat:m.place_cat||0,purposes:m.purposes,vibes:m.vibes,
-    people:order.map((p,i)=>({id:p.id,name:i===0?PROFILE.name:p.name,st:p.st,acc:p.acc,loc:p.loc})),legs:order.map(p=>(m.legs||{})[p.id]??legOf(p,byName(m.hub)).t),status:"upcoming",solo:!!m.solo})}
+    people:order.filter(p=>p.st).map((p,i)=>({id:p.id,name:i===0?PROFILE.name:p.name,st:p.st,acc:p.acc,loc:p.loc})),legs:order.filter(p=>p.st).map(p=>(m.legs||{})[p.id]??legOf(p,byName(m.hub)).t),status:"upcoming",solo:!!m.solo})}
 function downloadIcs(){const g=S.guest,m=g?.meeting,d=S.d;if(!m)return;const me=d.people[g.idx],leg=(m.legs||{})[me.id]||30;
   const dt=new Date(+m.date_ts+m.time_min*6e4),pad=n=>String(n).padStart(2,"0"),f=x=>`${x.getFullYear()}${pad(x.getMonth()+1)}${pad(x.getDate())}T${pad(x.getHours())}${pad(x.getMinutes())}00`;
   const end=new Date(dt.getTime()+2*36e5),alarm=leg+BUFFER;
@@ -1405,8 +1422,9 @@ const A={
   alarm:()=>{S.d.alarm=!S.d.alarm;render(true)},
   shareTg:()=>{S.d.share=!S.d.share;render(true)},
   src:v=>{const me=S.d.people[0];
-    if(v==="집"){setLoc(me,{...locFromStation(PROFILE.home,"집")});render(true)}
-    else if(v==="학교"){setLoc(me,{...locFromStation(PROFILE.school,"학교")});render(true)}
+    const k=v==="집"?"home":v==="학교"?"school":null;
+    if(k&&CONFIG.SUPABASE_URL&&!PROFILE[k+"Set"]){toast(`${v}이 아직 등록 안 됐어요. 검색으로 찾아주세요`);openLoc("draft",0);return}
+    if(k){setLoc(me,{...locFromStation(PROFILE[k],v)});if(ONLINE())hostSync();render(true)}
     else{openLoc("draft",0);A.gps()}},
   pick:v=>openLoc("draft",+v),
   pickFav:v=>openLoc("fav",v),
@@ -1420,11 +1438,11 @@ const A={
       S.loc.sel=makeLoc(label,"현재 위치 · 정확도 약 "+Math.round(pos.coords.accuracy)+"m",lat,lng,"현재 위치");S.loc.st=S.loc.sel.st;render(true)},
       ()=>{S.loc.denied=true;track("gps_denied");render(true)},{timeout:8000,enableHighAccuracy:true})},
   lconfirm:()=>{const L=S.loc,loc={...L.sel,src:L.sel.src};
-    if(L.ctx==="fav"){PROFILE[L.idx]=loc.st;saveProfile();S.loc=null;go("my");return}
+    if(L.ctx==="fav"){PROFILE[L.idx]=loc.st;PROFILE[L.idx+"Set"]=true;saveProfile();S.loc=null;go("my");return}
     const p=S.d.people[L.idx];setLoc(p,loc);if(L.ctx==="draft"&&L.idx>0)p.src="대신 입력";if(L.idx>0)p.state="done";
     if(ONLINE()){if(L.ctx==="guest"){if(!PROFILE.name&&(p.name||"").trim()){PROFILE.name=p.name.trim();saveProfile()}}if(L.ctx==="guest")guestSave({name:(p.name||"").trim()||"친구",state:"done",avail:p.avail||[],...locRow(p)});
       else if(L.idx===0)hostSync();else proxySave(L.idx,p)}
-    S.loc=null;if(L.ctx==="guest"){toast("입력 완료! 방장 화면에 바로 떠요");go("g_wait")}else go("s4")},
+    S.loc=null;if(L.ctx==="guest"){saveGuestMeeting();toast(S.guest&&S.guest.meeting&&S.guest.meeting.status==="confirmed"?"입력 완료! 내 출발 시간을 계산했어요":"입력 완료! 방장 화면에 바로 떠요");go("g_wait")}else go("s4")},
   poke:v=>{const i=+v,p=S.d.people[i];if(ONLINE()){p.poked=true;render(true);setTimeout(()=>{p.poked=false},500);
       toast(p.state==="opened"?`${p.name}님이 입력하는 중이에요. 카톡으로 한 번 더 알려주세요`:"아직 링크를 안 연 친구가 있어요. 단톡방에 다시 보내주세요");setTimeout(A.shareInvite,700);return}p.poked=true;toast(p.state==="opened"?`${p.name}님에게 푸시 알림을 보냈어요 👉`:`${p.name}님에게 카톡으로 한 번 더 보냈어요 👉`);render(true);setTimeout(()=>{p.poked=false},500);simJoin(i,900,2200)},
   invite:v=>{S.sheet={type:"invite"};render(true);if(v==="link")A.copyInvite()},
@@ -1456,7 +1474,7 @@ const A={
   heart:v=>{const p=S.places.find(x=>x.id===+v);p.votes.includes(0)?p.votes=p.votes.filter(x=>x!==0):p.votes.push(0);S.focus=p.id;render(true)},
   shareList:()=>{copyText(S.places.slice(0,5).map((p,i)=>`${i+1}. ${p.name} (${PURPOSES[p.cat][2]}, 도보 ${p.walk}분)`).join("\n"),"추천 리스트를 복사했어요")},
   startVote:()=>{track("vote_start");S.sheet={type:"vote"};render(true);
-    if(S.voteSim)return;if(!S.places.some(p=>p.votes.includes(0)))return;
+    if(ONLINE()||S.voteSim)return;if(!S.places.some(p=>p.votes.includes(0)))return;
     S.voteSim=true;const d=S.d,rnd=seeded(d.people.map(p=>p.name).join());
     d.people.slice(1).forEach((p,k)=>setTimeout(()=>{if(!S.places)return;const i=k+1;
       const pool=[...S.places].sort((a,b)=>(b.fit+b.votes.length*5+rnd()*30)-(a.fit+a.votes.length*5+rnd()*30));
@@ -1466,7 +1484,7 @@ const A={
     const m={id:"m"+Date.now(),name,date:d.date,time:d.time,hub:r.hub.name,place:win.name,placeCat:win.cat,votes:win.votes.length,purposes:d.purposes,vibes:d.vibes,alarm:d.alarm,share:d.share,
       people:d.people.map((p,i)=>({id:p.id,name:i===0?PROFILE.name:p.name,st:p.st,acc:p.acc,loc:p.loc})),legs:r.legs.map(l=>l.t),status:"upcoming",solo:v!=null};
     if(ONLINE()&&d.synced){m.id="c-"+d.code;m.code=d.code;const legs={};d.people.forEach((p,i)=>{if(p.id)legs[p.id]=r.legs[i].t});
-      SB.from("meetings").update({status:"confirmed",date_ts:d.date,time_min:d.time,hub:r.hub.name,place:win.name,place_cat:win.cat,legs,solo:v!=null}).eq("code",d.code).then(({error})=>{if(error)toast("저장 실패: "+error.message)})}
+      SB.from("meetings").update({status:"confirmed",name,date_ts:d.date,time_min:d.time,hub:r.hub.name,place:win.name,place_cat:win.cat,legs,solo:v!=null}).eq("code",d.code).then(({error})=>{if(error)toast("저장 실패: "+error.message)})}
     store.set("mg3_draft",null);putMeeting(m);S.cur=m.id;S.voteSim=false;S.places=null;track("confirmed",{solo:v!=null});go("done")},
   copyShare:()=>copyText(shareText(getMeeting(S.cur))),
   openMeet:v=>{const m=getMeeting(v);if(!m){toast("약속을 찾지 못했어요");return}S.cur=v;startRaceFor(m);go(S.race.me.phase==="moving"||S.race.me.arr?"race":"today")},
@@ -1485,12 +1503,13 @@ const A={
   statusSheet:()=>{S.sheet={type:"status"};render(true)},
   quick:v=>{S.sheet=null;sendChat(v)},
   send:()=>{const t=S.chatDraft.trim();if(t){S.chatDraft="";const i=document.getElementById("chatin");if(i)i.value="";sendChat(t)}},
-  toRoulette:()=>{S.roul=S.roul&&S.roul.mid===S.cur?S.roul:{mid:S.cur,pens:[...DEFAULT_PEN],mode:"last",rot:0,spinning:false};go("roulette")},
+  toRoulette:()=>{S.roul=S.roul&&S.roul.mid===S.cur?S.roul:{mid:S.cur,pens:[...DEFAULT_PEN],mode:"last",rot:0,spinning:false};const sv=sharedVerdict(S.race,getMeeting(S.cur));if(sv)S.verdict=sv;go("roulette")},
   mode:()=>{if(S.roul.spinning)return;S.roul.mode=S.roul.mode==="last"?"all":"last";S.roul.rot=0;render(true)},
   penEdit:()=>{if(S.roul.mode!=="last"){toast("꼴찌만 돌리기 모드에서 벌칙을 편집할 수 있어요");return}S.sheet={type:"pen"};render(true)},
   penAdd:()=>{S.roul.pens.push("새 벌칙");render(true)},
   penDel:v=>{S.roul.pens.splice(+v,1);render(true)},
   spin:()=>{const rl=S.roul,R=S.race,m=getMeeting(S.cur);if(rl.spinning)return;
+    const sv0=sharedVerdict(R,m);if(sv0){S.verdict=sv0;toast(`${sv0.by}님이 이미 돌렸어요`);render(true);return}
     const items=rl.mode==="last"?rl.pens.filter(x=>x.trim()):m.people.map((p,i)=>nameOf(m,i)),n=items.length,k=Math.floor(Math.random()*n);
     if(n<2){toast("벌칙을 2개 이상 넣어주세요");return}
     const mid=(k+0.5)*360/n,jit=(Math.random()-0.5)*(300/n)*0.8,base=Math.ceil(rl.rot/360)*360;
@@ -1499,10 +1518,12 @@ const A={
     document.querySelectorAll("[data-a=spin]").forEach(b=>{b.disabled=true});const cb=document.querySelector(".cta-bar .btn");if(cb)cb.textContent="두구두구...";
     setTimeout(()=>{rl.spinning=false;const order=rankOrder(R,m),loser=order[order.length-1];
       S.verdict=rl.mode==="last"?{idx:loser,name:nameOf(m,loser),pen:items[k],mode:"last"}:{idx:k,name:items[k],pen:"오늘 커피 쏘기",mode:"all"};
-      track("roulette");render(true)},4300)},
-  shareVerdict:()=>{const v=S.verdict,R=S.race,m=getMeeting(S.cur);if(v.shared)return;v.shared=true;postMsg(R,m,`🎯 룰렛 결과: ${v.name}님 → ${v.pen}`,true);toast("채팅에 공유했어요 · 모임 마치기를 누르면 기록에 저장돼요");render(true)},
+      track("roulette");render(true);
+      (async()=>{const v=S.verdict;if(!v)return;v.shared=true;v.by=PROFILE.name;await postMsg(R,m,`🎯 룰렛 결과: ${v.name}님 → ${v.pen}`,true);await loadLive(R,m);
+        const first=sharedVerdict(R,m);if(first&&S.verdict&&(first.name!==v.name||first.pen!==v.pen)){S.verdict=first;toast(`${first.by}님이 먼저 돌린 결과로 정해졌어요`);render(true)}})()},4300)},
+  shareVerdict:()=>{S.verdict=null;go("chat")},
   finish:()=>{const v=S.verdict,R=S.race,m=getMeeting(S.cur),order=rankOrder(R,m);
-    m.status="done";m.result={order,lateMin:m.people.map((_,i)=>{const a=liveOf(R,i).arr;return a?Math.max(0,Math.round((a-meetStart(m))/6e4)):null}),penalty:v.pen,loser:v.mode==="last"?order[order.length-1]:v.idx};
+    m.status="done";m.result={order,lateMin:m.people.map((_,i)=>{const a=liveOf(R,i).arr;return a?Math.max(0,Math.round((a-meetStart(m))/6e4)):null}),penalty:v.pen,loser:v.idx};
     if(m.result.lateMin[0]>0)PROFILE.lateAvg=Math.round((PROFILE.lateAvg*2+m.result.lateMin[0])/3);saveProfile();
     stopGps(R);putMeeting(m);S.verdict=null;S.race=null;S.roul=null;toast("기록에 저장했어요");go("records")},
   editName:()=>{S.sheet={type:"name"};render(true)},
