@@ -809,7 +809,7 @@ async function loadLive(R,m){if(!ONLINE()||!R.code)return;
   if(msgs){const before=R.chat.length;R.chat=msgs.map(x=>({id:x.id,sys:x.sys,text:x.text,name:x.name,mine:x.device_id===DEVICE}));
     if(R.loaded&&S.screen!=="chat")R.unread+=Math.max(0,R.chat.length-before);}
   if(R.loaded)m.people.forEach((_,i)=>{if(i>0&&!prevArr[i]&&R.others[i].arr&&["today","race"].includes(S.screen))toast(`${nameOf(m,i)}님이 도착했어요`)});
-  R.loaded=true;if(["today","race","chat","roulette"].includes(S.screen))render(true)}
+  R.loaded=true;if(["today","race","chat","roulette"].includes(S.screen))tickRender()}
 function liveSubscribe(R,m){if(!ONLINE()||!R.code)return;if(window.__liveCh)SB.removeChannel(window.__liveCh);
   window.__liveCh=SB.channel("live-"+R.code)
     .on("postgres_changes",{event:"UPDATE",schema:"public",table:"participants",filter:`code=eq.${R.code}`},()=>loadLive(R,m))
@@ -831,13 +831,13 @@ function startGps(R,m){if(R.watch!=null||!navigator.geolocation)return;const hub
     L.eta=covered>250&&el>1.5?Math.ceil(d/(covered/el)):Math.max(1,Math.round(m.legs[0]*(1-L.progress)));
     L.status=d<800?"곧 도착":"이동중";saveMine(R);pushMine(R,false);
     if(d<=ARRIVE_M){toast("약속 장소 근처예요. 도착으로 표시했어요");A.arrive();return}
-    if(["today","race","chat"].includes(S.screen))render(true)},
+    if(["today","race","chat"].includes(S.screen))tickRender()},
   err=>{R.me.gps=false;R.watch=null;if(err.code===1)toast("위치 권한이 없어서 예상 이동시간으로 진행돼요")},{enableHighAccuracy:true,maximumAge:10000,timeout:30000})}
 function stopGps(R){if(R&&R.watch!=null&&navigator.geolocation){navigator.geolocation.clearWatch(R.watch)}if(R)R.watch=null}
 /* 1초마다: 실제 시계로 화면 갱신, 위치가 없으면 예상시간으로 진행 */
 setInterval(()=>{const R=S.race;if(!R)return;const m=getMeeting(R.mid);if(!m)return;const L=R.me;
   if(L.phase==="moving"&&!L.gps){const el=(Date.now()-L.dep)/6e4;L.progress=Math.min(0.95,el/Math.max(1,m.legs[0]));L.eta=Math.max(1,Math.ceil(m.legs[0]-el));L.status=L.eta<=5?"곧 도착":"이동중";saveMine(R);pushMine(R,false)}
-  if(["today","race"].includes(S.screen))render(true)},1000);
+  if(["today","race"].includes(S.screen))tickRender()},1000);
 
 /* ============================================================
    화면
@@ -1104,7 +1104,7 @@ V.today=()=>{const m=getMeeting(S.cur),R=S.race,L=R.me,plan=prepPlan(m),dep=depM
   const big=L.phase==="moving"?{k:"도착까지",v:`${Math.max(1,L.eta??m.legs[0])}분`}:L.phase==="arrived"?{k:"도착 시간",v:hmMs(L.arr)}:{k:"출발까지",v:left>0?(left>=60?`${Math.floor(left/60)}시간 ${left%60}분`:`${left}분`):left===0?"지금!":`${-left}분 지남`};
   return `<div class="scr"><div class="top">${backBtn("home")}<h1>오늘의 약속</h1><span class="chip sm">${fmtShort(m.date)} ${hmMs(meetStart(m))}</span></div>
   <div class="noti"><div class="src"><i>모</i>모일곳 · 지금</div><b>${head.b}</b><span>${head.s}</span></div>
-  <div class="count"><div><small>${big.k}</small><div class="big">${big.v}</div></div><span class="chip on">도착 예정 ${hmMs(L.phase==="moving"&&L.eta!=null?now+L.eta*6e4:arrPlan)}</span></div>
+  <div class="count"><div><small>${big.k}</small><div class="big"><span data-tick>${big.v}</span></div></div><span class="chip on">도착 예정 <span data-tick>${hmMs(L.phase==="moving"&&L.eta!=null?now+L.eta*6e4:arrPlan)}</span></span></div>
   <div class="label" style="margin-top:18px">준비 코칭 <small>단계마다 버튼을 눌러 넘겨요</small></div>
   <div class="tl">${rows.map(r=>`<div class="tstep ${r.st}"><span class="dot"></span><time>${hmMs(r.at)}</time><b>${esc(r.name)}</b><span class="chip xs ${r.st==="now"?"on":""}" style="${r.st==="now"?"":"background:var(--card)"}">${r.chip}</span></div>`).join("")}</div>
   ${L.phase==="idle"?`<div class="tip"><p>지난 약속엔 준비가 평균 ${PROFILE.lateAvg}분 더 걸렸어요. 10분 일찍 시작해볼까요?</p>${PROFILE.early?`<button data-a="early" data-v="0">원래대로</button>`:`<button data-a="early" data-v="10">10분 당기기</button>`}</div>`:""}
@@ -1128,7 +1128,7 @@ V.race=()=>{const m=getMeeting(S.cur),R=S.race,W=390,H=560,now=Date.now();
   const left=meetStart(m)-now,mm=Math.floor(Math.max(0,left)/6e4),ss=Math.floor((Math.max(0,left)%6e4)/1000),live=m.people.some((_,i)=>liveOf(R,i).phase==="moving");
   const done=allArrived(R,m),canRoul=done||arrivedCount(R,m)>=2&&now>=meetStart(m);
   return `<div class="scr"><div class="mapwrap" style="height:560px">${svg}
-    <div class="racehead"><span class="l">${backBtn("today")}<i class="livedot ${live?"":"off"}" style="animation-delay:-${((performance.now()/1000)%1.6).toFixed(2)}s"></i>도착 레이스</span><span class="r">${left<=0?`약속 시간 ${hmMs(meetStart(m))}`:mm>=60?`약속까지 ${Math.floor(mm/60)}시간 ${mm%60}분`:`약속까지 ${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}`}</span></div></div>
+    <div class="racehead"><span class="l">${backBtn("today")}<i class="livedot ${live?"":"off"}"></i>도착 레이스</span><span class="r"><span data-tick>${left<=0?`약속 시간 ${hmMs(meetStart(m))}`:mm>=60?`약속까지 ${Math.floor(mm/60)}시간 ${mm%60}분`:`약속까지 ${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}`}</span></span></div></div>
   <div class="bsheet"><div class="grab"></div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b style="font-size:17px">실시간 순위</b><button class="chip sm" data-a="statusSheet">내 상태: ${esc(R.me.arr?"도착!":R.me.status)} ▼</button></div>
   ${order.map((i,k)=>{const L=liveOf(R,i),t=remText(L);return `<div class="rank ${i===0?"me":""}"><span class="n">${k+1}</span>${av(nameOf(m,i),i)}<span>${i===0?esc(PROFILE.name)+" (나)":esc(nameOf(m,i))}</span><div class="bar"><i style="width:${(L.arr?1:L.phase==="moving"?L.progress:0)*100}%"></i></div><span class="r ${t==="출발 전"&&now>depMs(m)?"late":""}">${t}</span></div>`}).join("")}
@@ -1216,6 +1216,15 @@ function stationList(q){q=(q||"").trim();
    렌더
    ============================================================ */
 const app=document.getElementById("app");let lastScreen=null;
+const TICK_RE=/<span data-tick>[^<]*<\/span>/g;let __tickKey=null,__pdown=false;
+document.addEventListener("pointerdown",()=>{__pdown=true},true);
+document.addEventListener("pointerup",()=>{setTimeout(()=>{__pdown=false},60)},true);
+document.addEventListener("pointercancel",()=>{__pdown=false},true);
+/* 주기적 갱신용: 바뀐 게 숫자뿐이면 그 글자만 바꾸고, 누르는 중에는 다시 그리지 않음 */
+function tickRender(){if(__pdown||S.sheet||S.verdict)return;const html=V[S.screen](),key=html.replace(TICK_RE,"");
+  if(key!==__tickKey){render(true);return}
+  const t=document.createElement("template");t.innerHTML=html;const nu=t.content.querySelectorAll("[data-tick]"),cur=app.querySelectorAll("[data-tick]");
+  if(nu.length!==cur.length){render(true);return}cur.forEach((el,i)=>{if(el.textContent!==nu[i].textContent)el.textContent=nu[i].textContent})}
 function render(keep){
   const fe=document.activeElement?.id,same=lastScreen===S.screen&&!S.sheet&&!S.verdict;
   if(same&&S.screen==="loc"&&fe==="lq"&&refreshLoc())return;
@@ -1225,7 +1234,7 @@ function render(keep){
   const slist=document.getElementById("slist"),sTop=slist?slist.scrollTop:0;
   const y=window.scrollY,changed=lastScreen!==S.screen;lastScreen=S.screen;
   if(S.d&&!S.guest&&["s1","s2","s3","s4","result","places"].includes(S.screen))store.set("mg3_draft",{d:S.d,screen:["result","places"].includes(S.screen)?"s4":S.screen,ts:Date.now()});
-  KSPEC={};app.innerHTML=V[S.screen]()+sheetHTML()+(S.verdict?verdictHTML():"");
+  KSPEC={};const __html=V[S.screen]();__tickKey=__html.replace(TICK_RE,"");app.innerHTML=__html+sheetHTML()+(S.verdict?verdictHTML():"");
   if(fid){const n=document.getElementById(fid);if(n){n.focus({preventScroll:true});try{n.setSelectionRange(sel,sel)}catch(e){}}}
   const c2=document.getElementById("chatlog");if(c2&&(stick||changed))c2.scrollTop=c2.scrollHeight;
   const s2=document.getElementById("slist");if(s2&&!changed)s2.scrollTop=sTop;
@@ -1285,7 +1294,7 @@ function hostSubscribe(code){if(CH)SB.removeChannel(CH);
     const before=S.d.people.filter(p=>p.st).length,host=data.find(r=>r.device_id===DEVICE),others=data.filter(r=>r!==host);
     const me=S.d.people[0];S.d.people=[me,...others.map(rowToPerson)];S.d.people[0].id=host?.id;S.d.count=Math.max(S.d.count,S.d.people.length);syncFriends(S.d);
     const after=S.d.people.filter(p=>p.st).length;if(after>before&&S.screen==="s4"){const last=[...others].reverse().find(r=>r.st);toast(`${last?.name||"친구"}님이 출발지를 입력했어요`)}
-    if(["s4","loc"].includes(S.screen))render(true)};
+    if(["s4","loc"].includes(S.screen))tickRender()};
   CH=SB.channel("host-"+code).on("postgres_changes",{event:"*",schema:"public",table:"participants",filter:`code=eq.${code}`},refresh).subscribe(st=>{if(st==="SUBSCRIBED")refresh()});refresh();
   window.__livePoll=()=>{if(S.d&&S.d.code===code&&!S.guest&&["s4","loc"].includes(S.screen))refresh()};clearInterval(window.__hostIv);window.__hostIv=setInterval(()=>{if(document.visibilityState==="visible")window.__livePoll()},6000)}
 async function guestBoot(code){S.screen="boot";render();
@@ -1309,7 +1318,7 @@ async function guestRefresh(rerender){const g=S.guest;if(!g||!g.meeting)return;c
   g.idx=Math.max(0,ppl.findIndex(p=>p.device===DEVICE));if(typedName&&!ppl[g.idx].st)ppl[g.idx].name=typedName;if(!ppl[g.idx].name&&PROFILE.name)ppl[g.idx].name=PROFILE.name;if(typedAvail&&!ppl[g.idx].st)ppl[g.idx].avail=typedAvail;
   S.d.mode=m.mode||"fixed";S.d.slots=m.slots||[];
   while(S.d.people.length<S.d.count)S.d.people.push({name:"",st:null,state:"waiting",placeholder:true});
-  if(rerender&&["g_land","g_wait"].includes(S.screen)&&document.activeElement?.id!=="gname")render(true)}
+  if(rerender&&["g_land","g_wait"].includes(S.screen)&&document.activeElement?.id!=="gname")tickRender()}
 async function guestSave(fields){const g=S.guest;const {error}=await SB.from("participants").update(fields).eq("code",g.code).eq("device_id",DEVICE);
   if(error)toast("저장 실패: "+error.message);else if(fields.state==="done")track("guest_done",{code:g.code})}
 function saveGuestMeeting(){const g=S.guest,m=g.meeting,d=S.d;if(!m||m.status!=="confirmed")return;const me=d.people[g.idx];
