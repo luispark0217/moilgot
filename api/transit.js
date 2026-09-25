@@ -6,13 +6,14 @@ export default async function handler(req, res) {
   if (![sx, sy, ex, ey].every((v) => v !== undefined && v !== "" && !isNaN(Number(v)))) {
     return res.status(400).json({ error: "sx, sy, ex, ey(경도·위도)가 필요해요" });
   }
-  if (!process.env.KAKAO_REST_KEY) {
+  const KEY = process.env.KAKAO_REST_KEY || process.env.Kakao_Rest_Key;
+  if (!KEY) {
     return res.status(500).json({ error: "서버에 KAKAO_REST_KEY 환경변수가 없어요" });
   }
   const url = new URL("https://dapi.kakao.com/v2/routing/publictraffic");
   url.search = new URLSearchParams({ start_x: sx, start_y: sy, end_x: ex, end_y: ey }).toString();
   try {
-    const r = await fetch(url, { headers: { Authorization: `KakaoAK ${process.env.KAKAO_REST_KEY}` } });
+    const r = await fetch(url, { headers: { Authorization: `KakaoAK ${KEY}` } });
     const j = await r.json();
     if (!r.ok || !Array.isArray(j.routes) || j.routes.length === 0) {
       return res.status(502).json({ error: j.message || "경로를 찾지 못했어요", code: j.code });
