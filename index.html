@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>모일곳 — 우리 어디서 만날까?</title>
-<meta name="description" content="출발지만 입력하면 모두에게 공평한 만날 곳과 갈 곳을 찾아줘요">
+<meta name="description" content="어디서 만날지, 단톡방에서 그만 싸우세요">
 <meta property="og:type" content="website">
 <meta property="og:title" content="모일곳 — 우리 어디서 만날까?">
-<meta property="og:description" content="친구가 초대했어요. 출발지만 입력하면 끝!">
+<meta property="og:description" content="어디서 출발하는지만 알려줘">
 <meta property="og:image" content="https://moilgot.vercel.app/og.png">
 <meta property="og:url" content="https://moilgot.vercel.app">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
@@ -392,8 +392,11 @@ textarea.share{width:100%;height:124px;border-radius:16px;border:0;background:va
 .pdetail .top2{display:flex;gap:14px;align-items:center;margin-bottom:12px}
 .pdetail .thumb{width:64px;height:64px}
 .pdetail h3{font-size:20px}
-.kov-av{width:40px;height:40px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;font-weight:800;color:#1F2022;box-shadow:0 2px 6px rgba(0,0,0,.2);font-family:var(--font)}
+.kov-av{width:40px;height:40px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;font-weight:800;color:#1F2022;box-shadow:0 2px 6px rgba(0,0,0,.2),0 0 24px 12px color-mix(in srgb,var(--g,#C8F135) 50%,transparent);font-family:var(--font)}
 .kov-tag{background:#fff;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;margin-top:4px;text-align:center;font-family:var(--font);color:#1F2022}
+.linkbtn{display:block;margin:10px auto 0;font-size:13px;font-weight:600;color:var(--muted);text-decoration:underline;text-underline-offset:3px;background:none}
+.kov-hub{width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(200,241,53,.85) 0,rgba(200,241,53,.35) 30%,rgba(200,241,53,.12) 50%,rgba(200,241,53,0) 70%);display:grid;place-items:center;pointer-events:none}
+.kov-hub i{width:22px;height:22px;border-radius:50%;background:#1F2022;border:5px solid #fff;box-shadow:0 0 0 3px #C8F135}
 .kov-pin{background:#1F2022;color:#fff;border-radius:15px;padding:6px 12px;font-size:13px;font-weight:800;font-family:var(--font);white-space:nowrap}
 .kov-mk{width:32px;height:32px;border-radius:9px;border:3px solid #fff;color:#fff;display:grid;place-items:center;font-weight:800;font-size:12.5px;font-family:var(--font)}
 .srcbadge{font-size:11px;font-weight:800;border-radius:8px;padding:3px 8px;background:var(--card);color:var(--muted)}
@@ -469,7 +472,7 @@ textarea.share{width:100%;height:124px;border-radius:16px;border:0;background:va
 <body>
 <div id="app"></div>
 <script>
-const LINE={"1":["1","#0052A4"],"2":["2","#00A84D"],"3":["3","#EF7C1C"],"4":["4","#00A5DE"],"5":["5","#996CAC"],"6":["6","#CD7C2F"],"7":["7","#747F00"],"8":["8","#E6186C"],"9":["9","#BDB092"],"S":["신분당","#D4003B"],"B":["수인분당","#F5A200"],"A":["공항","#0090D2"],"K":["경의중앙","#77C4A3"]};
+const LINE={"1":["1","#0052A4"],"2":["2","#00A84D"],"3":["3","#EF7C1C"],"4":["4","#00A5DE"],"5":["5","#996CAC"],"6":["6","#CD7C2F"],"7":["7","#747F00"],"8":["8","#E6186C"],"9":["9","#BDB092"],"S":["신분당","#D4003B"],"B":["수인분당","#F5A200"],"A":["공항","#0090D2"],"K":["경의중앙","#77C4A3"],"I":["인천1","#759CCE"],"J":["인천2","#F5A251"],"G":["경춘","#178C72"],"U":["의정부","#FB8100"],"E":["에버라인","#56AB2D"],"Q":["경강","#005BAC"],"W":["우이신설","#B0CE18"],"H":["서해","#8FC31F"],"P":["김포골드","#AD8605"],"L":["신림","#6789CA"]};
 const RAW=[
 ["강남",37.4979,127.0276,"2S",[5,4,5,4,5,5],[2,2,2,3],5],
 ["홍대입구",37.5572,126.9245,"2AK",[5,5,5,3,5,4],[2,5,2,3],5,"연남"],
@@ -539,7 +542,9 @@ const RAW=[
 ["중계",37.6448,127.0641,"7"],["도봉산",37.6896,127.0460,"17"],["구파발",37.6368,126.9189,"3"],
 ["인천시청",37.4574,126.7022,"1"],["송도(인천대입구)",37.3864,126.6395,"1"],["광명사거리",37.4793,126.8547,"7"],
 ];
-const ST=RAW.map(r=>({name:r[0],lat:r[1],lng:r[2],lines:r[3].split(""),hub:!!r[4],cat:r[4],vibe:r[5],scale:r[6],short:r[7]||r[0]}));
+/* 수도권 전체 역 (가까운 역 찾기·검색용, 만날 곳 후보는 위 RAW의 주요 역만) — 출처: github.com/stripe2933/SeoulMetropolitanSubway + 신림선 추가 */
+const RAW_ALL=[["4·19민주묘지",37.6495,127.0137,"W"],["가능",37.7484,127.0443,"1"],["가양",37.5614,126.8544,"9"],["가오리",37.6415,127.0168,"W"],["가재울",37.4842,126.6838,"J"],["가정",37.5248,126.6754,"J"],["가정중앙시장",37.5175,126.6768,"J"],["가좌",37.5687,126.9148,"K"],["가천대",37.4486,127.1267,"B"],["가평",37.8145,127.5107,"G"],["간석",37.4647,126.6935,"1"],["간석오거리",37.4671,126.7079,"I"],["갈매",37.6341,127.1148,"G"],["갈산",37.5171,126.7216,"I"],["강남대",37.2702,127.1261,"E"],["강동",37.5359,127.1324,"5"],["강동구청",37.5302,127.1204,"8"],["강매",37.6123,126.8445,"K"],["강변",37.5351,127.0947,"2"],["강촌",37.8057,127.6342,"G"],["개롱",37.498,127.1351,"5"],["개봉",37.4946,126.8587,"1"],["개포동",37.4891,127.0661,"B"],["개화",37.5783,126.7969,"9"],["개화산",37.5725,126.8068,"5"],["거여",37.4933,127.1438,"5"],["걸포북변",37.6316,126.7058,"P"],["검단사거리",37.6017,126.6564,"J"],["검단오류",37.5949,126.6279,"J"],["검바위",37.5611,126.6775,"J"],["검암",37.569,126.6747,"AJ"],["경기광주",37.3989,127.2533,"Q"],["경기도청북부청사",37.7508,127.0716,"U"],["경마공원",37.444,127.0078,"4"],["경인교대입구",37.5381,126.7226,"I"],["경전철의정부",37.7373,127.0433,"U"],["경찰병원",37.496,127.1245,"3"],["계산",37.5433,126.7277,"I"],["계양",37.5716,126.7363,"AI"],["고덕",37.555,127.1542,"5"],["고려대",37.5904,127.0363,"6"],["고색",37.2498,126.9806,"B"],["고잔",37.3168,126.823,"4B"],["고진",37.2446,127.2142,"E"],["고촌",37.6012,126.7703,"P"],["곡산",37.6458,126.8018,"K"],["곤제",37.7505,127.0838,"U"],["곤지암",37.3505,127.3463,"Q"],["공릉",37.6255,127.073,"7"],["공항시장",37.5637,126.8106,"9"],["공항화물청사",37.4591,126.4775,"A"],["과천",37.4329,126.9966,"4"],["관악",37.4196,126.9085,"1"],["관악산",37.469,126.945,"L"],["광교중앙",37.2884,127.0517,"S"],["광나루",37.5453,127.1035,"5"],["광명",37.4167,126.885,"1"],["광운대",37.6238,127.0617,"1"],["광흥창",37.5475,126.932,"6"],["구래",37.6454,126.6286,"P"],["구로",37.5033,126.8823,"1"],["구룡",37.487,127.0595,"B"],["구리",37.6033,127.1434,"K"],["구반포",37.5014,126.9875,"9"],["구산",37.6112,126.9173,"6"],["구성",37.299,127.1057,"B"],["구의",37.5372,127.0862,"2"],["구일",37.4963,126.8697,"1"],["국수",37.5162,127.3993,"K"],["국제업무지구",37.3997,126.6305,"I"],["국회의사당",37.5281,126.9178,"9"],["군포",37.3542,126.9485,"1"],["굴봉산",37.8321,127.5578,"G"],["굴포천",37.507,126.7313,"7"],["굽은다리",37.5455,127.1429,"5"],["귤현",37.5663,126.7427,"I"],["금곡",37.6374,127.2075,"G"],["금릉",37.7513,126.7654,"K"],["금정",37.3724,126.9434,"14"],["금천구청",37.4562,126.8936,"1"],["금촌",37.7662,126.7746,"K"],["금호",37.5483,127.0158,"3"],["기흥",37.2755,127.1165,"BE"],["길동",37.5378,127.14,"5"],["김량장",37.2373,127.1986,"E"],["김유정",37.8184,127.7143,"G"],["까치울",37.5062,126.8113,"7"],["남구로",37.4863,126.8874,"7"],["남동구청",37.4482,126.7366,"J"],["남부터미널",37.4852,127.0162,"3"],["남성",37.4848,126.9709,"7"],["남영",37.5406,126.9713,"1"],["남춘천",37.864,127.7239,"G"],["남태령",37.4642,126.9891,"4"],["남한산성입구",37.4517,127.1599,"8"],["내방",37.4877,126.9936,"7"],["녹번",37.6008,126.9358,"3"],["녹사평",37.5347,126.9865,"6"],["녹양",37.7594,127.0423,"1"],["녹천",37.6446,127.0514,"1"],["논현",37.5112,127.0217,"7"],["능곡",37.619,126.8204,"K"],["단대오거리",37.445,127.1568,"8"],["달미",37.3488,126.8094,"H"],["달월",37.38,126.7454,"B"],["답십리",37.567,127.0526,"5"],["당고개",37.6702,127.0791,"4"],["당곡",37.4903,126.9277,"L"],["당정",37.3437,126.9484,"1"],["대곡",37.6318,126.8104,"3K"],["대공원",37.4361,127.0068,"4"],["대모산입구",37.4916,127.0731,"B"],["대방",37.5134,126.9265,"1L"],["대성리",37.684,127.3797,"G"],["대야미",37.328,126.9169,"4"],["대청",37.4937,127.0795,"3"],["대치",37.4945,127.0632,"3"],["대화",37.6762,126.7475,"3"],["대흥",37.5476,126.9425,"6"],["덕계",37.8188,127.0567,"1"],["덕소",37.5869,127.2088,"K"],["덕정",37.8432,127.0616,"1"],["도농",37.6088,127.1612,"K"],["도림천",37.5145,126.8826,"2"],["도봉",37.6792,127.0455,"1"],["도심",37.5796,127.2227,"K"],["도원",37.4688,126.6425,"1"],["도화",37.4661,126.6686,"1"],["독립문",37.5745,126.9579,"3"],["독바위",37.6184,126.9331,"6"],["독산",37.466,126.8895,"1"],["독정",37.5849,126.676,"J"],["돌곶이",37.6105,127.0564,"6"],["동대입구",37.5591,127.0053,"3"],["동두천",37.9276,127.0549,"1"],["동두천중앙",37.9018,127.0564,"1"],["동막",37.3979,126.6734,"I"],["동묘앞",37.5727,127.016,"16"],["동백",37.2691,127.1527,"E"],["동수",37.4855,126.7186,"I"],["동암",37.4707,126.7029,"1"],["동오",37.7453,127.057,"U"],["동인천",37.4754,126.6326,"1"],["동작",37.5029,126.9794,"49"],["동천",37.3378,127.1029,"S"],["동춘",37.4046,126.6809,"I"],["두정",36.8336,127.1491,"1"],["둔전",37.2672,127.2136,"E"],["둔촌동",37.5277,127.1362,"5"],["둔촌오륜",37.5194,127.1387,"9"],["등촌",37.5507,126.8656,"9"],["뚝섬",37.5472,127.0474,"2"],["뚝섬유원지",37.5316,127.0668,"7"],["마곡",37.5602,126.8247,"5"],["마두",37.6522,126.7776,"3"],["마들",37.6652,127.0577,"7"],["마산",37.6406,126.644,"P"],["마석",37.6528,127.3117,"G"],["마장",37.5661,127.043,"5"],["마전",37.5976,126.6672,"J"],["마천",37.495,127.1529,"5"],["마포",37.5396,126.9459,"5"],["만수",37.455,126.7317,"J"],["망월사",37.7102,127.0474,"1"],["망포",37.2458,127.0569,"B"],["매교",37.2655,127.0159,"B"],["매봉",37.4869,127.0467,"3"],["매탄권선",37.2525,127.0408,"B"],["먹골",37.6106,127.0778,"7"],["면목",37.5887,127.0875,"7"],["명동",37.561,126.9864,"4"],["명일",37.5514,127.144,"5"],["명지대",37.2381,127.1903,"E"],["명학",37.3845,126.9356,"1"],["모래내시장",37.4559,126.7196,"J"],["몽촌토성",37.5178,127.1129,"8"],["무악재",37.5826,126.9502,"3"],["문산",37.8546,126.7874,"K"],["문정",37.486,127.1225,"8"],["문학경기장",37.4347,126.6984,"I"],["미사",37.563,127.1925,"5"],["미아",37.6267,127.026,"4"],["미아사거리",37.6133,127.0301,"4"],["박촌",37.5537,126.7451,"I"],["반월",37.3124,126.9038,"4"],["반포",37.5082,127.0116,"7"],["발곡",37.7271,127.053,"U"],["발산",37.5587,126.8377,"5"],["방배",37.4815,126.9976,"2"],["방이",37.5088,127.1261,"5"],["방학",37.6674,127.0443,"1"],["방화",37.5776,126.8128,"5"],["배방",36.7777,127.0528,"1"],["백마",37.658,126.7946,"K"],["백양리",37.8308,127.5893,"G"],["백운",37.4833,126.7073,"1"],["버티고개",37.5478,127.0067,"6"],["범골",37.7288,127.0437,"U"],["별내",37.6421,127.127,"G"],["병점",37.2068,127.0332,"1"],["보라매",37.4999,126.9206,"7L"],["보라매공원",37.4948,126.9186,"L"],["보라매병원",37.4935,126.924,"L"],["보문",37.5853,127.0198,"6W"],["보산",37.9141,127.0572,"1"],["보정",37.3128,127.1083,"B"],["보평",37.259,127.2185,"E"],["복정",37.4699,127.1267,"8B"],["봉명",36.8014,127.136,"1"],["봉은사",37.5143,127.0602,"9"],["봉화산",37.6174,127.0914,"6"],["부개",37.4885,126.7407,"1"],["부발",37.2604,127.4903,"Q"],["부천시청",37.5047,126.764,"7"],["부천종합운동장",37.5054,126.7972,"7"],["부평구청",37.5079,126.721,"7I"],["부평삼거리",37.4778,126.7103,"I"],["부평시장",37.4984,126.7223,"I"],["북한산보국문",37.6121,127.0083,"W"],["북한산우이",37.6629,127.0128,"W"],["불광",37.61,126.9303,"36"],["사가정",37.5809,127.0885,"7"],["사릉",37.6511,127.1769,"G"],["사리",37.2906,126.8571,"B"],["사우",37.6203,126.7198,"P"],["사평",37.5042,127.0153,"9"],["산본",37.358,126.933,"4"],["산성",37.4569,127.1499,"8"],["삼가",37.2421,127.1682,"E"],["삼거리신대방",37.4998,126.9282,"7"],["삼동",37.4087,127.2034,"Q"],["삼산체육관",37.5065,126.7414,"7"],["삼성중앙",37.513,127.053,"9"],["삼송",37.6531,126.8957,"3"],["삼양",37.6269,127.0182,"W"],["삼양사거리",37.6213,127.0205,"W"],["삼전",37.5046,127.0874,"9"],["상갈",37.2618,127.1087,"B"],["상계",37.6607,127.0734,"4"],["상도",37.5029,126.9479,"7"],["상동",37.5058,126.7532,"7"],["상록수",37.3029,126.8666,"4"],["상왕십리",37.5644,127.0293,"2"],["상월곡",37.6066,127.0488,"6"],["상일동",37.5567,127.1659,"5"],["상천",37.7702,127.4545,"G"],["상현",37.2978,127.0694,"S"],["새말",37.7488,127.0638,"U"],["새절",37.5909,126.9136,"6"],["샛강",37.5174,126.9284,"9L"],["서강대",37.5521,126.9355,"K"],["서구청",37.544,126.6768,"J"],["서대문",37.5658,126.9666,"5"],["서동탄",37.1957,127.0519,"1"],["서부여성회관",37.5003,126.6759,"J"],["서빙고",37.5196,126.9884,"K"],["서울대벤처타운",37.4721,126.9336,"L"],["서울지방병무청",37.506,126.9224,"L"],["서원",37.4786,126.9331,"L"],["서정리",37.0566,127.0529,"1"],["서초",37.4918,127.0077,"2"],["석남",37.5075,126.6763,"J"],["석바위시장",37.4577,126.6924,"J"],["석수",37.4351,126.9023,"1"],["석천사거리",37.4568,126.7104,"J"],["석촌고분",37.5025,127.0965,"9"],["선바위",37.4517,127.0022,"4"],["선부",37.3344,126.81,"H"],["선유도",37.5382,126.8933,"9"],["선정릉",37.5109,127.0436,"9B"],["선학",37.4269,126.6989,"I"],["성균관대",37.3003,126.971,"1"],["성복",37.3135,127.0804,"S"],["성환",36.916,127.1268,"1"],["세류",37.2439,127.0138,"1"],["세마",37.1871,127.0434,"1"],["세종대왕릉",37.2936,127.5707,"Q"],["센트럴파크",37.3928,126.635,"I"],["소래포구",37.4009,126.7335,"B"],["소사",37.4829,126.7954,"1H"],["소새울",37.4685,126.7973,"H"],["소요산",37.9489,127.0611,"1"],["솔밭공원",37.656,127.0133,"W"],["솔샘",37.6203,127.0136,"W"],["송내",37.4876,126.7532,"1"],["송도",37.43,126.6547,"B"],["송산",37.7373,127.0872,"U"],["송정",37.5612,126.8124,"5"],["송탄",37.0757,127.0543,"1"],["송파",37.4997,127.1122,"8"],["송파나루",37.511,127.1127,"9"],["수내",37.3785,127.1143,"B"],["수락산",37.6779,127.0554,"7"],["수리산",37.3506,126.9256,"4"],["수색",37.5809,126.8957,"K"],["수원시청",37.2619,127.0309,"B"],["수지구청",37.3225,127.0947,"S"],["수진",37.4374,127.1405,"8"],["숭실대입구",37.4963,126.9536,"7"],["숭의",37.4608,126.6384,"B"],["시민공원",37.4584,126.6811,"J"],["시청·용인대",37.2394,127.1789,"E"],["시흥능곡",37.3699,126.8087,"H"],["시흥대야",37.4501,126.793,"H"],["시흥시청",37.3816,126.8059,"H"],["신갈",37.2861,127.1113,"B"],["신금호",37.5545,127.0205,"5"],["신길",37.5172,126.9166,"15"],["신길온천",37.3376,126.767,"4B"],["신내",37.6126,127.1037,"6G"],["신논현",37.5048,127.0255,"9"],["신답",37.5698,127.0471,"2"],["신당",37.5657,127.0195,"26"],["신둔도예촌",37.3156,127.4052,"Q"],["신목동",37.5443,126.8831,"9"],["신반포",37.5035,126.9961,"9"],["신방화",37.5675,126.8172,"9"],["신설동",37.5758,127.0242,"12W"],["신연수",37.4181,126.694,"I"],["신원",37.5256,127.3731,"K"],["신이문",37.6018,127.0674,"1"],["신정",37.525,126.8561,"5"],["신정네거리",37.5202,126.8529,"2"],["신중동",37.503,126.7769,"7"],["신창",36.7696,126.9514,"1"],["신천",37.4392,126.7868,"H"],["신포",37.4685,126.6245,"B"],["신풍",37.5001,126.9098,"7"],["신현",37.4096,126.7878,"H"],["신흥",37.4409,127.1475,"8"],["쌍문",37.6485,127.0347,"4"],["쌍용",36.7937,127.1214,"1"],["아산",36.7921,127.1041,"1"],["아시아드경기장",37.5513,126.6771,"J"],["아신",37.5139,127.4432,"K"],["아차산",37.5522,127.0896,"5"],["아현",37.5574,126.9561,"2"],["안산",37.3271,126.7886,"4B"],["안양",37.4017,126.9227,"1"],["암사",37.5502,127.1275,"8"],["압구정",37.5265,127.0285,"3"],["애오개",37.5534,126.9567,"5"],["야당",37.7126,126.7615,"K"],["야목",37.2614,126.8838,"B"],["약수",37.5542,127.0105,"36"],["양수",37.546,127.3291,"K"],["양원",37.6066,127.1079,"K"],["양재시민의숲",37.4701,127.0385,"S"],["양정",37.604,127.1947,"K"],["양주",37.7741,127.0447,"1"],["양천구청",37.5124,126.8657,"2"],["양천향교",37.5681,126.842,"9"],["양촌",37.6418,126.6146,"P"],["양평(5호선)",37.5256,126.8864,"5"],["양평(경의중앙)",37.4927,127.4922,"K"],["어룡",37.7427,127.0852,"U"],["어린이대공원",37.548,127.0747,"7"],["어정",37.275,127.1437,"E"],["어천",37.2501,126.9088,"B"],["언주",37.5073,127.034,"9"],["여의나루",37.5271,126.933,"5"],["여주",37.2829,127.6285,"Q"],["역곡",37.4853,126.8121,"1"],["역삼",37.5007,127.0365,"2"],["역촌",37.6062,126.9228,"6"],["연수",37.4179,126.6787,"B"],["염창",37.547,126.8749,"9"],["영등포구청",37.525,126.896,"25"],["영등포시장",37.5227,126.9052,"5"],["영종",37.512,126.525,"A"],["영통",37.2515,127.0713,"B"],["예술회관",37.4485,126.7009,"I"],["오류동",37.4944,126.8448,"1"],["오리",37.3398,127.1089,"B"],["오목교",37.5245,126.8753,"5"],["오목천",37.2434,126.9639,"B"],["오빈",37.5062,127.4737,"K"],["오산",37.1447,127.0666,"1"],["오산대",37.1694,127.0631,"1"],["오이도",37.3623,126.7387,"4B"],["옥수",37.541,127.0181,"3K"],["온수",37.4922,126.8238,"17"],["온양온천",36.7805,127.0032,"1"],["올림픽공원",37.5162,127.1306,"59"],["완정",37.5928,126.673,"J"],["왕길",37.5951,126.6425,"J"],["외대앞",37.5963,127.0637,"1"],["용답",37.5621,127.0509,"2"],["용두",37.5741,127.0383,"2"],["용마산",37.5737,127.0868,"7"],["용문",37.4818,127.5938,"K"],["우장산",37.5488,126.8363,"5"],["운길산",37.5546,127.3102,"K"],["운동장·송담대",37.2379,127.2091,"E"],["운서",37.4928,126.4937,"A"],["운양",37.6538,126.6838,"P"],["운연",37.4396,126.7596,"J"],["운정",37.7256,126.7672,"K"],["원곡",37.3132,126.7957,"H"],["원당",37.6531,126.8429,"3"],["원덕",37.4688,127.5466,"K"],["원시",37.3026,126.7868,"H"],["원인재",37.4128,126.6872,"BI"],["원흥",37.6507,126.873,"3"],["월계",37.6333,127.0589,"1"],["월곡",37.6018,127.0415,"6"],["월곶",37.3918,126.7427,"B"],["월드컵경기장",37.5696,126.8991,"6"],["월롱",37.7962,126.7926,"K"],["을지로4가",37.5671,126.9978,"25"],["을지로입구",37.566,126.9822,"2"],["응봉",37.55,127.0345,"K"],["의왕",37.3203,126.948,"1"],["의정부시청",37.7392,127.0348,"U"],["의정부중앙",37.7437,127.0496,"U"],["이매",37.3955,127.1278,"BQ"],["이천",37.2642,127.4422,"Q"],["인더스파크남동",37.4077,126.6952,"B"],["인덕원",37.4015,126.9767,"4"],["인천",37.4763,126.6171,"1B"],["인천가좌",37.4898,126.6752,"J"],["인천공항1터미널",37.4475,126.4526,"A"],["인천공항2터미널",37.4688,126.4336,"A"],["인천논현",37.4007,126.7225,"B"],["인천대공원",37.4485,126.7529,"J"],["인천터미널",37.4419,126.6997,"I"],["인하대",37.4483,126.6498,"B"],["일산",37.682,126.77,"K"],["일원",37.484,127.0841,"3"],["임진강",37.8883,126.7471,"K"],["임학",37.545,126.7386,"I"],["작전",37.5303,126.7226,"I"],["잠실나루",37.5207,127.1038,"2"],["잠원",37.5129,127.0114,"3"],["장기",37.6441,126.6691,"P"],["장승배기",37.5049,126.9391,"7"],["장암",37.7,127.0528,"7"],["장지",37.4786,127.1262,"8"],["장한평",37.5616,127.0637,"5"],["전대·에버랜드",37.2854,127.2195,"E"],["정릉",37.6026,127.0135,"W"],["정부과천청사",37.4265,126.9899,"4"],["정왕",37.3519,126.7428,"4B"],["제기동",37.5782,127.0349,"1"],["제물포",37.4668,126.6575,"1"],["종로5가",37.571,127.0015,"1"],["종합운동장",37.5113,127.0751,"29"],["주안",37.4651,126.6795,"1J"],["주안국가산단",37.4739,126.6812,"J"],["주엽",37.6701,126.7613,"3"],["죽전",37.3244,127.1075,"B"],["중곡",37.5659,127.0843,"7"],["중동",37.4867,126.7645,"1"],["중랑",37.595,127.0762,"GK"],["중앙",37.316,126.8384,"4B"],["중앙보훈병원",37.5284,127.1484,"9"],["중화",37.6026,127.0793,"7"],["증미",37.5581,126.8606,"9"],["증산",37.5837,126.9095,"6"],["지석",37.2697,127.1366,"E"],["지식정보단지",37.3775,126.6459,"I"],["지제",37.0189,127.0705,"1"],["지축",37.6481,126.9139,"3"],["지평",37.4769,127.6289,"K"],["지행",37.8923,127.0558,"1"],["직산",36.8709,127.1438,"1"],["진위",37.1101,127.0624,"1"],["창동",37.6534,127.048,"14"],["창신",37.5794,127.0153,"6"],["천마산",37.6592,127.2851,"G"],["천안",36.8105,127.1465,"1"],["천왕",37.4869,126.8386,"7"],["철산",37.4762,126.8682,"7"],["청계산입구",37.4484,127.0547,"S"],["청구",37.5606,127.0141,"56"],["청라국제도시",37.5565,126.6247,"A"],["청명",37.2595,127.079,"B"],["청평",37.7355,127.4266,"G"],["초당",37.2608,127.1595,"E"],["초월",37.3734,127.2999,"Q"],["초지",37.3204,126.8066,"4BH"],["춘의",37.5037,126.787,"7"],["춘천",37.8845,127.7167,"G"],["충무로",37.5614,126.9942,"34"],["충정로",37.5601,126.9638,"25"],["캠퍼스타운",37.3884,126.6622,"I"],["탄현",37.694,126.7611,"K"],["탑석",37.7335,127.0889,"U"],["태평",37.4398,127.1277,"B"],["테크노파크",37.3823,126.6563,"I"],["퇴계원",37.6483,127.1435,"G"],["파주",37.8154,126.7927,"K"],["팔당",37.5474,127.244,"K"],["평내호평",37.6532,127.2444,"G"],["평촌",37.3942,126.9638,"4"],["평택",36.9908,127.0853,"1"],["풍무",37.6124,126.7324,"P"],["풍산",37.6723,126.7863,"K"],["하계",37.6365,127.068,"7"],["하남풍산",37.5523,127.204,"5"],["학동",37.5143,127.0319,"7"],["학여울",37.4969,127.0712,"3"],["한강진",37.5398,127.0018,"6"],["한남",37.5294,127.0092,"K"],["한대앞",37.3098,126.8536,"4B"],["한성대입구",37.5884,127.006,"4"],["한성백제",37.5165,127.1164,"9"],["한양대",37.5557,127.0436,"2"],["한티",37.4963,127.0529,"B"],["행당",37.5574,127.0295,"5"],["행신",37.6121,126.8343,"K"],["호구포",37.4016,126.7087,"B"],["화계",37.6341,127.0175,"W"],["화곡",37.5417,126.8405,"5"],["화랑대",37.6198,127.0835,"6"],["화서",37.284,126.9896,"1"],["화전",37.603,126.8683,"K"],["화정",37.6346,126.8327,"3"],["회룡",37.7244,127.0472,"1U"],["회현",37.5588,126.9784,"4"],["효자",37.754,127.0772,"U"],["효창공원앞",37.539,126.9621,"6K"],["흑석",37.5092,126.9635,"9"],["흥선",37.7433,127.0372,"U"]];
+const ST=[...RAW,...RAW_ALL].map(r=>({name:r[0],lat:r[1],lng:r[2],lines:r[3].split(""),hub:!!r[4],cat:r[4],vibe:r[5],scale:r[6],short:r[7]||r[0]}));
 // 서울대 캠퍼스는 셔틀+2호선 기준으로 처리
 const HUBS=ST.filter(s=>s.hub);
 
@@ -623,10 +628,10 @@ function recommend(people,purposes,vibes,w,opt={}){const {hubs=HUBS,k=3,leg=legO
 }
 function reason(r,purposes){
   const names=(purposes.length?purposes:[0]).map(i=>PURPOSES[i][0]).join("·");
-  const out=[`모두 ${r.max}분 이내로 도착`];
-  out.push(r.spread<=10?`이동 차이 ${r.spread}분으로 공평`:`이동 차이 ${r.spread}분`);
-  if(r.fit>=4.5)out.push(`${names} 가게가 특히 많은 상권`);else if(r.fit>=3.5)out.push(`${names} 하기 괜찮은 상권`);
-  if(r.avgTr===0)out.push("모두 환승 없음");
+  const out=[`제일 먼 사람도 ${r.max}분`];
+  out.push(`서로 ${r.spread}분 차이`);
+  if(r.fit>=4.5)out.push(`${names} 할 데 많음`);else if(r.fit>=3.5)out.push(`${names} 할 데 꽤 있음`);
+  if(r.avgTr===0)out.push("다들 환승 없이 한 번에");
   return out.join(" · ");
 }
 
@@ -637,6 +642,9 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v)
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 function track(ev,props){const f=store.get("mg3_funnel",{});f[ev]=(f[ev]||0)+1;store.set("mg3_funnel",f);
   if(window.SB)SB.from("events").insert({code:(S.guest?.code||S.d?.code||null),device_id:DEVICE,name:ev,props:props||null}).then(()=>{},()=>{});}
+/* 같은 사람이 다른 기기로 들어온 경우: 모임별로 "이 기기 = 기존 참여자 id" 연결 */
+const claimOf=code=>store.get("mg3_claim",{})[code]||null;
+const setClaim=(code,id)=>{const c=store.get("mg3_claim",{});if(id)c[code]=id;else delete c[code];store.set("mg3_claim",c)};
 const DEVICE=(()=>{let d=store.get("mg3_device",null);if(!d){d=Math.random().toString(36).slice(2)+Date.now().toString(36);store.set("mg3_device",d)}return d})();
 const ONLINE=()=>!!window.SB;
 const today=new Date();today.setHours(0,0,0,0);
@@ -697,7 +705,7 @@ const initial=n=>String(n||"?").slice(0,1);
 const avc=i=>AVC[i%AVC.length];
 const av=(name,i,cls="",style="")=>`<span class="av ${cls}" style="background:${avc(i)};${style}">${esc(initial(name))}</span>`;
 const lineBadges=s=>`<span class="lines">${s.lines.map(l=>`<span class="ln" style="background:${LINE[l][1]}">${LINE[l][0]}</span>`).join("")}</span>`;
-const lineText=s=>s.lines.map(l=>/\d/.test(LINE[l][0])?LINE[l][0]+"호선":({"공항":"공항철도","경의중앙":"경의중앙선","신분당":"신분당선","수인분당":"수인분당선"})[LINE[l][0]]).join(" · ");
+const lineText=s=>s.lines.map(l=>/\d/.test(LINE[l][0])?LINE[l][0]+"호선":({"공항":"공항철도","경의중앙":"경의중앙선","신분당":"신분당선","수인분당":"수인분당선","의정부":"의정부경전철","에버라인":"에버라인","김포골드":"김포골드라인"})[LINE[l][0]]||LINE[l][0]+"선").join(" · ");
 function seeded(str){let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return()=>{h^=h<<13;h^=h>>>17;h^=h<<5;return((h>>>0)%10000)/10000}}
 let toastT;function toast(msg){document.querySelector(".toast")?.remove();const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),2300)}
 const backBtn=(to,cls="")=>`<button class="icon-btn ${cls}" data-a="go" data-v="${to}" aria-label="뒤로">←</button>`;
@@ -724,19 +732,19 @@ function projector(pts,W,H,pad,minKm){
 }
 function mapBase(P,W,H){
   const river=RIVER.map(([a,b])=>P.f(a,b).map(v=>v.toFixed(1)).join(",")).join(" "),rw=Math.max(10,Math.min(60,P.k*0.9));
-  return `<defs><pattern id="grid" width="66" height="66" patternUnits="userSpaceOnUse"><path d="M0 33H66M33 0V66" stroke="var(--map-road)" stroke-width="7"/><path d="M0 0H66M0 0V66" stroke="var(--map-road)" stroke-width="3"/></pattern></defs>
+  return `<defs>${AVC.map((c,k)=>`<radialGradient id="glw${k}"><stop offset="0" stop-color="${c}" stop-opacity=".95"/><stop offset=".4" stop-color="${c}" stop-opacity=".45"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient>`).join("")}<pattern id="grid" width="66" height="66" patternUnits="userSpaceOnUse"><path d="M0 33H66M33 0V66" stroke="var(--map-road)" stroke-width="7"/><path d="M0 0H66M0 0V66" stroke="var(--map-road)" stroke-width="3"/></pattern></defs>
   <rect width="${W}" height="${H}" fill="var(--map-bg)"/><rect width="${W}" height="${H}" fill="url(#grid)"/>
   <rect x="${W*0.6}" y="${H*0.1}" width="130" height="96" rx="18" fill="var(--map-park)"/><rect x="${W*0.06}" y="${H*0.6}" width="96" height="70" rx="16" fill="var(--map-park)"/>
   <polyline points="${river}" fill="none" stroke="var(--map-water)" stroke-width="${rw}" stroke-linecap="round" stroke-linejoin="round"/>`;
 }
 function hubPin(x,y,name){const w=name.length*13.5+26;
-  return `<circle cx="${x}" cy="${y}" r="11" fill="var(--lime)" stroke="#1F2022" stroke-width="4"/><rect x="${x-w/2}" y="${y-50}" width="${w}" height="30" rx="15" fill="#1F2022"/><text x="${x}" y="${y-30}" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">${esc(name)}</text>`}
-function avatarSvg(x,y,r,name,i){return `<circle cx="${x}" cy="${y}" r="${r}" fill="${avc(i)}" stroke="#fff" stroke-width="3"/><text x="${x}" y="${y+r*0.28}" text-anchor="middle" font-size="${r*0.75}" font-weight="800" fill="#1F2022">${esc(initial(name))}</text>`}
+  return `<circle cx="${x}" cy="${y}" r="95" fill="url(#glw0)"/><circle cx="${x}" cy="${y}" r="42" fill="var(--lime)" fill-opacity=".14" stroke="#6F8F00" stroke-opacity=".55" stroke-width="1.5"/><circle cx="${x}" cy="${y}" r="15" fill="#fff" stroke="var(--lime)" stroke-width="3"/><circle cx="${x}" cy="${y}" r="8" fill="#1F2022"/><rect x="${x-w/2}" y="${y-50}" width="${w}" height="30" rx="15" fill="#1F2022"/><text x="${x}" y="${y-30}" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">${esc(name)}</text>`}
+function avatarSvg(x,y,r,name,i,glow=true){return `${glow?`<circle cx="${x}" cy="${y}" r="${r*2.5}" fill="url(#glw${i%AVC.length})"/>`:""}<circle cx="${x}" cy="${y}" r="${r}" fill="${avc(i)}" stroke="#fff" stroke-width="3"/><text x="${x}" y="${y+r*0.28}" text-anchor="middle" font-size="${r*0.75}" font-weight="800" fill="#1F2022">${esc(initial(name))}</text>`}
 function spreadPts(list){const seen={};return list.map(([x,y,k])=>{seen[k]=(seen[k]||0)+1;return [x+(seen[k]-1)*28,y]})}
 function resultMap(r,people){
   const W=390,H=520,sts=people.map(ptOf),P=projector([r.hub,...sts],W,H,{l:50,r:50,t:110,b:120},4);
   const [hx,hy]=P.f(r.hub.lat,r.hub.lng),pos=spreadPts(sts.map(s=>[...P.f(s.lat,s.lng),s.name]));
-  let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${esc(r.hub.name)}역 중심 지도">${mapBase(P,W,H)}<circle cx="${hx}" cy="${hy}" r="75" fill="var(--lime)" opacity=".35"/>`;
+  let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${esc(r.hub.name)}역 중심 지도">${mapBase(P,W,H)}`;
   pos.forEach(([x,y])=>s+=`<line x1="${x}" y1="${y}" x2="${hx}" y2="${hy}" stroke="#1F2022" stroke-width="2.5" stroke-dasharray="3 6" stroke-linecap="round"/>`);
   pos.forEach(([x,y],i)=>s+=`${avatarSvg(x,y,21,people[i].name,i)}<rect x="${x-19.5}" y="${y+25}" width="39" height="21" rx="10.5" fill="var(--bg)"/><text x="${x}" y="${y+39.5}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${r.legs[i].t}분</text>`);
   return s+hubPin(hx,hy,r.hub.name+"역")+`</svg>`;
@@ -786,7 +794,7 @@ const ingOf=n=>({"씻기":"씻는중..","옷 입기 · 화장":"화장중..","�
 function blankLive(){return {phase:"idle",step:0,status:"출발 전",progress:0,dep:null,arr:null,eta:null,gps:false}}
 function rowLive(r){return r?{phase:r.phase||"idle",step:r.prep_step||0,status:r.status||"출발 전",progress:+r.progress||0,dep:r.departed_at?+r.departed_at:null,arr:r.arrived_at?+r.arrived_at:null,eta:r.eta,gps:!!r.gps}:blankLive()}
 function makeRace(m){const mine=store.get("mg3_live_"+m.id,null);
-  return {mid:m.id,code:m.code||null,me:mine?{...blankLive(),...mine}:blankLive(),others:m.people.map(()=>blankLive()),
+  return {myId:m.people[0]?.id||null,mid:m.id,code:m.code||null,me:mine?{...blankLive(),...mine}:blankLive(),others:m.people.map(()=>blankLive()),
     chat:ONLINE()&&m.code?[]:store.get("mg3_chat_"+m.id,[]),seen:0,unread:0,startDist:mine?.startDist??null,watch:null,lastPush:0,loaded:false}}
 const liveOf=(R,i)=>i===0?R.me:R.others[i];
 const nameOf=(m,i)=>i===0?PROFILE.name:(m.people[i].name||"친구");
@@ -805,18 +813,19 @@ function allArrived(R,m){return m.people.every((_,i)=>liveOf(R,i).arr)}
 function arrivedCount(R,m){return m.people.filter((_,i)=>liveOf(R,i).arr).length}
 function remText(L){if(L.arr)return "도착";if(L.phase==="moving")return L.eta!=null?`${Math.max(1,L.eta)}분`:`${Math.round(L.progress*100)}%`;if(L.phase==="prep")return "준비 중";return "출발 전"}
 /* ---- 서버 동기화 ---- */
-async function pushMine(R,force){if(!ONLINE()||!R.code)return;const now=Date.now();if(!force&&now-R.lastPush<10000)return;R.lastPush=now;const L=R.me;
-  const {error}=await SB.from("participants").update({phase:L.phase,prep_step:L.step,status:L.status,progress:L.progress,departed_at:L.dep,arrived_at:L.arr,eta:L.eta,gps:L.gps}).eq("code",R.code).eq("device_id",DEVICE);
+async function pushMine(R,force){if(force)R.meRemote=false;if(!ONLINE()||!R.code||R.meRemote)return;const now=Date.now();if(!force&&now-R.lastPush<10000)return;R.lastPush=now;const L=R.me;
+  const {error}=await SB.from("participants").update({phase:L.phase,prep_step:L.step,status:L.status,progress:L.progress,departed_at:L.dep,arrived_at:L.arr,eta:L.eta,gps:L.gps}).eq("code",R.code).eq(R.myId?"id":"device_id",R.myId||DEVICE);
   if(error)console.warn("pushMine",error.message)}
 async function loadLive(R,m){if(!ONLINE()||!R.code)return;
   const [{data:rows},{data:msgs}]=await Promise.all([SB.from("participants").select("*").eq("code",R.code),SB.from("messages").select("*").eq("code",R.code).order("id")]);
   if(!S.race||S.race!==R)return;
   /* 확정 후 늦게 들어온 친구도 레이스에 추가 */
-  let grew=false;(rows||[]).forEach(r=>{if(r.st&&r.device_id!==DEVICE&&!m.people.some(p=>p.id===r.id)){const pp=rowToPerson(r);m.people.push({id:r.id,name:r.name||"친구",st:r.st,acc:r.acc,loc:pp.loc});m.legs.push(legOf(pp,byName(m.hub)).t);R.others.push(blankLive());grew=true}});if(grew)putMeeting(m);
+  R.myId=m.people[0]?.id||null;const myRow=(rows||[]).find(r=>r.id===R.myId);R.myDev=myRow?myRow.device_id:DEVICE;R.otherDevs=new Set((rows||[]).filter(r=>r.id!==R.myId).map(r=>r.device_id));
+  let grew=false;(rows||[]).forEach(r=>{if(r.st&&r.id!==R.myId&&r.device_id!==DEVICE&&!m.people.some(p=>p.id===r.id)){const pp=rowToPerson(r);m.people.push({id:r.id,name:r.name||"친구",st:r.st,acc:r.acc,loc:pp.loc});m.legs.push(legOf(pp,byName(m.hub)).t);R.others.push(blankLive());grew=true}});if(grew)putMeeting(m);
   const prevArr=m.people.map((_,i)=>!!liveOf(R,i).arr);
   (rows||[]).forEach(r=>{const i=m.people.findIndex(p=>p.id&&p.id===r.id);if(i>0)R.others[i]=rowLive(r);
-    if(i===0&&R.me.phase==="idle"&&r.phase&&r.phase!=="idle")R.me=rowLive(r)});
-  if(msgs){const before=R.chat.length;R.chat=msgs.map(x=>({id:x.id,sys:x.sys,text:x.text,name:x.name,mine:x.device_id===DEVICE}));
+    if(i===0&&(R.meRemote||(R.me.phase==="idle"&&r.phase&&r.phase!=="idle"))){R.me=rowLive(r);R.meRemote=true}});
+  if(msgs){const before=R.chat.length;R.chat=msgs.map(x=>({id:x.id,sys:x.sys,text:x.text,name:x.name,mine:x.device_id===DEVICE||x.device_id===R.myDev||(!!R.otherDevs&&!R.otherDevs.has(x.device_id)&&x.name===PROFILE.name)}));
     if(R.loaded&&S.screen!=="chat")R.unread+=Math.max(0,R.chat.length-before);}
   if(R.loaded)m.people.forEach((_,i)=>{if(i>0&&!prevArr[i]&&R.others[i].arr&&["today","race"].includes(S.screen))toast(`${nameOf(m,i)}님이 도착했어요`)});
   R.loaded=true;
@@ -842,13 +851,13 @@ function startGps(R,m){if(R.watch!=null||!navigator.geolocation)return;const hub
     const el=(Date.now()-L.dep)/6e4,covered=R.startDist-d;
     L.eta=covered>250&&el>1.5?Math.ceil(d/(covered/el)):Math.max(1,Math.round(m.legs[0]*(1-L.progress)));
     L.status=d<800?"곧 도착":"이동중";saveMine(R);pushMine(R,false);
-    if(d<=ARRIVE_M){toast("약속 장소 근처예요. 도착으로 표시했어요");A.arrive();return}
+    if(d<=ARRIVE_M){toast("거의 다 왔네요. 도착으로 해둘게요");A.arrive();return}
     if(["today","race","chat"].includes(S.screen))tickRender()},
-  err=>{R.me.gps=false;R.watch=null;if(err.code===1)toast("위치 권한이 없어서 예상 이동시간으로 진행돼요")},{enableHighAccuracy:true,maximumAge:10000,timeout:30000})}
+  err=>{R.me.gps=false;R.watch=null;if(err.code===1)toast("위치를 못 써서 예상 시간으로 갈게요")},{enableHighAccuracy:true,maximumAge:10000,timeout:30000})}
 function stopGps(R){if(R&&R.watch!=null&&navigator.geolocation){navigator.geolocation.clearWatch(R.watch)}if(R)R.watch=null}
 /* 1초마다: 실제 시계로 화면 갱신, 위치가 없으면 예상시간으로 진행 */
 setInterval(()=>{const R=S.race;if(!R)return;const m=getMeeting(R.mid);if(!m)return;const L=R.me;
-  if(L.phase==="moving"&&!L.gps){const el=(Date.now()-L.dep)/6e4;L.progress=Math.min(0.95,el/Math.max(1,m.legs[0]));L.eta=Math.max(1,Math.ceil(m.legs[0]-el));L.status=L.eta<=5?"곧 도착":"이동중";saveMine(R);pushMine(R,false)}
+  if(L.phase==="moving"&&!L.gps&&!R.meRemote){const el=(Date.now()-L.dep)/6e4;L.progress=Math.min(0.95,el/Math.max(1,m.legs[0]));L.eta=Math.max(1,Math.ceil(m.legs[0]-el));L.status=L.eta<=5?"곧 도착":"이동중";saveMine(R);pushMine(R,false)}
   R.others.forEach((O,i)=>{if(i>0&&O.phase==="moving"&&!O.gps&&O.dep&&!O.arr){const leg=Math.max(1,m.legs[i]||30),el=(Date.now()-O.dep)/6e4;O.progress=Math.max(O.progress,Math.min(0.95,el/leg));O.eta=Math.max(1,Math.ceil(leg-el))}});
   if(["today","race"].includes(S.screen))tickRender()},1000);
 
@@ -875,20 +884,20 @@ V.home=()=>{
     <circle cx="42" cy="34" r="17" fill="#FFD86B" stroke="#fff" stroke-width="3"/><text x="42" y="39" text-anchor="middle" font-size="14" font-weight="800" fill="#1F2022">지</text>
     <circle cx="112" cy="84" r="17" fill="#A9D8FF" stroke="#fff" stroke-width="3"/><text x="112" y="89" text-anchor="middle" font-size="14" font-weight="800" fill="#1F2022">도</text>
     <circle cx="72" cy="176" r="17" fill="#FFB5C9" stroke="#fff" stroke-width="3"/><text x="72" y="181" text-anchor="middle" font-size="14" font-weight="800" fill="#1F2022">서</text></svg>
-    <h2>우리 어디서<br>만날까?</h2><p>각자 출발지만 넣으면 딱 중간 지점과 갈 곳을 찾아줘요</p></div>
+    <h2>우리 어디서<br>만날까?</h2><p>다들 어디서 오는지만 알려주면 돼요</p></div>
   <div style="height:16px"></div><button class="btn" data-a="new">+ 새 모임 만들기</button>
   ${(()=>{const dr=store.get("mg3_draft",null);if(!dr||Date.now()-dr.ts>2*DAY)return "";const n=dr.d.people.filter(p=>p.st).length;
     return `<div class="meet" style="margin-top:12px;display:flex;align-items:center;gap:12px"><div style="flex:1"><span class="chip xs on">만드는 중</span><h3>${esc(dr.d.name||"이름 없는 모임")}</h3><div class="m">${n}/${dr.d.count}명 출발지 입력</div></div>
     <div style="display:flex;flex-direction:column;gap:6px"><button class="chip sm dark" data-a="resume">이어서 하기</button><button class="chip sm" data-a="dropDraft">지우기</button></div></div>`})()}
   <div class="sec">다가오는 약속</div>
-  ${up.length?up.slice(0,2).map(meetCard).join(""):`<div class="empty">아직 잡힌 약속이 없어요. 새 모임을 만들어 단톡방에 링크를 공유해보세요.</div>`}
+  ${up.length?up.slice(0,2).map(meetCard).join(""):`<div class="empty">잡힌 약속이 없어요</div>`}
   <div class="sec">지난 모임</div>
-  ${past.length?past.slice(0,2).map(pastRow).join(""):`<div class="empty">약속을 마치면 도착 순위와 벌칙이 여기에 남아요.</div>`}
+  ${past.length?past.slice(0,2).map(pastRow).join(""):`<div class="empty">끝난 약속은 여기 쌓여요</div>`}
   <div class="spacer"></div>${tabbar("home")}</div>`;
 };
 V.mine=()=>{const all=meetings(),up=all.filter(m=>m.status==="upcoming").sort((a,b)=>a.date-b.date),past=all.filter(m=>m.status==="done").sort((a,b)=>b.date-a.date);
   return `<div class="scr"><div class="top"><span class="logo">내 모임</span></div>
-  <div class="sec" style="margin-top:4px">예정 <small>${up.length}개</small></div>${up.length?up.map(meetCard).join(""):`<div class="empty">예정된 약속이 없어요.</div>`}
+  <div class="sec" style="margin-top:4px">예정 <small>${up.length}개</small></div>${up.length?up.map(meetCard).join(""):`<div class="empty">잡힌 약속이 없어요</div>`}
   <div class="sec">지난 모임 <small>${past.length}개</small></div>${past.map(pastRow).join("")}
   <div class="spacer"></div>${tabbar("mine")}</div>`};
 V.records=()=>{
@@ -901,7 +910,7 @@ V.records=()=>{
   return `<div class="scr"><div class="top"><span class="logo">기록</span></div>
   <div class="statgrid"><div class="stat"><small>평균 도착 순위</small><b>${avgR}등</b></div><div class="stat"><small>1등</small><b>${wins}회</b></div><div class="stat"><small>지각</small><b>${lates}회</b></div></div>
   <div class="sec">친구들 도착 랭킹</div>
-  ${lb.map(([n,v],k)=>`<div class="lb"><span style="font-weight:900;text-align:center">${k+1}</span>${av(n,Object.keys(board).indexOf(n))}<span>${esc(n)}${n===me?" (나)":""}</span><em>1등 ${v.w} · 꼴찌 ${v.l}</em></div>`).join("")||`<div class="empty">레이스 기록이 아직 없어요.</div>`}
+  ${lb.map(([n,v],k)=>`<div class="lb"><span style="font-weight:900;text-align:center">${k+1}</span>${av(n,Object.keys(board).indexOf(n))}<span>${esc(n)}${n===me?" (나)":""}</span><em>1등 ${v.w} · 꼴찌 ${v.l}</em></div>`).join("")||`<div class="empty">아직 기록이 없어요</div>`}
   <div class="sec">레이스 기록</div>
   ${done.map(m=>`<div class="rec"><b>${esc(m.name)}</b><div class="m">${fmtShort(m.date)} · ${esc(m.hub)}역 · ${esc(m.place)}</div>
     <div class="tags"><span class="tag fit">1등 ${esc(m.people[m.result.order[0]].name)}</span><span class="tag">꼴찌 ${esc(m.people[m.result.loser].name)}</span><span class="tag">벌칙 ${esc(m.result.penalty)}</span></div></div>`).join("")}
@@ -913,7 +922,7 @@ V.my=()=>{
   <button class="set" data-a="editName"><b>내 이름</b><span>${esc(PROFILE.name)} ›</span></button>
   <button class="set" data-a="pickFav" data-v="home"><b>집</b><span>${PROFILE.home&&(PROFILE.homeSet||!CONFIG.SUPABASE_URL)?esc(PROFILE.home)+"역":"등록하기"} ›</span></button>
   <button class="set" data-a="pickFav" data-v="school"><b>학교</b><span>${PROFILE.school&&(PROFILE.schoolSet||!CONFIG.SUPABASE_URL)?esc(PROFILE.school)+"역":"등록하기"} ›</span></button>
-  <div class="sec">평소 준비 시간 <small>준비 코칭에 쓰여요</small></div>
+  <div class="sec">평소 준비 시간 <small>준비 시간표 짤 때 써요</small></div>
   ${PROFILE.prep.map((p,i)=>`<div class="set"><b>${esc(p[0])}</b><span class="stepper"><button data-a="prep" data-v="${i}:-5" aria-label="줄이기">−</button>${p[1]}분<button data-a="prep" data-v="${i}:5" aria-label="늘리기">+</button></span></div>`).join("")}
   <div class="sec">가설 검증 지표 <small>이 기기 기준</small></div>
   ${steps.map(([k,l])=>{const v=f[k]||0;return `<div class="fun"><span>${l}</span><small>${v}회 · ${Math.round(v/top*100)}%</small><div class="bar"><i style="width:${Math.min(100,v/top*100)}%"></i></div></div>`}).join("")}
@@ -924,7 +933,7 @@ V.my=()=>{
 /* 01 */
 V.s1=()=>{const d=S.d;
   return `<div class="scr">${stepTop(1,"home")}
-  <h2 class="q">몇 명이서 만나요?</h2><p class="sub">나를 포함한 인원을 골라주세요</p>
+  <h2 class="q">몇 명이서 만나요?</h2><p class="sub">나까지 세서요</p>
   <div class="counter"><button class="round" data-a="cnt" data-v="-1" aria-label="인원 줄이기" ${d.count<=2?"disabled style='opacity:.4'":""}>${minus}</button>
     <div class="bign">${d.count}<small>명</small></div><button class="round dark" data-a="cnt" data-v="1" aria-label="인원 늘리기" ${d.count>=8?"disabled style='opacity:.4'":""}>${plus}</button></div>
   <div class="avrow">${av("나",0)}${Array.from({length:Math.min(d.count-1,5)},()=>`<span class="qbox">?</span>`).join("")}${d.count>6?`<span class="qbox">+${d.count-6}</span>`:""}</div>
@@ -935,9 +944,9 @@ V.s1=()=>{const d=S.d;
 /* 02 */
 V.s2=()=>{const d=S.d;
   return `<div class="scr">${stepTop(2,"s1")}
-  <h2 class="q">무엇을 하러 만나요?</h2><p class="sub">여러 개 골라도 괜찮아요</p>
-  ${histCount()<2?`<div class="taste empty"><div><span class="chip xs">★ 내 취향 반영</span><p>모임을 ${2-histCount()}번 더 하면 내가 고른 곳을 배워서 추천에 반영해요</p></div><button class="sw" disabled aria-label="내 취향 반영 (아직 사용 불가)" style="opacity:.4"></button></div>`:`
-  <div class="taste ${d.taste?"":"off"}"><div><span class="chip xs on">★ 내 취향 반영</span><p>지난 모임에서 조용한 카페·와인바를 자주 골랐어요</p></div>
+  <h2 class="q">무엇을 하러 만나요?</h2><p class="sub">여러 개 골라도 돼요</p>
+  ${histCount()<2?`<div class="taste empty"><div><span class="chip xs">★ 내 취향 반영</span><p>모임 ${2-histCount()}번 더 하면 켤 수 있어요</p></div><button class="sw" disabled aria-label="내 취향 반영 (아직 사용 불가)" style="opacity:.4"></button></div>`:`
+  <div class="taste ${d.taste?"":"off"}"><div><span class="chip xs on">★ 내 취향 반영</span><p>요즘 조용한 카페랑 와인바를 자주 갔네요</p></div>
     <button class="sw ${d.taste?"on":""}" data-a="taste" role="switch" aria-checked="${d.taste}" aria-label="내 취향 반영"></button></div>`}
   <div class="pgrid">${PURPOSES.map((p,i)=>`<button class="pcard ${d.purposes.includes(i)?"on":""}" data-a="purp" data-v="${i}" aria-pressed="${d.purposes.includes(i)}"><span class="ic">${p[1]}</span><b>${p[0]}</b></button>`).join("")}</div>
   <div class="label">분위기</div>
@@ -948,7 +957,7 @@ V.s3=()=>{const d=S.d;
   const sel=new Date(d.date),ws=d.weekStart??(()=>{const x=new Date(sel);x.setDate(x.getDate()-((x.getDay()+6)%7));return x.getTime()})();
   d.weekStart=ws;const w0=new Date(ws),canPrev=ws>today.getTime(),H=Math.floor(d.time/60),M=d.time%60;
   return `<div class="scr">${stepTop(3,"s2")}
-  <h2 class="q">언제 만나요?</h2><p class="sub">${d.mode==="poll"?"후보를 2~4개 고르면 친구들이 되는 시간에 체크해요":"날짜와 시간만 고르면 끝!"}</p>
+  <h2 class="q">언제 만나요?</h2><p class="sub">${d.mode==="poll"?"후보 2~4개 넣으면 친구들이 되는 시간에 체크해요":"날짜랑 시간 정해주세요"}</p>
   <div class="seg"><button class="${d.mode!=="poll"?"on":""}" data-a="tmode" data-v="fixed">날짜 확정</button><button class="${d.mode==="poll"?"on":""}" data-a="tmode" data-v="poll">친구들과 시간 맞추기</button></div>
   <div class="monthbar"><span>${w0.getFullYear()}년 ${w0.getMonth()+1}월</span><span class="nav"><button data-a="week" data-v="-1" aria-label="이전 주" ${canPrev?"":"disabled"}>←</button><button data-a="week" data-v="1" aria-label="다음 주">→</button></span></div>
   <div class="week">${Array.from({length:7},(_,k)=>{const t=ws+k*DAY,dt=new Date(t),past=t<today.getTime();
@@ -958,7 +967,7 @@ V.s3=()=>{const d=S.d;
     <div class="list" id="twH" aria-label="시">${Array.from({length:24},(_,h)=>`<button class="opt ${h===H?"on":""}" data-a="setH" data-v="${h}">${h<12?"오전":"오후"} ${h%12||12}시</button>`).join("")}</div>
     <div class="list" id="twM" aria-label="분">${Array.from({length:60},(_,m)=>`<button class="opt ${m===M?"on":""}" data-a="setM" data-v="${m}">${String(m).padStart(2,"0")}분</button>`).join("")}</div></div>
   <div class="chips" style="margin-top:16px">${[["점심 12시",720],["저녁 6시",1080],["저녁 7시",1140],["밤 9시",1260]].map(([l,v])=>`<button class="chip ${d.time===v?"on":""}" data-a="settm" data-v="${v}">${l}</button>`).join("")}</div>
-  <div class="toggle-row" style="margin-top:22px"><div><b>지각 방지 알림</b><span>출발 시간 · 준비 시작 시간을 알려드려요</span></div><button class="sw ${d.alarm?"on":""}" data-a="alarm" role="switch" aria-checked="${d.alarm}" aria-label="지각 방지 알림"></button></div>
+  <div class="toggle-row" style="margin-top:22px"><div><b>나갈 시간 알림</b><span>준비할 때랑 나갈 때 알려줄게요</span></div><button class="sw ${d.alarm?"on":""}" data-a="alarm" role="switch" aria-checked="${d.alarm}" aria-label="지각 방지 알림"></button></div>
   ${d.mode==="poll"?`<div class="label">후보 시간 <small>${d.slots.length}/4</small></div>
   <div class="slots">${d.slots.map((x,k)=>`<span class="slot">${fmtSlot(x)}<button data-a="slotDel" data-v="${k}" aria-label="후보 삭제">✕</button></span>`).join("")}
   ${d.slots.length<4?`<button class="chip slot-add" data-a="slotAdd">+ ${fmtSlot({date:d.date,time:d.time})} 추가</button>`:""}</div>`:""}
@@ -967,9 +976,9 @@ V.s3=()=>{const d=S.d;
 const STATE_TXT={waiting:"아직 링크를 안 열었어요",opened:"링크 확인 · 입력하는 중..."};
 V.s4=()=>{const d=S.d,me=d.people[0],n=d.people.filter(p=>p.st).length;
   return `<div class="scr">${stepTop(4,"s3")}
-  <h2 class="q">어디서 출발해요?</h2><p class="sub">친구들은 초대 링크로 각자 입력해요</p>
+  <h2 class="q">어디서 출발해요?</h2><p class="sub">친구들 건 링크로 받을게요</p>
   ${me.st&&me.loc?`<div class="mecard">${av("나",0)}<div><b>${esc(me.loc.label)} (${esc(me.src)})</b><span>내 출발지 · ${esc(me.st)}역까지 ${me.loc.accMode} ${me.acc}분</span></div><button class="chg" data-a="pick" data-v="0">변경</button></div>`
-    :`<div class="mecard" data-a="pick" data-v="0" style="cursor:pointer;box-shadow:inset 0 0 0 2px var(--lime-deep)">${av("나",0)}<div><b>내 출발지를 먼저 알려주세요</b><span>현재 위치 또는 검색으로 찾아요</span></div><button class="chg" data-a="pick" data-v="0" style="color:#1F2022">입력</button></div>`}
+    :`<div class="mecard" data-a="pick" data-v="0" style="cursor:pointer;box-shadow:inset 0 0 0 2px var(--lime-deep)">${av("나",0)}<div><b>내 출발지부터 넣어주세요</b><span>지금 위치나 검색으로</span></div><button class="chg" data-a="pick" data-v="0" style="color:#1F2022">입력</button></div>`}
   <div class="chips" style="margin-top:10px">${["현재 위치","집","학교"].map(s=>`<button class="chip sm ${me.src===s?"on":""}" data-a="src" data-v="${s}">${s}</button>`).join("")}</div>
   ${d.mode==="poll"?pollCard(d):""}
   <div class="label" style="margin-top:28px">친구 출발지 <small>${n}/${d.count} 입력 완료</small></div>
@@ -978,7 +987,7 @@ V.s4=()=>{const d=S.d,me=d.people[0],n=d.people.filter(p=>p.st).length;
     ${p.st?`<span class="chip on">입력 완료</span>`:`<button class="chip poke" data-a="poke" data-v="${i}">콕 찌르기</button>`}</div>`}).join("")}
   <div class="linkbar"><button class="kakao" data-a="invite">카톡으로 초대</button><button data-a="invite" data-v="link">링크 복사</button></div>
   <div class="toggle-row"><div><b style="font-size:13.5px">약속 당일 위치 공유 · 도착 레이스 참가</b></div><button class="sw ${d.share?"on":""}" data-a="shareTg" role="switch" aria-checked="${d.share}" aria-label="위치 공유와 도착 레이스 참가"></button></div>
-  <div class="spacer"></div><div class="cta-bar">${!me.st?`<button class="btn" data-a="pick" data-v="0">내 출발지 입력하기</button>`:ONLINE()&&n>=2&&n<d.count?`<button class="btn" data-a="find">지금 입력한 ${n}명으로 찾기</button><p class="demo-note">${d.count-n}명이 아직이에요. 기다리면 자동으로 채워져요</p>`
+  <div class="spacer"></div><div class="cta-bar">${!me.st?`<button class="btn" data-a="pick" data-v="0">내 출발지 입력하기</button>`:ONLINE()&&n>=2&&n<d.count?`<button class="btn" data-a="find">지금 입력한 ${n}명으로 찾기</button><p class="demo-note">${d.count-n}명은 아직이에요. 들어오면 자동으로 채워져요</p>`
     :`<button class="btn" data-a="find" ${n===d.count?"":"disabled"}>${n===d.count?"중간 지점 찾기":`${d.count-n}명 더 입력하면 찾을 수 있어요`}</button>`}</div></div>`};
 /* 위치 선택 (현위치 · 검색 · 지도) */
 V.loc=()=>{const L=S.loc,who=L.ctx==="fav"?(L.idx==="home"?"집":"학교"):L.ctx==="guest"?"내":L.idx===0?"내":`${S.d.people[L.idx].name}님`;
@@ -991,15 +1000,15 @@ function locCta(){const L=S.loc;return `<button class="btn" data-a="lconfirm" ${
 function locBody(){const L=S.loc,sel=L.sel,q=L.q.trim(),res=q?L.results:[];
   if(q)return res.length?`<div>${res.slice(0,8).map((r,k)=>`<button class="lres" data-a="lpick" data-v="${k}"><span class="ic">${r.kind==="st"?"🚇":r.kind==="kakao"?"📍":"🏫"}</span><div><b>${esc(r.name)}</b><span>${esc(r.sub)}</span></div></button>`).join("")}</div>`
     :`<p class="sub" style="margin:14px 2px">${L.searching?"찾는 중...":`"${esc(L.q)}" 검색 결과가 없어요. 동 이름이나 근처 역으로 찾아보세요.`}</p>`;
-  if(L.denied&&!sel)return `<div class="deny"><b>위치 권한이 꺼져 있어요</b><p>검색으로 찾아도 똑같이 정확해요. 현재 위치를 쓰고 싶다면:<br>· 아이폰: 설정 → 개인정보 보호 → 위치 서비스 → 사용 중인 브라우저(카카오톡 안이면 카카오톡) → 앱을 사용하는 동안<br>· 안드로이드: 주소창 왼쪽 자물쇠 → 권한 → 위치 허용</p>
+  if(L.denied&&!sel)return `<div class="deny"><b>위치 권한이 꺼져 있어요</b><p>검색해도 결과는 똑같아요. 그래도 켜고 싶으면:<br>· 아이폰: 설정 → 개인정보 보호 → 위치 서비스 → 사용 중인 브라우저(카카오톡 안이면 카카오톡) → 앱을 사용하는 동안<br>· 안드로이드: 주소창 왼쪽 자물쇠 → 권한 → 위치 허용</p>
     <div class="row2"><button class="btn ghost sm" data-a="focusSearch">검색으로 찾기</button><button class="btn sm" data-a="gpsRetry">다시 시도</button></div></div>
     <p class="sub" style="margin:14px 2px;font-size:13.5px">집·학교·회사 이름이나 동 이름, 가까운 역으로 검색해보세요.</p>`;
   return `<button class="gps" data-a="gps">📍 현재 위치로 찾기<span style="margin-left:auto;font-weight:600;font-size:12px;color:var(--muted)">위치 권한 필요</span></button>
-  <div class="locmap" id="locmap">${locSvg(sel)}${regLocMap(sel)}${sel?`<span class="hint">${KMAP.ready?"지도를 움직여 위치를 조정할 수 있어요":"가까운 역까지 점선으로 이어져요"}</span>`:""}</div>
+  <div class="locmap" id="locmap">${locSvg(sel)}${regLocMap(sel)}${sel?`<span class="hint">${KMAP.ready?"지도를 움직여서 맞춰도 돼요":"점선은 가까운 역까지 가는 길이에요"}</span>`:""}</div>
   ${sel?`<div class="picked"><b>${esc(sel.label)}</b><div class="m">${esc(sel.sub)}</div>
     <div style="font-size:13px;font-weight:700;margin-bottom:8px">어느 역에서 탈까요?</div>
     <div class="stpick">${nearStations(sel.lat,sel.lng,3).map(({s,d})=>{const a=accessOf(d);return `<button class="${s.name===L.st?"on":""}" data-a="lst" data-v="${esc(s.name)}">${esc(s.name)}역 <small>${a.mode} ${a.min}분</small></button>`}).join("")}</div></div>`
-   :`<p class="sub" style="margin:14px 2px;font-size:13.5px">현재 위치를 쓰거나 집·학교·회사 근처를 검색해주세요. 가까운 역과 걸어가는 시간까지 같이 계산해요.</p>`}`}
+   :`<p class="sub" style="margin:14px 2px;font-size:13.5px">집, 학교, 회사 아무 데나 검색해보세요</p>`}`}
 /* 입력 중(특히 한글 조합 중)엔 입력창을 건드리지 않고 주변만 갱신 */
 function refreshLoc(){KSPEC={};const b=document.getElementById("locbody");if(!b)return false;b.innerHTML=locBody();
   document.getElementById("loccta").innerHTML=locCta();const x=document.getElementById("lqx");if(x)x.style.display=S.loc.q?"":"none";mountMaps();return true}
@@ -1010,8 +1019,8 @@ function refreshChat(){const tmp=document.createElement("div");tmp.innerHTML=V.c
 function regResultMap(r,people){if(!KMAP.ready)return "";const pts=people.map(ptOf);
   KSPEC.rmap={center:[r.hub.lat,r.hub.lng],fit:[[r.hub.lat,r.hub.lng],...pts.map(p=>[p.lat,p.lng])],pad:[110,50,140,50],circle:[r.hub.lat,r.hub.lng,900],
     lines:pts.map(p=>[[p.lat,p.lng],[r.hub.lat,r.hub.lng]]),
-    overlays:[{lat:r.hub.lat,lng:r.hub.lng,y:1.3,html:`<div class="kov-pin">${esc(r.hub.name)}역</div>`},
-      ...pts.map((p,i)=>({lat:p.lat,lng:p.lng,y:.4,html:`<div style="display:flex;flex-direction:column;align-items:center"><div class="kov-av" style="background:${avc(i)}">${esc(initial(people[i].name))}</div><div class="kov-tag">${r.legs[i].t}분</div></div>`}))]};return ""}
+    overlays:[{lat:r.hub.lat,lng:r.hub.lng,y:.5,html:`<div class="kov-hub"><i></i></div>`},{lat:r.hub.lat,lng:r.hub.lng,y:1.9,html:`<div class="kov-pin">${esc(r.hub.name)}역</div>`},
+      ...pts.map((p,i)=>({lat:p.lat,lng:p.lng,y:.4,html:`<div style="display:flex;flex-direction:column;align-items:center"><div class="kov-av" style="background:${avc(i)};--g:${avc(i)}">${esc(initial(people[i].name))}</div><div class="kov-tag">${r.legs[i].t}분</div></div>`}))]};return ""}
 function placePos(hub,p){if(p.lat)return [p.lat,p.lng];return [hub.lat+Math.sin(p.ang)*p.rad*0.0055,hub.lng+Math.cos(p.ang)*p.rad*0.0068]}
 function regPlaceMap(hub,places,focus){if(!KMAP.ready)return "";
   KSPEC.pmap={center:[hub.lat-0.0025,hub.lng],level:4,circle:[hub.lat,hub.lng,650],
@@ -1030,51 +1039,51 @@ function locSvg(sel){const W=390,H=230;
   return g+`<circle cx="${x}" cy="${y}" r="26" fill="var(--lime)" opacity=".35"/><path d="M${x} ${y+2}c-10-12-14-18-14-24a14 14 0 0128 0c0 6-4 12-14 24z" fill="#1F2022"/><circle cx="${x}" cy="${y-22}" r="5" fill="#C8F135"/></svg>`}
 /* 게스트(초대받은 친구) 화면 */
 V.g_land=()=>{const d=S.d,g=S.guest,p=d.people[g.idx],done=d.people.filter(x=>x.st).length,host=d.people[0].name;
-  return `<div class="scr"><div class="guestbar"><span class="logo" style="font-size:20px">모일곳</span><span>설치 없이 웹에서 참여 중</span></div>
-  <div class="invite-hero"><span class="chip xs dark">${esc(host)}님의 초대</span><h2>${esc(d.name.trim()||"우리 모임")}에<br>같이 가요!</h2>
+  return `<div class="scr"><div class="guestbar"><span class="logo" style="font-size:20px">모일곳</span><span>앱 설치 안 해도 돼요</span></div>
+  <div class="invite-hero"><span class="chip xs dark">${esc(host)}님의 초대</span><h2>${esc(d.name.trim()||"우리 모임")},<br>어디서 출발해요?</h2>
     <div class="kv"><span>언제</span><b>${d.mode==="poll"&&!(g.meeting&&g.meeting.status==="confirmed")?`후보 ${d.slots.length}개 중 투표 중`:`${fmtDate(d.date)} ${fmtTime(d.time)}`}</b><span>뭐해</span><b>${(d.purposes.length?d.purposes:[0]).map(i=>PURPOSES[i][0]).join(" · ")}</b><span>누구</span><b style="display:flex;align-items:center;gap:8px"><span class="stack">${d.people.filter(x=>!x.placeholder).map((x,i)=>av(x.name||"?",i)).join("")}</span><span style="font-weight:700">${done}/${d.count}명 입력</span></b></div></div>
   ${d.mode==="poll"&&!(g.meeting&&g.meeting.status==="confirmed")?`<div class="label" style="margin-top:24px">되는 시간 모두 골라주세요 <small>여러 개 가능</small></div>
   ${d.slots.map((x,k)=>{const on=(p.avail||[]).includes(k),c=d.people.filter((q,j)=>j!==g.idx&&!q.placeholder&&(q.is_host||j===0||(q.avail||[]).includes(k))).length+(on?1:0);
     return `<button class="availrow ${on?"on":""}" data-a="avail" data-v="${k}" aria-pressed="${on}"><span class="ck">${on?"✓":""}</span><b>${fmtSlot(x)}</b><small>${c}명 가능</small></button>`}).join("")}`:""}
-  ${g.meeting&&g.meeting.status==="confirmed"?`<div class="card" style="margin-top:16px;background:var(--lime-soft)"><b style="font-size:14px">약속이 이미 ${esc(g.meeting.hub)}역 · ${esc(g.meeting.place)}로 정해졌어요</b><p style="font-size:12.5px;color:var(--muted);margin:4px 0 0">출발지를 넣으면 내 출발 시간과 도착 레이스에 같이 참여할 수 있어요</p></div>`:""}
+  ${g.meeting&&g.meeting.status==="confirmed"?`<div class="card" style="margin-top:16px;background:var(--lime-soft)"><b style="font-size:14px">약속이 이미 ${esc(g.meeting.hub)}역 · ${esc(g.meeting.place)}로 정해졌어요</b><p style="font-size:12.5px;color:var(--muted);margin:4px 0 0">출발지 넣으면 나갈 시간 알려줄게요</p></div>`:""}
   <div class="label" style="margin-top:26px">내 이름</div>
   <input class="field" id="gname" data-in="gname" value="${esc(p.name)}" placeholder="친구들이 알아볼 이름" maxlength="6" aria-label="내 이름">
-  <p class="sub" style="font-size:13px;margin:12px 2px 0">출발 위치만 알려주면 모두에게 공평한 만날 곳을 찾아드려요. 정확한 위치는 저장하지 않고 가까운 역과 동네 이름만 공유돼요.</p>
-  <div class="spacer"></div><div class="cta-bar"><button class="btn" data-a="gstart">내 출발지 입력하기</button>${g.online?"":`<p class="demo-note">데모: 친구가 카톡 링크를 눌렀을 때 보는 화면이에요 · <button data-a="gexit" style="text-decoration:underline;font-size:11.5px;color:var(--faint)">방장 화면으로</button></p>`}</div></div>`};
+  <p class="sub" style="font-size:13px;margin:12px 2px 0">친구들한테는 가까운 역 이름만 보여요</p>
+  <div class="spacer"></div><div class="cta-bar"><button class="btn" data-a="gstart">내 출발지 입력하기</button>${g.online&&d.people.some(x=>!x.local&&!x.placeholder&&x.name)?`<button class="linkbtn" data-a="claimOpen">다른 기기로 이미 들어왔어요</button>`:""}${g.online?"":`<p class="demo-note">데모: 친구가 카톡 링크를 눌렀을 때 보는 화면이에요 · <button data-a="gexit" style="text-decoration:underline;font-size:11.5px;color:var(--faint)">방장 화면으로</button></p>`}</div></div>`};
 V.g_wait=()=>{const d=S.d,g=S.guest,p=d.people[g.idx],host=d.people[0].name,cf=g.meeting&&g.meeting.status==="confirmed"?g.meeting:null;
   if(cf){const leg=(cf.legs||{})[p.id]??(p.st?legOf(p,byName(cf.hub)).t:null),dep=leg!=null?d.time-leg-BUFFER:null,hub=byName(cf.hub);
     return `<div class="scr"><div class="guestbar"><span class="logo" style="font-size:20px">모일곳</span><span>${esc(d.name||"우리 모임")}</span></div>
     <div class="ticket"><span class="chip xs dark">약속 확정!</span><h2>${esc(cf.hub)}역<br>${esc(cf.place)}</h2>
       <div class="kv"><span>언제</span><b>${fmtDate(d.date)} ${fmtTime(d.time)}</b><span>출발</span><b>${dep!=null?`${hhmm(dep)} (${esc(p.st)}역에서 ${leg}분)`:"-"}</b><span>누구</span><b>${d.people.filter(x=>!x.placeholder).map(x=>esc(x.name)).join(", ")}</b></div></div>
     <div class="row2" style="margin-top:14px"><a class="btn ghost sm" style="text-decoration:none" href="https://map.kakao.com/link/to/${encodeURIComponent(cf.place)},${hub?.lat},${hub?.lng}" target="_blank" rel="noopener">카카오맵 길찾기</a><button class="btn ghost sm" data-a="ics">캘린더에 추가</button></div>
-    <button class="btn" data-a="guestDay" style="margin-top:12px">약속 당일 화면 열기 · 준비·도착 레이스</button>
-    <div class="card" style="margin-top:22px;background:var(--lime-soft)"><b style="font-size:16px">다음 약속은 내가 잡아볼까?</b><p style="font-size:13px;color:var(--muted);margin:6px 0 12px">다른 단톡방 약속도 링크 하나로 정해보세요.</p><button class="btn sm" data-a="gNext">새 모임 만들기</button></div>
+    <button class="btn" data-a="guestDay" style="margin-top:12px">약속 당일 화면</button>
+    <div class="card" style="margin-top:22px;background:var(--lime-soft)"><b style="font-size:16px">다른 약속도 여기서 잡을래요?</b><p style="font-size:13px;color:var(--muted);margin:6px 0 12px">링크 하나면 돼요</p><button class="btn sm" data-a="gNext">새 모임 만들기</button></div>
     <div class="spacer"></div><div class="cta-bar"><button class="btn ghost" data-a="gHome">모일곳 홈으로</button></div></div>`}
   return `<div class="scr"><div class="guestbar"><span class="logo" style="font-size:20px">모일곳</span><span>${esc(d.name.trim()||"우리 모임")}</span></div>
-  <div class="ticket"><span class="chip xs dark">입력 완료!</span><h2>${esc(p.name)}님은<br>${esc(p.st)}역에서 출발해요</h2>
+  <div class="ticket"><span class="chip xs dark">넣었어요</span><h2>${esc(p.name)}님은<br>${esc(p.st)}역에서 출발해요</h2>
     <div style="font-size:13.5px;font-weight:600;opacity:.75">${esc(p.loc?.label||"")} · 역까지 ${p.loc?.accMode||"도보"} ${p.acc}분</div></div>
   <div class="label">친구들 입력 현황 <small>${d.people.filter(x=>x.st).length}/${d.count}</small></div>
   ${d.people.map((x,i)=>`<div class="frow">${av(x.name||"?",i)}<div><b>${esc(x.name||"새 친구")}${i===0?" (방장)":""}${i===g.idx?" (나)":""}</b><span>${x.st?esc(x.st)+"역":STATE_TXT[x.state]||""}</span></div>${x.st?`<span class="chip on">완료</span>`:`<span class="chip">대기</span>`}</div>`).join("")}
-  <div class="toggle-row" style="margin-top:6px"><div><b>도착 레이스 참가</b><span>약속 당일 출발 후에만 위치를 공유해요</span></div><button class="sw ${p.race!==false?"on":""}" data-a="gRace" role="switch" aria-checked="${p.race!==false}" aria-label="도착 레이스 참가"></button></div>
-  <div class="toggle-row" style="margin-top:8px"><div><b>출발 알림 받기</b><span>장소가 정해지면 출발 시간을 알려드려요</span></div><button class="sw ${p.push!==false?"on":""}" data-a="gPush" role="switch" aria-checked="${p.push!==false}" aria-label="출발 알림 받기"></button></div>
-  <p class="sub" style="font-size:13px;margin:14px 2px 0">모두 입력하면 ${esc(host)}님이 만날 곳을 정해요. 확정되면 이 링크를 다시 열었을 때 결과와 내 출발 시간이 보여요.</p>
-  <div class="spacer"></div><div class="cta-bar">${g.online?`<button class="btn ghost" data-a="gstart">출발지 바꾸기</button>`:`<button class="btn ghost" data-a="gexit">방장 화면으로 돌아가기 (데모)</button>`}</div></div>`};
+  <div class="toggle-row" style="margin-top:6px"><div><b>당일 도착 레이스</b><span>나갈 때 누른 뒤에만 켜져요</span></div><button class="sw ${p.race!==false?"on":""}" data-a="gRace" role="switch" aria-checked="${p.race!==false}" aria-label="도착 레이스 참가"></button></div>
+  <div class="toggle-row" style="margin-top:8px"><div><b>나갈 시간 알림</b><span>장소 정해지면 알려줄게요</span></div><button class="sw ${p.push!==false?"on":""}" data-a="gPush" role="switch" aria-checked="${p.push!==false}" aria-label="출발 알림 받기"></button></div>
+  <p class="sub" style="font-size:13px;margin:14px 2px 0">${g.claimedHost?"장소는 모임 만든 기기에서 정해요. 정해지면 여기도 바로 떠요":`다 모이면 ${esc(host)}님이 장소를 정해요. 정해지면 이 링크에서 바로 볼 수 있어요`}</p>
+  <div class="spacer"></div><div class="cta-bar">${g.online?`<button class="btn ghost" data-a="gstart">출발지 바꾸기</button>${claimOf(g.code)?`<button class="linkbtn" data-a="unclaim">${esc(p.name)}님이 아니에요</button>`:""}`:`<button class="btn ghost" data-a="gexit">방장 화면으로 돌아가기 (데모)</button>`}</div></div>`};
 /* 05 */
 V.result=()=>{const d=S.d,r=S.results[S.sel],mx=Math.max(...r.legs.map(l=>l.t));
   return `<div class="scr">
   <div class="mapwrap" id="rmap" style="height:520px">${resultMap(r,d.people)}${regResultMap(r,d.people)}<div class="mapbtns">${backBtn("s4","float-btn")}<button class="icon-btn float-btn" data-a="shareResult" aria-label="결과 공유">↗</button></div></div>
   <div class="bsheet"><div class="grab"></div>
-  <div style="display:flex;justify-content:space-between;align-items:flex-start"><span class="eyebrow">${S.sel===0?"추천 만날 지점":`후보 ${S.sel+1}`}</span><button class="chip sm" data-a="cands">${S.sel===0?`다른 후보 ${S.results.length-1}곳`:"후보 비교"}</button></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start"><span class="eyebrow">${S.sel===0?"여기서 만나요":`후보 ${S.sel+1}`}</span><button class="chip sm" data-a="cands">${S.sel===0?`다른 후보 ${S.results.length-1}곳`:"후보 비교"}</button></div>
   <div class="hub-name">${esc(r.hub.name)}역</div><div style="font-size:13px;color:var(--muted);font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${lineText(r.hub)}</span><span class="srcbadge ${S.real?"real":""}">${S.refining?"실제 경로 계산 중...":S.real?"실시간 대중교통 기준":"이동시간 추정치"}</span></div>
   <div class="stats"><div class="stat"><small>평균 이동</small><b>${r.avg}분</b></div><div class="stat"><small>최대 차이</small><b>${r.spread}분</b></div><div class="stat"><small>환승</small><b>${Math.round(r.avgTr*10)/10||0}회</b></div></div>
   <div class="bars">${r.legs.map((l,i)=>`<span>${i===0?"나":esc(d.people[i].name)}</span><div class="bar"><i style="width:${l.t/mx*100}%;background:${avc(i)}"></i></div><span class="r">${l.t}분</span>`).join("")}</div>
-  <div class="fb">${S.fb==null?`<span>이 추천 어때요?</span><button class="chip sm" data-a="fb" data-v="1">👍 괜찮아요</button><button class="chip sm" data-a="fb" data-v="0">👎 별로예요</button>`
-    :S.fb?`<span>고마워요! 다음 추천에 반영할게요</span>`:`<span>어떤 점이 아쉬웠어요?</span><button class="chip sm" data-a="fbWhy" data-v="멀어요">누군가 너무 멀어요</button><button class="chip sm" data-a="fbWhy" data-v="동네">동네가 별로예요</button><button class="chip sm dark" data-a="cands">다른 후보 보기</button>`}</div>
+  <div class="fb">${S.fb==null?`<span>여기 괜찮아요?</span><button class="chip sm" data-a="fb" data-v="1">좋아요</button><button class="chip sm" data-a="fb" data-v="0">별로</button>`
+    :S.fb?`<span>알겠어요, 다음엔 참고할게요</span>`:`<span>뭐가 별로예요?</span><button class="chip sm" data-a="fbWhy" data-v="멀어요">누가 너무 멀어요</button><button class="chip sm" data-a="fbWhy" data-v="동네">동네가 별로예요</button><button class="chip sm dark" data-a="cands">다른 후보 보기</button>`}</div>
   <div class="spacer"></div><div class="cta-bar"><button class="btn" data-a="places">여기 주변 장소 보기</button></div></div></div>`};
 /* 06 */
 V.places=()=>{const d=S.d,hub=S.results[S.sel].hub;
   const cats=[...new Set(S.places.map(p=>p.cat))],shown=S.places.filter(p=>S.filter<0||p.cat===S.filter),focus=S.focus??shown[0]?.id;
-  const title=(d.name.trim()||"우리 모임")+" 추천 리스트",ps=(d.purposes.length?d.purposes:[0]).map(i=>PURPOSES[i][0]);
+  const title=(d.name.trim()||"우리 모임")+" 갈 만한 곳",ps=(d.purposes.length?d.purposes:[0]).map(i=>PURPOSES[i][0]);
   return `<div class="scr">
   <div class="mapwrap" id="pmap" style="height:440px">${placeMap(hub,shown,focus)}${regPlaceMap(hub,shown,focus)}
     <div class="pill-head"><button class="icon-btn" data-a="go" data-v="result" aria-label="뒤로">←</button><span class="ttl">${esc(hub.name)}역 주변 · ${ps.join(" · ")}</span></div></div>
@@ -1084,9 +1093,9 @@ V.places=()=>{const d=S.d,hub=S.results[S.sel].hub;
   ${shown.map(p=>{const mine=p.votes.includes(0);
     return `<div class="place" data-a="placeOpen" data-v="${p.id}" style="cursor:pointer"><button class="thumb" data-a="placeOpen" data-v="${p.id}" aria-label="${esc(p.name)} 자세히 보기"><i style="background:${CAT_COLOR[p.cat]}"></i>${CAT_SHORT[p.cat]}</button>
     <div class="info"><h4>${esc(p.name)}</h4><div class="m">${PURPOSES[p.cat][2]} · 도보 ${p.walk}분 · ${esc(p.feat)}</div>
-    <span class="tag fit">취향 ${p.fit}%</span>${p.second?`<span class="tag">2차</span>`:d.vibes.slice(0,1).map(i=>`<span class="tag">${VIBES[i]}</span>`).join("")}</div>
+    ${p.fit>=78?`<span class="tag fit">내 스타일</span>`:""}${p.second?`<span class="tag">2차</span>`:d.vibes.slice(0,1).map(i=>`<span class="tag">${VIBES[i]}</span>`).join("")}</div>
     <button class="heart ${p.votes.length?"has":""} ${mine?"mine":""}" data-a="heart" data-v="${p.id}" aria-pressed="${mine}" aria-label="${esc(p.name)} 찜">${mine||p.votes.length?"♥":"♡"} ${p.votes.length}</button></div>`}).join("")}
-  <p class="sample">가게를 누르면 투표 없이 바로 정할 수도 있어요 · 예시 장소는 크롤링 데이터로 교체돼요</p></div>
+  <p class="sample">가게 눌러서 바로 정해도 돼요 · 지금 가게는 예시예요</p></div>
   <button class="fab" data-a="startVote">${ONLINE()?"♡ 후보 모아보기":"투표로 정하기"}</button></div>`};
 /* 확정 */
 V.done=()=>{const m=getMeeting(S.cur);
@@ -1094,7 +1103,7 @@ V.done=()=>{const m=getMeeting(S.cur);
   return `<div class="scr"><div class="top">${backBtn("home")}<h1 style="text-align:center">약속 확정</h1><span style="width:40px"></span></div>
   <div class="ticket"><span class="chip xs dark">확정!</span><h2>${esc(m.name)}</h2>
     <div class="kv"><span>언제</span><b>${fmtDate(m.date)} ${fmtTime(m.time)}</b><span>어디</span><b>${esc(m.hub)}역 · ${esc(m.place)}</b><span>결정</span><b>${m.solo?"방장이 바로 확정":(m.votes||0)+"표로 1위"}</b></div>
-    <div class="perf"></div><div style="font-weight:800;font-size:14px;margin-bottom:10px">각자 출발 시간 <span style="font-weight:600;opacity:.6">(${BUFFER}분 여유 포함)</span></div>
+    <div class="perf"></div><div style="font-weight:800;font-size:14px;margin-bottom:10px">각자 출발 시간 <span style="font-weight:600;opacity:.6">(${BUFFER}분 여유 두고)</span></div>
     ${m.people.map((p,i)=>`<div class="dep">${av(p.name,i)}<span>${i===0?"나":esc(p.name)} <em>${esc(p.st)}역 · ${m.legs[i]}분</em></span><b>${hhmm(depOf(m,i))}</b></div>`).join("")}</div>
   <div class="label">단톡방에 보낼 메시지</div><textarea class="share" readonly id="sharetxt">${esc(text)}</textarea>
   <div class="spacer"></div><div class="cta-bar"><div class="row2"><button class="btn ghost" data-a="copyShare">메시지 복사</button><button class="btn" data-a="openMeet" data-v="${m.id}">약속 당일 화면</button></div>${ONLINE()?"":`<p class="demo-note"><button data-a="guestDemo" style="text-decoration:underline;font-size:12px;color:var(--muted)">친구 폰에서는 이렇게 보여요 (데모)</button></p>`}</div></div>`};
@@ -1102,9 +1111,9 @@ function shareText(m){return `📍 ${m.name} 확정!\n${fmtDate(m.date)} ${fmtTi
 
 /* 07 */
 function myAction(R,m){const L=R.me,plan=prepPlan(m);
-  if(L.phase==="idle")return {a:"startPrep",t:"준비 시작 · 친구들에게 상태 공유"};
-  if(L.phase==="prep"&&L.step<plan.length)return {a:"nextStep",t:`${plan[L.step].name} 끝! 다음 단계로`};
-  if(L.phase==="prep")return {a:"depart",t:"출발! 도착 레이스 시작"};
+  if(L.phase==="idle")return {a:"startPrep",t:"준비 시작"};
+  if(L.phase==="prep"&&L.step<plan.length)return {a:"nextStep",t:`${plan[L.step].name} 끝`};
+  if(L.phase==="prep")return {a:"depart",t:"지금 나가요"};
   if(L.phase==="moving")return {a:"arrive",t:"도착했어요"};
   return null}
 V.today=()=>{const m=getMeeting(S.cur),R=S.race,L=R.me,plan=prepPlan(m),dep=depMs(m),now=Date.now(),arrPlan=dep+m.legs[0]*6e4,act=myAction(R,m);
@@ -1112,17 +1121,17 @@ V.today=()=>{const m=getMeeting(S.cur),R=S.race,L=R.me,plan=prepPlan(m),dep=depM
   const rows=[...plan.map((s,k)=>({at:s.at,name:s.name,chip:`${s.dur}분`,st:L.phase==="idle"?"":(L.phase!=="prep"||k<L.step)?"done":k===L.step?"now":""})),
     {at:dep,name:"출발!",chip:`대중교통 ${m.legs[0]}분`,st:["moving","arrived"].includes(L.phase)?"done":(L.phase==="prep"&&L.step>=plan.length)?"now":""},
     {at:arrPlan,name:`${m.hub}역 도착`,chip:L.arr?`${hmMs(L.arr)} 도착`:`여유 ${BUFFER}분`,st:L.arr?"done":L.phase==="moving"?"now":""}];
-  const head=L.phase==="idle"?{b:`${hmMs(dep)}에 출발해야 늦지 않아요!`,s:`${hmMs(plan[0]?.at??dep)}부터 준비하면 딱 맞아요 · ${esc(m.name)}`}
-    :L.phase==="prep"?{b:L.step<plan.length?`지금은 ${plan[L.step].name} 차례예요`:"준비 끝! 출발하면 레이스가 시작돼요",s:`${hmMs(dep)} 출발 목표 · ${esc(m.name)}`}
-    :L.phase==="moving"?{b:`${m.hub}역으로 이동 중 · 약 ${Math.max(1,L.eta??m.legs[0])}분 남았어요`,s:L.gps?"위치로 진행률을 계산 중 · 좌표는 공유되지 않아요":"위치 권한이 없어 예상 이동시간으로 진행 중"}
-    :{b:`${hmMs(L.arr)}에 도착했어요!`,s:`친구들이 오는 모습은 도착 레이스에서 볼 수 있어요`};
+  const head=L.phase==="idle"?{b:`${hmMs(dep)}에는 나가야 해요`,s:`${hmMs(plan[0]?.at??dep)}부터 준비 시작 · ${esc(m.name)}`}
+    :L.phase==="prep"?{b:L.step<plan.length?`${plan[L.step].name} 하는 중`:"준비 끝. 나가면 레이스 시작이에요",s:`${hmMs(dep)} 출발 목표 · ${esc(m.name)}`}
+    :L.phase==="moving"?{b:`${m.hub}역 가는 중 · ${Math.max(1,L.eta??m.legs[0])}분쯤 남음`,s:L.gps?"거리만 계산해요. 내 위치는 안 보여줘요":"위치 권한이 없어 예상 이동시간으로 진행 중"}
+    :{b:`${hmMs(L.arr)} 도착`,s:`다른 사람들은 레이스에서 보여요`};
   const big=L.phase==="moving"?{k:"도착까지",v:`${Math.max(1,L.eta??m.legs[0])}분`}:L.phase==="arrived"?{k:"도착 시간",v:hmMs(L.arr)}:{k:left<0?"출발 시간 지남":"출발까지",v:left>0?(left>=60?`${Math.floor(left/60)}시간 ${left%60}분`:`${left}분`):left===0?"지금!":`+${-left}분`};
   return `<div class="scr"><div class="top">${backBtn("home")}<h1>오늘의 약속</h1><span class="chip sm">${fmtShort(m.date)} ${hmMs(meetStart(m))}</span></div>
   <div class="noti"><div class="src"><i>모</i>모일곳 · 지금</div><b>${head.b}</b><span>${head.s}</span></div>
   <div class="count"><div><small>${big.k}</small><div class="big"><span data-tick>${big.v}</span></div></div><span class="chip on">도착 예정 <span data-tick>${hmMs(L.phase==="moving"&&L.eta!=null?now+L.eta*6e4:arrPlan)}</span></span></div>
-  <div class="label" style="margin-top:18px">준비 코칭 <small>단계마다 버튼을 눌러 넘겨요</small></div>
+  <div class="label" style="margin-top:18px">준비 순서 <small>하나 끝날 때마다 눌러요</small></div>
   <div class="tl">${rows.map(r=>`<div class="tstep ${r.st}"><span class="dot"></span><time>${hmMs(r.at)}</time><b>${esc(r.name)}</b><span class="chip xs ${r.st==="now"?"on":""}" style="${r.st==="now"?"":"background:var(--card)"}">${r.chip}</span></div>`).join("")}</div>
-  ${L.phase==="idle"?`<div class="tip"><p>지난 약속엔 준비가 평균 ${PROFILE.lateAvg}분 더 걸렸어요. 10분 일찍 시작해볼까요?</p>${PROFILE.early?`<button data-a="early" data-v="0">원래대로</button>`:`<button data-a="early" data-v="10">10분 당기기</button>`}</div>`:""}
+  ${L.phase==="idle"?`<div class="tip"><p>지난번엔 준비가 ${PROFILE.lateAvg}분씩 밀렸어요</p>${PROFILE.early?`<button data-a="early" data-v="0">원래대로</button>`:`<button data-a="early" data-v="10">10분 당기기</button>`}</div>`:""}
   ${L.phase==="prep"?`<button class="chip sm" data-a="prevStep" style="margin-top:12px">↺ 이전 단계로</button>`:""}
   <div class="spacer"></div><div class="cta-bar">${act&&L.phase!=="moving"?`<button class="btn" data-a="${act.a}">${act.t}</button>`:`<div class="row2"><button class="btn ghost" data-a="go" data-v="race">도착 레이스 보기</button>${act?`<button class="btn" data-a="${act.a}">${act.t}</button>`:`<button class="btn" data-a="go" data-v="chat">채팅</button>`}</div>`}
   ${L.phase!=="moving"&&act?`<button class="btn ghost sm" data-a="go" data-v="race" style="margin-top:8px">친구들 현황 · 도착 레이스 보기</button>`:""}</div></div>`};
@@ -1132,12 +1141,16 @@ V.race=()=>{const m=getMeeting(S.cur),R=S.race,W=390,H=560,now=Date.now();
   const [hx,hy]=P.f(hub.lat,hub.lng),origins=spreadPts(sts.map(s=>[...P.f(s.lat,s.lng),s.name]));
   let svg=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="도착 레이스 지도">${mapBase(P,W,H)}`;
   origins.forEach(([x,y])=>svg+=`<line x1="${x}" y1="${y}" x2="${hx}" y2="${hy}" stroke="#1F2022" stroke-width="2.5" stroke-dasharray="3 6" stroke-linecap="round" opacity=".55"/>`);
-  svg+=hubPin(hx,hy,m.hub+"역");
   const order=rankOrder(R,m);let ai=0;
-  origins.forEach(([ox,oy],i)=>{const L=liveOf(R,i);let x,y;
-    if(L.arr){const a=(ai++)*1.25+0.5;x=hx+Math.cos(a)*44;y=hy+30+Math.sin(a)*16}else{const pr=L.phase==="moving"?Math.min(0.9,L.progress):0;x=ox+(hx-ox)*pr;y=oy+(hy-oy)*pr}
-    const st=L.arr?"":L.status,w=st.length*11+22,rk=order.indexOf(i)+1,fill=L.arr?"#C8F135":L.phase==="prep"?"#FFD6DE":L.phase==="idle"?"#F2F2EE":"#FFFFFF";
-    svg+=`<g>${avatarSvg(x,y,23,nameOf(m,i),i)}${st?`<rect x="${x-w/2}" y="${y-58}" width="${w}" height="26" rx="13" fill="${fill}" stroke="#1F2022" stroke-opacity=".08"/><text x="${x}" y="${y-40.5}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#1F2022">${esc(st)}</text>`:""}
+  const pos=origins.map(([ox,oy],i)=>{const L=liveOf(R,i);if(L.arr){const a=(ai++)*1.25+0.5;return [hx+Math.cos(a)*44,hy+30+Math.sin(a)*16]}
+    const pr=L.phase==="moving"?Math.min(0.9,L.progress):0;return [ox+(hx-ox)*pr,oy+(hy-oy)*pr]});
+  /* 출발한 사람은 지나온 길을 자기 색으로 빛나게 */
+  origins.forEach(([ox,oy],i)=>{const L=liveOf(R,i);if(L.phase!=="moving"&&!L.arr)return;const [x,y]=L.arr?[hx,hy]:pos[i];
+    svg+=`<line x1="${ox}" y1="${oy}" x2="${x}" y2="${y}" stroke="${avc(i)}" stroke-width="18" stroke-linecap="round" opacity=".28"/><line x1="${ox}" y1="${oy}" x2="${x}" y2="${y}" stroke="${avc(i)}" stroke-width="5" stroke-linecap="round"/>`});
+  svg+=hubPin(hx,hy,m.hub+"역");
+  origins.forEach(([ox,oy],i)=>{const L=liveOf(R,i);const [x,y]=pos[i];
+    const st=L.arr?"":L.phase==="moving"&&L.status!=="곧 도착"?`${m.hub}역 쪽으로 이동 중`:L.status,w=st.length*11+22,rk=order.indexOf(i)+1,fill=L.arr?"#C8F135":L.phase==="prep"?"#FFD6DE":L.phase==="idle"?"#F2F2EE":"#FFFFFF";
+    svg+=`<g>${avatarSvg(x,y,23,nameOf(m,i),i)}${st?`<rect x="${Math.max(6,Math.min(W-w-6,x-w/2))}" y="${y-58}" width="${w}" height="26" rx="13" fill="${fill}" stroke="#1F2022" stroke-opacity=".08"/><text x="${Math.max(6+w/2,Math.min(W-6-w/2,x))}" y="${y-40.5}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#1F2022">${esc(st)}</text>`:""}
     <rect x="${x+13}" y="${y-28}" width="22" height="22" rx="7" fill="#1F2022"/><text x="${x+24}" y="${y-12.5}" text-anchor="middle" font-size="12" font-weight="900" fill="#fff">${rk}</text></g>`});
   svg+=`</svg>`;
   const left=meetStart(m)-now,mm=Math.floor(Math.max(0,left)/6e4),ss=Math.floor((Math.max(0,left)%6e4)/1000),live=m.people.some((_,i)=>liveOf(R,i).phase==="moving");
@@ -1147,7 +1160,7 @@ V.race=()=>{const m=getMeeting(S.cur),R=S.race,W=390,H=560,now=Date.now();
   <div class="bsheet"><div class="grab"></div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b style="font-size:17px">실시간 순위</b><button class="chip sm" data-a="statusSheet">내 상태: ${esc(R.me.arr?"도착!":R.me.status)} ▼</button></div>
   ${order.map((i,k)=>{const L=liveOf(R,i),t=remText(L);return `<div class="rank ${i===0?"me":""}"><span class="n">${k+1}</span>${av(nameOf(m,i),i)}<span>${i===0?esc(PROFILE.name)+" (나)":esc(nameOf(m,i))}</span><div class="bar"><i style="width:${(L.arr?1:L.phase==="moving"?L.progress:0)*100}%"></i></div><span class="r ${t==="출발 전"&&now>depMs(m)?"late":""}">${t}</span></div>`}).join("")}
-  ${done?`<div class="done-banner">🎉 모두 모였어요! 꼴찌 ${esc(nameOf(m,order[order.length-1]))}님, 룰렛 돌릴 시간이에요</div>`:!ONLINE()?`<p class="note" style="font-size:12px;color:var(--faint);margin-top:8px">온라인 연결이 없어 내 진행만 보여요</p>`:""}
+  ${done?`<div class="done-banner">다 모였어요. 꼴찌는 ${esc(nameOf(m,order[order.length-1]))}님</div>`:!ONLINE()?`<p class="note" style="font-size:12px;color:var(--faint);margin-top:8px">인터넷이 끊겨서 내 것만 보여요</p>`:""}
   <div class="spacer"></div><div class="cta-bar"><div class="row2" style="grid-template-columns:120px 1fr"><button class="btn ghost" data-a="go" data-v="chat" style="position:relative;height:52px">채팅${R.unread?`<span class="badge">${R.unread}</span>`:""}</button>${canRoul?`<button class="btn lime" data-a="toRoulette" style="height:52px">${done?"벌칙 룰렛 돌리기":"지금 모인 사람으로 룰렛"}</button>`:`<button class="btn" data-a="statusSheet" style="height:52px">상태 바꾸기</button>`}</div></div></div></div>`};
 /* 09 */
 V.chat=()=>{const m=getMeeting(S.cur),R=S.race;R.unread=0;
@@ -1158,7 +1171,7 @@ V.chat=()=>{const m=getMeeting(S.cur),R=S.race;R.unread=0;
     ${m.people.map((_,i)=>`<span class="av" style="left:calc(24px + (100% - 48px) * ${pr(i)});background:${avc(i)};z-index:${10-i}">${esc(initial(nameOf(m,i)))}</span>`).join("")}
     <div class="ends"><span>출발</span><span>도착</span></div></div>
   <div class="chatlog" id="chatlog">${R.chat.length?R.chat.map(c=>c.sys?`<div class="sys">${esc(c.text)}</div>`:c.mine?`<div class="msg me"><div class="bub">${esc(c.text)}</div></div>`:
-    `<div class="msg">${av(c.name||"?",idxOf(c.name))}<div><small>${esc(c.name||"친구")}</small><div class="bub">${esc(c.text)}</div></div></div>`).join(""):`<div class="sys">아직 메시지가 없어요. 필요할 때 한마디 남겨보세요</div>`}</div>
+    `<div class="msg">${av(c.name||"?",idxOf(c.name))}<div><small>${esc(c.name||"친구")}</small><div class="bub">${esc(c.text)}</div></div></div>`).join(""):`<div class="sys">아직 조용하네요</div>`}</div>
   <div class="chatwrap"><div class="quick">${(allArrived(R,m)?["룰렛 돌리자","벌칙 뭐 나올까ㅋㅋ","다들 고생했어"]:["곧 도착","5분만","먼저 들어가 있어"]).map(q=>`<button class="chip" data-a="quick" data-v="${q}">${q}</button>`).join("")}</div>
   <div class="composer"><input id="chatin" data-in="chat" placeholder="메시지 보내기" value="${esc(S.chatDraft)}" autocomplete="off" aria-label="메시지 입력" enterkeyhint="send"><button class="send" data-a="send" aria-label="보내기">↑</button></div></div></div>`};
 /* 10 */
@@ -1171,7 +1184,7 @@ V.roulette=()=>{const m=getMeeting(S.cur),R=S.race,rl=S.roul,order=rankOrder(R,m
     <text x="${c}" y="${c-r*0.64}" text-anchor="middle" font-size="${t.length>5?12:13.5}" font-weight="800" fill="${k%3===1&&!(n%3===1&&k===n-1)?"#FFFFFF":"#1F2022"}" transform="rotate(${mid} ${c} ${c})">${esc(t)}</text>`});
   const done=allArrived(R,m);
   return `<div class="scr"><div class="top">${backBtn("race")}<h1>벌칙 룰렛</h1></div>
-  <h2 class="q" style="margin-top:6px">${done?"모두 모였어요!":"지금 모인 사람끼리!"}</h2><p class="sub" style="margin:0">${rl.mode==="last"?`${done?"꼴찌":"아직 안 온"} ${esc(nameOf(m,loser))}님 몫의 룰렛이에요`:"전원 참여! 걸린 사람이 한턱내요"}</p>
+  <h2 class="q" style="margin-top:6px">${done?"다 모였어요":"온 사람끼리 먼저"}</h2><p class="sub" style="margin:0">${rl.mode==="last"?`${done?"꼴찌":"아직 안 온"} ${esc(nameOf(m,loser))}님이 돌려요`:"다 같이 돌려요. 걸리면 쏘기"}</p>
   <div class="podium">${order.map((i,k)=>`<div class="p ${k===order.length-1?"last":k===0?"first":""}">${k===order.length-1?`<span class="tagl">꼴찌</span>`:(k+1)+"등"}${av(nameOf(m,i),i)}<span>${esc(nameOf(m,i))}</span></div>`).join("")}</div>
   <div class="wheelbox"><svg class="pointer" width="30" height="26" viewBox="0 0 30 26"><path d="M15 26L2 3a2 2 0 012-3h22a2 2 0 012 3z" fill="#1F2022"/></svg>
     <svg class="w" id="wheel" viewBox="0 0 300 300" style="transform:rotate(${rl.rot}deg)"><circle cx="150" cy="150" r="149" fill="#1F2022"/>${slices}</svg>
@@ -1185,40 +1198,45 @@ function sheetHTML(){
   const sh=S.sheet;if(!sh)return "";
   let inner="";
   if(sh.type==="station"){const isMe=sh.idx===0&&sh.ctx==="draft";const p=sh.ctx==="draft"?S.d.people[sh.idx]:null;
-    inner=`<h3>${sh.ctx==="fav"?(sh.idx==="home"?"집":"학교")+" 역":isMe?"내 출발지":`${esc(p.name)} 출발지`}</h3><p class="desc">${sh.ctx==="draft"&&!isMe?"친구가 링크로 입력하기 전에 대신 넣을 수도 있어요":"가까운 지하철역을 골라주세요"}</p>
+    inner=`<h3>${sh.ctx==="fav"?(sh.idx==="home"?"집":"학교")+" 역":isMe?"내 출발지":`${esc(p.name)} 출발지`}</h3><p class="desc">${sh.ctx==="draft"&&!isMe?"링크 안 여는 친구는 대신 넣어줘도 돼요":"어느 역에서 타요?"}</p>
     ${sh.ctx==="draft"&&!isMe?`<input class="field" id="fname" data-in="fname" value="${esc(p.name)}" placeholder="이름" maxlength="6" style="margin-bottom:8px">`:""}
     <input class="field" id="sq" data-in="sq" placeholder="역 이름 검색 (예: 성수, 판교)" autocomplete="off" value="${esc(S.stationQ)}"><div class="slist" id="slist">${stationList(S.stationQ)}</div>`}
   if(sh.type==="cands"){const d=S.d;
-    inner=`<h3>후보 비교</h3><p class="desc">이동 시간, 공평함, 상권을 함께 따져서 골랐어요</p>
+    inner=`<h3>후보 비교</h3><p class="desc">누구 하나 너무 멀지 않은지, 근처에 갈 데는 많은지 같이 봤어요</p>
     ${S.results.map((c,i)=>`<button class="cand ${i===S.sel?"on":""}" data-a="cand" data-v="${i}"><div class="h"><span>${i+1}. ${esc(c.hub.name)}역</span><span style="font-size:13px;color:var(--muted)">평균 ${c.avg}분 · 차이 ${c.spread}분</span></div><p>${reason(c,d.purposes)}</p></button>`).join("")}
     <div class="card" style="margin-top:6px"><b style="font-size:14px">추천 기준</b>
     <div class="slider"><input type="range" min="0" max="100" value="${S.w.fair}" data-in="fair" aria-label="빠름과 공평함 사이"><div class="ends"><span>다 같이 빨리</span><span>한 명도 멀지 않게</span></div></div>
     <div class="slider"><input type="range" min="0" max="100" value="${S.w.area}" data-in="area" aria-label="상권 중요도"><div class="ends"><span>이동 시간만</span><span>놀 곳 많은 동네</span></div></div></div>
     <p class="note" style="font-size:12px;color:var(--faint);margin:10px 0 0">이동 시간은 역 간 거리·환승으로 추정한 값이에요. 배포 버전에선 실시간 대중교통 경로로 계산해요.</p>`}
   if(sh.type==="vote"){const d=S.d,total=d.people.length,voted=new Set(S.places.flatMap(p=>p.votes)).size,top=[...S.places].filter(p=>p.votes.length).sort((a,b)=>b.votes.length-a.votes.length||b.fit-a.fit);
-    inner=ONLINE()?`<h3>후보 ${top.length}곳</h3><p class="desc">${top.length?"♡ 담은 곳 중 한 곳으로 확정해요 · 친구들이 같이 투표하는 기능은 곧 붙여요":"먼저 리스트에서 ♡로 후보를 담아주세요"}</p>`:`<h3>투표 중 · ${voted}/${total}명 참여</h3><p class="desc">${S.places.some(p=>p.votes.includes(0))?"친구들 표가 실시간으로 들어오고 있어요":"먼저 리스트에서 ♡로 마음에 드는 곳을 골라주세요"}</p>`;inner+=`
+    inner=ONLINE()?`<h3>후보 ${top.length}곳</h3><p class="desc">${top.length?"♡ 한 곳 중에 골라요":"먼저 리스트에서 ♡로 후보를 담아주세요"}</p>`:`<h3>투표 중 · ${voted}/${total}명 참여</h3><p class="desc">${S.places.some(p=>p.votes.includes(0))?"친구들 표가 실시간으로 들어오고 있어요":"먼저 리스트에서 ♡로 마음에 드는 곳을 골라주세요"}</p>`;inner+=`
     ${top.slice(0,5).map(p=>`<div class="tally"><span>${esc(p.name)}</span><span class="who">${p.votes.map(v=>av(v===0?"나":d.people[v].name,v)).join("")}</span><div class="bar"><i style="width:${p.votes.length/total*100}%"></i></div></div>`).join("")||`<div class="empty" style="margin-bottom:12px">아직 표가 없어요</div>`}
     <div class="row2" style="margin-top:8px"><button class="btn ghost sm" data-a="closeSheet">리스트로</button><button class="btn sm" data-a="confirm" ${top.length?"":"disabled"}>${top.length?(ONLINE()?"1순위 후보로 확정":"투표 마감 · 확정"):(ONLINE()?"후보를 담아주세요":"표를 기다리는 중")}</button></div>`}
   if(sh.type==="status"){const m=getMeeting(S.cur),R=S.race,L=R.me,act=myAction(R,m);
-    inner=`<h3>내 상태: ${esc(L.arr?"도착!":L.status)}</h3><p class="desc">${L.phase==="moving"?(L.gps?"위치로 진행률을 계산하고 있어요 · 정확한 위치는 공유되지 않아요":"위치 권한이 없어 예상 이동시간으로 진행 중이에요"):"누르는 순간 친구들 화면에 바로 반영돼요"}</p>
-    ${act?`<button class="btn" data-a="${act.a}">${act.t}</button>`:`<div class="empty">도착 완료! 친구들을 기다리는 중이에요</div>`}
+    inner=`<h3>내 상태: ${esc(L.arr?"도착!":L.status)}</h3><p class="desc">${L.phase==="moving"?(L.gps?"거리만 계산해요. 내 위치는 안 보여줘요":"위치 권한이 없어 예상 이동시간으로 진행 중이에요"):"누르면 친구들 화면에도 바로 떠요"}</p>
+    ${act?`<button class="btn" data-a="${act.a}">${act.t}</button>`:`<div class="empty">도착! 다른 사람 기다리는 중</div>`}
     ${act&&act.a!=="arrive"&&!L.arr?`<button class="btn ghost sm" data-a="arrive" style="margin-top:8px">벌써 도착했어요</button>`:""}
-    <div class="label" style="margin-top:20px">채팅으로 한마디 <small>누를 때만 보내져요</small></div><div class="chips">${["5분만!!","조금 늦어요","먼저 들어가 있어","거의 다 왔어"].map(q=>`<button class="chip" data-a="quick" data-v="${q}">${q}</button>`).join("")}</div>`}
+    <div class="label" style="margin-top:20px">빠른 메시지</div><div class="chips">${["5분만!!","조금 늦어요","먼저 들어가 있어","거의 다 왔어"].map(q=>`<button class="chip" data-a="quick" data-v="${q}">${q}</button>`).join("")}</div>`}
   if(sh.type==="pen"){inner=`<h3>벌칙 직접 편집</h3><p class="desc">2~8개까지 넣을 수 있어요</p>
     ${S.roul.pens.map((p,i)=>`<div class="pen-row"><input id="pen${i}" data-in="pen" data-i="${i}" value="${esc(p)}" maxlength="10" aria-label="벌칙 ${i+1}"><button data-a="penDel" data-v="${i}" aria-label="삭제" ${S.roul.pens.length<=2?"disabled":""}>−</button></div>`).join("")}
     <div class="row2" style="margin-top:6px"><button class="btn ghost sm" data-a="penAdd" ${S.roul.pens.length>=8?"disabled":""}>+ 추가</button><button class="btn sm" data-a="closeSheet">완료</button></div>`}
   if(sh.type==="invite"){const d=S.d,url=inviteUrl(),title=d.name.trim()||"우리 모임";
     inner=`<h3>친구 초대하기</h3><p class="desc">단톡방에 이렇게 보여요</p>
     <div class="kcard"><div class="kimg"><span>우리 어디서<br>만날까?</span><svg width="90" height="90" viewBox="0 0 130 130" style="position:absolute;right:10px;top:10px" aria-hidden="true"><path d="M30 25L60 70M110 55L60 70M65 115L60 70" stroke="#1F2022" stroke-width="4" stroke-dasharray="3 7" stroke-linecap="round"/><circle cx="60" cy="70" r="10" fill="#C8F135" stroke="#1F2022" stroke-width="5"/><circle cx="30" cy="25" r="15" fill="#FFD86B" stroke="#fff" stroke-width="3"/><circle cx="110" cy="55" r="15" fill="#A9D8FF" stroke="#fff" stroke-width="3"/><circle cx="65" cy="115" r="15" fill="#FFB5C9" stroke="#fff" stroke-width="3"/></svg></div>
-      <div class="kbody"><b>${esc(PROFILE.name)}님이 '${esc(title)}'에 초대했어요</b><span>${fmtDate(d.date)} ${fmtTime(d.time)} · 출발지만 입력하면 끝</span></div><div class="kbtn">내 출발지 입력하기</div></div>
+      <div class="kbody"><b>${esc(PROFILE.name)}님이 '${esc(title)}'에 초대했어요</b><span>${fmtDate(d.date)} ${fmtTime(d.time)} · 출발지만 넣으면 돼요</span></div><div class="kbtn">내 출발지 입력하기</div></div>
     <div class="linkrow"><span>${esc(url)}</span><button data-a="copyInvite">복사</button></div>
     <div class="row2" style="margin-top:12px"><button class="btn sm" style="background:#FEE500;color:#191600" data-a="shareInvite">카톡으로 보내기</button><button class="btn ghost sm" data-a="guestPreview">친구 화면 미리보기</button></div>
-    <ol class="howto"><li>링크를 받은 친구는 앱 설치·가입 없이 브라우저에서 열어요</li><li>이름과 출발 위치(현재 위치 또는 검색)만 넣으면 끝</li><li>입력하는 순간 이 화면 목록이 실시간으로 채워져요</li><li>안 연 친구는 콕 찌르기로 카톡 알림을 한 번 더 보내요</li></ol>`}
+    <p class="desc" style="margin-top:12px">친구는 앱 설치 없이 링크로 바로 들어와요</p>`}
   if(sh.type==="place"){const p=S.places.find(x=>x.id===sh.id),mine=p.votes.includes(0);
     inner=`<div class="pdetail"><div class="top2"><span class="thumb" style="background:${CAT_COLOR[p.cat]};color:#fff">${CAT_SHORT[p.cat]}</span><div><h3>${esc(p.name)}</h3><div class="m" style="font-size:13px;color:var(--muted)">${PURPOSES[p.cat][2]} · 도보 ${p.walk}분 · ${esc(p.feat)}</div></div></div>
-    <span class="tag fit">취향 ${p.fit}%</span><span class="tag">♥ ${p.votes.length}표</span>${p.second?`<span class="tag">2차 추천</span>`:""}
-    <p class="desc" style="margin:14px 0">방장이 바로 정하면 투표 없이 확정되고, 친구들에게 결과가 공유돼요.</p>
+    ${p.fit>=78?`<span class="tag fit">내 스타일</span>`:""}<span class="tag">♥ ${p.votes.length}표</span>${p.second?`<span class="tag">2차 추천</span>`:""}
+    <p class="desc" style="margin:14px 0">여기로 정하면 친구들 화면에도 바로 떠요</p>
     <div class="row2"><button class="btn ghost sm" data-a="heart" data-v="${p.id}">${mine?"♥ 후보에서 빼기":"♡ 투표 후보에 담기"}</button><button class="btn sm" data-a="confirm" data-v="${p.id}">여기로 바로 확정</button></div></div>`}
+  if(sh.type==="claim"){const d=S.d,list=d.people.filter(p=>!p.local&&!p.placeholder&&p.name);
+    inner=`<h3>누구세요?</h3><p class="desc">다른 폰이나 노트북으로 이미 들어왔다면 내 이름을 눌러주세요. 한 사람이 두 번 들어가지 않게 이 기기를 연결해둘게요</p>
+    ${list.map((p,i)=>`<button class="frow" data-a="claim" data-v="${p.id}" style="width:100%;text-align:left">${av(p.name,d.people.indexOf(p))}<div><b>${esc(p.name)}${p.is_host?" (방장)":""}</b><span>${p.st?esc(p.st)+"역에서 출발":"아직 출발지 전"}</span></div><span class="chip sm">나예요</span></button>`).join("")||`<div class="empty">아직 들어온 사람이 없어요</div>`}
+    <p class="desc" style="margin-top:10px;font-size:12px">방장은 모임 만든 기기에서만 장소를 정할 수 있어요. 여기선 결과랑 약속 당일 화면을 같이 봐요</p>
+    <button class="btn ghost sm" data-a="closeSheet" style="margin-top:6px">처음 들어온 거예요</button>`}
   if(sh.type==="name"){inner=`<h3>${sh.then?"먼저 이름을 알려주세요":"내 이름"}</h3><p class="desc">${sh.then?"친구들이 받는 초대장에 이 이름이 보여요":"친구들에게 보이는 이름이에요"}</p><input class="field" id="myname" data-in="myname" value="${esc(PROFILE.name)}" placeholder="예: 민석" maxlength="6"><div style="height:12px"></div><button class="btn sm" data-a="closeSheet">저장</button>`}
   const anim=sh._shown?' style="animation:none"':'';sh._shown=true;
   return `<div class="dim" data-a="closeSheet"><div class="sheet" role="dialog" data-stop="1"${anim}><div class="grab"></div>${inner}</div></div>`;
@@ -1226,7 +1244,7 @@ function sheetHTML(){
 function stationList(q){q=(q||"").trim();
   const list=ST.filter(s=>!q||s.name.includes(q)).sort((a,b)=>(q&&b.name.startsWith(q))-(q&&a.name.startsWith(q))||a.name.localeCompare(b.name,"ko"));
   return list.length?list.map(s=>`<button class="sitem" data-a="setst" data-v="${esc(s.name)}"><span>${esc(s.name)}역</span>${lineBadges(s)}</button>`).join(""):
-    `<p class="desc" style="padding:16px 4px">"${esc(q)}"역을 찾지 못했어요. 지금은 수도권 주요 역 ${ST.length}곳만 있어요.</p>`}
+    `<p class="desc" style="padding:16px 4px">"${esc(q)}"역을 찾지 못했어요. 수도권 지하철역 ${ST.length}곳 중에 없어요. 역 이름을 다시 확인해주세요.</p>`}
 
 /* ============================================================
    렌더
@@ -1261,7 +1279,7 @@ function render(keep){
 function go(s){S.screen=s;S.sheet=null;render();if(s==="s4"&&ONLINE()&&S.d&&!S.guest)hostSync()}
 function verdictHTML(){const v=S.verdict;
   return `<div class="verdict"><div class="box">${av(v.name,v.idx)}<div style="font-weight:800;font-size:15px">${esc(v.name)}님 ${v.mode==="last"?"벌칙은":"당첨!"}</div><h2>${esc(v.pen)}</h2>
-  <p style="font-size:12.5px;font-weight:600;opacity:.7;margin:-4px 0 14px">${v.by&&v.by!==PROFILE.name?`${esc(v.by)}님이 돌린 결과 · `:""}모두의 화면과 채팅에 같은 결과가 떠요</p>
+  <p style="font-size:12.5px;font-weight:600;opacity:.7;margin:-4px 0 14px">${v.by&&v.by!==PROFILE.name?`${esc(v.by)}님이 돌린 결과 · `:""}다들 같은 결과 보고 있어요</p>
   <div class="row2"><button class="btn" data-a="shareVerdict" style="background:#1F2022;color:#fff">채팅 보기</button><button class="btn" data-a="finish" style="background:#fff;color:#1F2022">모임 마치기</button></div></div></div>
   <div class="confetti">${Array.from({length:40},(_,i)=>`<i style="left:${(i*37)%100}%;background:${AVC[i%6]};animation-delay:${(i%10)*0.08}s"></i>`).join("")}</div>`}
 
@@ -1319,24 +1337,32 @@ async function guestBoot(code){S.screen="boot";render();
   if(error||!m){S.screen="gone";render();return}
   let {data:rows}=await SB.from("participants").select("*").eq("code",code).order("created_at");
   const host=rows.find(r=>r.is_host);
-  if(host&&host.device_id===DEVICE){toast("내가 만든 모임이에요. 방장 화면으로 이어갈게요");resetUrl();const dr=store.get("mg3_draft",null);
+  if(host&&host.device_id===DEVICE){toast("내가 만든 모임이라 방장 화면으로 갈게요");resetUrl();const dr=store.get("mg3_draft",null);
     if(dr&&dr.d.code===code){A.resume()}else go("home");return}
-  if(!rows.find(r=>r.device_id===DEVICE)){const {error:e}=await SB.from("participants").insert({code,device_id:DEVICE,name:"",state:"opened"});if(e)console.warn(e);track("guest_opened",{code});}
-  S.guest={online:true,code,meeting:m,idx:0};await guestRefresh();
+  const claim=claimOf(code);if(claim&&!rows.find(r=>r.id===claim))setClaim(code,null);
+  const mine=rows.find(r=>r.id===claimOf(code))||rows.find(r=>r.device_id===DEVICE);
+  if(!mine)track("guest_opened",{code});
+  S.guest={online:true,code,meeting:m,idx:0,rowId:mine?mine.id:null};await guestRefresh();
   const me=S.d.people[S.guest.idx];S.screen=me.st?"g_wait":"g_land";render();
   SB.channel("guest-"+code).on("postgres_changes",{event:"*",schema:"public",table:"participants",filter:`code=eq.${code}`},()=>guestRefresh(true))
-    .on("postgres_changes",{event:"UPDATE",schema:"public",table:"meetings",filter:`code=eq.${code}`},p=>{if(!S.guest)return;S.guest.meeting=p.new;guestRefresh(true);if(p.new.status==="confirmed"){saveGuestMeeting();toast("약속이 확정됐어요!")}}).subscribe(st=>{if(st==="SUBSCRIBED")guestRefresh(true)});
-  window.__livePoll=async()=>{if(!S.guest||S.guest.code!==code)return;const {data:m2}=await SB.from("meetings").select("*").eq("code",code).maybeSingle();if(m2&&m2.status!==S.guest.meeting.status){S.guest.meeting=m2;if(m2.status==="confirmed"){saveGuestMeeting();toast("약속이 확정됐어요!")}}guestRefresh(true)};clearInterval(window.__guestIv);window.__guestIv=setInterval(()=>{if(document.visibilityState==="visible")window.__livePoll()},8000);
+    .on("postgres_changes",{event:"UPDATE",schema:"public",table:"meetings",filter:`code=eq.${code}`},p=>{if(!S.guest)return;S.guest.meeting=p.new;guestRefresh(true);if(p.new.status==="confirmed"){saveGuestMeeting();toast("장소 정해졌어요")}}).subscribe(st=>{if(st==="SUBSCRIBED")guestRefresh(true)});
+  window.__livePoll=async()=>{if(!S.guest||S.guest.code!==code)return;const {data:m2}=await SB.from("meetings").select("*").eq("code",code).maybeSingle();if(m2&&m2.status!==S.guest.meeting.status){S.guest.meeting=m2;if(m2.status==="confirmed"){saveGuestMeeting();toast("장소 정해졌어요")}}guestRefresh(true)};clearInterval(window.__guestIv);window.__guestIv=setInterval(()=>{if(document.visibilityState==="visible")window.__livePoll()},8000);
   if(m.status==="confirmed")saveGuestMeeting()}
 async function guestRefresh(rerender){const g=S.guest;if(!g||!g.meeting)return;const m=g.meeting;const {data:rows}=await SB.from("participants").select("*").eq("code",g.code).order("created_at");
   const host=rows.find(r=>r.is_host),others=rows.filter(r=>r!==host),ppl=[...(host?[host]:[]),...others].map(rowToPerson);
+  if(!g.rowId){const dv=rows.find(r=>r.device_id===DEVICE);if(dv)g.rowId=dv.id}
+  if(!g.rowId||!ppl.some(p=>p.id===g.rowId))ppl.push({name:"",st:null,state:"opened",device:DEVICE,local:true});
+  g.claimedHost=!!(host&&g.rowId===host.id&&host.device_id!==DEVICE);
   const typedName=S.d&&S.d.people[g.idx]?.name,typedAvail=S.d&&S.d.people[g.idx]?.avail;
   S.d={code:g.code,name:m.name||"",date:+m.date_ts,time:m.time_min,purposes:m.purposes||[],vibes:m.vibes||[],count:Math.max(m.count,ppl.length),people:ppl};
-  g.idx=Math.max(0,ppl.findIndex(p=>p.device===DEVICE));if(typedName&&!ppl[g.idx].st)ppl[g.idx].name=typedName;if(!ppl[g.idx].name&&PROFILE.name)ppl[g.idx].name=PROFILE.name;if(typedAvail&&!ppl[g.idx].st)ppl[g.idx].avail=typedAvail;
+  g.idx=Math.max(0,ppl.findIndex(p=>g.rowId?p.id===g.rowId:p.local));if(typedName&&!ppl[g.idx].st)ppl[g.idx].name=typedName;if(!ppl[g.idx].name&&PROFILE.name)ppl[g.idx].name=PROFILE.name;if(typedAvail&&!ppl[g.idx].st)ppl[g.idx].avail=typedAvail;
   S.d.mode=m.mode||"fixed";S.d.slots=m.slots||[];
   while(S.d.people.length<S.d.count)S.d.people.push({name:"",st:null,state:"waiting",placeholder:true});
   if(rerender&&["g_land","g_wait"].includes(S.screen)&&document.activeElement?.id!=="gname")tickRender()}
-async function guestSave(fields){const g=S.guest;const {error}=await SB.from("participants").update(fields).eq("code",g.code).eq("device_id",DEVICE);
+async function ensureRow(){const g=S.guest;if(!g||g.rowId)return g&&g.rowId;const me=S.d.people[g.idx];
+  const {data,error}=await SB.from("participants").insert({code:g.code,device_id:DEVICE,name:(me?.name||"").trim()||PROFILE.name||"",state:"opened"}).select().single();
+  if(error){console.warn(error);return null}g.rowId=data.id;if(me){me.id=data.id;me.local=false}return data.id}
+async function guestSave(fields){const g=S.guest;const id=await ensureRow();if(!id){toast("저장이 안 됐어요. 다시 해볼게요");return}const {error}=await SB.from("participants").update(fields).eq("id",id);
   if(error)toast("저장 실패: "+error.message);else if(fields.state==="done")track("guest_done",{code:g.code})}
 function saveGuestMeeting(){const g=S.guest,m=g&&g.meeting,d=S.d;if(!m||m.status!=="confirmed"||!d)return;const me=d.people[g.idx];if(!me||!me.st)return;
   const order=[me,...d.people.filter((p,i)=>i!==g.idx&&!p.placeholder)];
@@ -1347,9 +1373,9 @@ function downloadIcs(){const g=S.guest,m=g?.meeting,d=S.d;if(!m)return;const me=
   const end=new Date(dt.getTime()+2*36e5),alarm=leg+BUFFER;
   const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//moilgot//KO","BEGIN:VEVENT",`UID:${g.code}-${DEVICE}@moilgot`,`DTSTART:${f(dt)}`,`DTEND:${f(end)}`,
     `SUMMARY:${m.name||"모임"} @ ${m.place}`,`LOCATION:${m.hub}역 ${m.place}`,`DESCRIPTION:${me.st}역에서 ${leg}분. ${hhmm(m.time_min-leg-BUFFER)}에 출발하세요`,
-    "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:지금 출발하면 딱 맞아요",`TRIGGER:-PT${alarm}M`,"END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+    "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:지금 나가야 안 늦어요",`TRIGGER:-PT${alarm}M`,"END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));a.download="moilgot.ics";document.body.appendChild(a);a.click();a.remove();track("ics")}
-V.boot=()=>`<div class="scr" style="justify-content:center;align-items:center"><span class="logo">모일곳</span><p class="sub" style="margin-top:10px">초대장을 여는 중...</p></div>`;
+V.boot=()=>`<div class="scr" style="justify-content:center;align-items:center"><span class="logo">모일곳</span><p class="sub" style="margin-top:10px">여는 중...</p></div>`;
 V.gone=()=>`<div class="scr" style="justify-content:center"><span class="logo">모일곳</span><h2 class="q" style="margin-top:16px">초대 링크를 찾을 수 없어요</h2><p class="sub">링크가 잘못됐거나 모임이 삭제됐어요. 초대한 친구에게 링크를 다시 받아주세요.</p><button class="btn" data-a="gHome">모일곳 홈으로</button></div>`;
 /* ---- 위치 검색: 카카오 장소검색(키 있을 때) → 없으면 역·주요 장소 목록 ---- */
 let lqT;function searchLoc(q){const L=S.loc;q=q.trim();if(!q){L.results=[];return render(true)}
@@ -1379,7 +1405,7 @@ function mountMaps(){if(!KMAP.ready)return;for(const [id,spec] of Object.entries
   const holder=document.createElement("div");holder.style.cssText="position:absolute;inset:0";el.querySelector("svg")?.remove();el.prepend(holder);
   const LL=(a,b)=>new kakao.maps.LatLng(a,b),map=new kakao.maps.Map(holder,{center:LL(...spec.center),level:spec.level||7});
   (spec.lines||[]).forEach(([a,b])=>new kakao.maps.Polyline({map,path:[LL(...a),LL(...b)],strokeWeight:3,strokeColor:"#1F2022",strokeOpacity:.7,strokeStyle:"shortdash"}));
-  if(spec.circle)new kakao.maps.Circle({map,center:LL(spec.circle[0],spec.circle[1]),radius:spec.circle[2],strokeWeight:2,strokeColor:"#6F8F00",strokeStyle:"dash",fillColor:"#C8F135",fillOpacity:.3});
+  if(spec.circle)new kakao.maps.Circle({map,center:LL(spec.circle[0],spec.circle[1]),radius:spec.circle[2],strokeWeight:1.5,strokeColor:"#6F8F00",strokeOpacity:.55,strokeStyle:"solid",fillColor:"#C8F135",fillOpacity:.14});
   (spec.overlays||[]).forEach(o=>{const ov=new kakao.maps.CustomOverlay({map,position:LL(o.lat,o.lng),content:o.html,yAnchor:o.y??0.5,clickable:!!o.click});
     if(o.click){const n=document.createElement("div");n.innerHTML=o.html;n.firstChild.addEventListener("click",()=>A[o.click[0]](o.click[1]));ov.setContent(n.firstChild)}});
   if(spec.fit&&spec.fit.length>1){const bd=new kakao.maps.LatLngBounds();spec.fit.forEach(p=>bd.extend(LL(...p)));map.setBounds(bd,...(spec.pad||[90,50,120,50]))}
@@ -1411,7 +1437,7 @@ const A={
   slotDel:v=>{S.d.slots.splice(+v,1);render(true)},
   avail:v=>{const p=S.d.people[S.guest.idx],k=+v;p.avail=p.avail||[];p.avail=p.avail.includes(k)?p.avail.filter(x=>x!==k):[...p.avail,k];render(true)},
   fb:v=>{S.fb=v==="1";track("rec_feedback",{good:S.fb,hub:S.results[S.sel].hub.name});render(true)},
-  fbWhy:v=>{track("rec_feedback_why",{why:v});toast("알려줘서 고마워요");A.cands()},
+  fbWhy:v=>{track("rec_feedback_why",{why:v});toast("알겠어요");A.cands()},
   focusSearch:()=>{document.getElementById("lq")?.focus()},
   gpsRetry:()=>{S.loc.denied=false;A.gps()},
   guestDemo:()=>{const m=getMeeting(S.cur);const ppl=m.people.map((p,i)=>({...p,id:"p"+i,device:"d"+i,state:"done",is_host:i===0}));const legs={};ppl.forEach((p,i)=>legs[p.id]=m.legs[i]);
@@ -1423,7 +1449,7 @@ const A={
   shareTg:()=>{S.d.share=!S.d.share;render(true)},
   src:v=>{const me=S.d.people[0];
     const k=v==="집"?"home":v==="학교"?"school":null;
-    if(k&&CONFIG.SUPABASE_URL&&!PROFILE[k+"Set"]){toast(`${v}이 아직 등록 안 됐어요. 검색으로 찾아주세요`);openLoc("draft",0);return}
+    if(k&&CONFIG.SUPABASE_URL&&!PROFILE[k+"Set"]){toast(`${v==="집"?"집은":"학교는"} 아직 등록 전이에요. 검색해주세요`);openLoc("draft",0);return}
     if(k){setLoc(me,{...locFromStation(PROFILE[k],v)});if(ONLINE())hostSync();render(true)}
     else{openLoc("draft",0);A.gps()}},
   pick:v=>openLoc("draft",+v),
@@ -1442,16 +1468,20 @@ const A={
     const p=S.d.people[L.idx];setLoc(p,loc);if(L.ctx==="draft"&&L.idx>0)p.src="대신 입력";if(L.idx>0)p.state="done";
     if(ONLINE()){if(L.ctx==="guest"){if(!PROFILE.name&&(p.name||"").trim()){PROFILE.name=p.name.trim();saveProfile()}}if(L.ctx==="guest")guestSave({name:(p.name||"").trim()||"친구",state:"done",avail:p.avail||[],...locRow(p)});
       else if(L.idx===0)hostSync();else proxySave(L.idx,p)}
-    S.loc=null;if(L.ctx==="guest"){saveGuestMeeting();toast(S.guest&&S.guest.meeting&&S.guest.meeting.status==="confirmed"?"입력 완료! 내 출발 시간을 계산했어요":"입력 완료! 방장 화면에 바로 떠요");go("g_wait")}else go("s4")},
+    S.loc=null;if(L.ctx==="guest"){saveGuestMeeting();toast(S.guest&&S.guest.meeting&&S.guest.meeting.status==="confirmed"?"넣었어요. 나갈 시간 계산했어요":"넣었어요");go("g_wait")}else go("s4")},
   poke:v=>{const i=+v,p=S.d.people[i];if(ONLINE()){p.poked=true;render(true);setTimeout(()=>{p.poked=false},500);
       toast(p.state==="opened"?`${p.name}님이 입력하는 중이에요. 카톡으로 한 번 더 알려주세요`:"아직 링크를 안 연 친구가 있어요. 단톡방에 다시 보내주세요");setTimeout(A.shareInvite,700);return}p.poked=true;toast(p.state==="opened"?`${p.name}님에게 푸시 알림을 보냈어요 👉`:`${p.name}님에게 카톡으로 한 번 더 보냈어요 👉`);render(true);setTimeout(()=>{p.poked=false},500);simJoin(i,900,2200)},
   invite:v=>{S.sheet={type:"invite"};render(true);if(v==="link")A.copyInvite()},
   copyInvite:()=>{copyText(inviteUrl(),"초대 링크를 복사했어요");startInviteSim()},
-  shareInvite:()=>{const d=S.d,url=inviteUrl(),text=`${PROFILE.name}님이 '${d.name.trim()||"우리 모임"}'에 초대했어요. 출발지만 입력해줘!`;
-    if(navigator.share){navigator.share({title:"모일곳 초대",text,url}).then(()=>{toast("보냈어요! 친구가 입력하면 여기 떠요");startInviteSim()}).catch(()=>{})}
+  shareInvite:()=>{const d=S.d,url=inviteUrl(),text=`${PROFILE.name}님이 '${d.name.trim()||"우리 모임"}' 어디서 만날지 정하자. 출발지만 넣어줘!`;
+    if(navigator.share){navigator.share({title:"모일곳 초대",text,url}).then(()=>{toast("보냈어요. 들어오면 여기 떠요");startInviteSim()}).catch(()=>{})}
     else{copyText(`${text}\n${url}`,"카톡에 붙여넣어 보내주세요");startInviteSim()}},
   guestPreview:()=>{if(ONLINE()){window.open(inviteUrl(),"_blank");return}const i=S.d.people.findIndex((p,k)=>k>0&&!p.st);if(i<0){toast("모두 입력했어요");return}S.guest={idx:i};S.d.people[i].state="opened";S.sheet=null;go("g_land")},
-  gstart:()=>openLoc("guest",S.guest.idx),
+  gstart:()=>{if(ONLINE())ensureRow();openLoc("guest",S.guest.idx)},
+  claimOpen:()=>{S.sheet={type:"claim"};render(true)},
+  claim:v=>{const g=S.guest,p=S.d.people.find(x=>x.id===v);if(!g||!p)return;setClaim(g.code,v);g.rowId=v;PROFILE.name=p.name;saveProfile();
+    S.sheet=null;toast(`${p.name}님으로 이어서 할게요`);guestRefresh().then(()=>{if(g.meeting.status==="confirmed")saveGuestMeeting();go(S.d.people[g.idx].st?"g_wait":"g_land")})},
+  unclaim:()=>{const g=S.guest;setClaim(g.code,null);g.rowId=null;guestRefresh().then(()=>go("g_land"))},
   gexit:()=>{S.guest=null;go("s4")},
   gRace:()=>{const p=S.d.people[S.guest.idx];p.race=p.race===false;render(true);if(ONLINE())guestSave({race:p.race!==false})},
   gPush:()=>{const p=S.d.people[S.guest.idx];p.push=p.push===false;render(true);if(ONLINE())guestSave({push:p.push!==false})},
@@ -1472,7 +1502,7 @@ const A={
   filter:v=>{S.filter=+v;S.focus=null;render(true)},
   focus:v=>{S.focus=+v;render(true)},
   heart:v=>{const p=S.places.find(x=>x.id===+v);p.votes.includes(0)?p.votes=p.votes.filter(x=>x!==0):p.votes.push(0);S.focus=p.id;render(true)},
-  shareList:()=>{copyText(S.places.slice(0,5).map((p,i)=>`${i+1}. ${p.name} (${PURPOSES[p.cat][2]}, 도보 ${p.walk}분)`).join("\n"),"추천 리스트를 복사했어요")},
+  shareList:()=>{copyText(S.places.slice(0,5).map((p,i)=>`${i+1}. ${p.name} (${PURPOSES[p.cat][2]}, 도보 ${p.walk}분)`).join("\n"),"목록 복사했어요")},
   startVote:()=>{track("vote_start");S.sheet={type:"vote"};render(true);
     if(ONLINE()||S.voteSim)return;if(!S.places.some(p=>p.votes.includes(0)))return;
     S.voteSim=true;const d=S.d,rnd=seeded(d.people.map(p=>p.name).join());
@@ -1492,14 +1522,14 @@ const A={
   openRec:v=>{const m=getMeeting(v);toast(m.result?`1등 ${m.people[m.result.order[0]].name} · 벌칙 ${m.result.penalty} (${m.people[m.result.loser].name})`:"기록이 없어요")},
   early:v=>{PROFILE.early=+v;saveProfile();render(true)},
   startPrep:()=>{const R=S.race,m=getMeeting(S.cur),plan=prepPlan(m),L=R.me;L.phase="prep";L.step=0;L.status=plan.length?ingOf(plan[0].name):"곧 나감";
-    saveMine(R);pushMine(R,true);postMsg(R,m,`${PROFILE.name}님이 준비를 시작했어요`,true);track("race_start");toast("친구들에게 준비 시작을 알렸어요");render(true)},
+    saveMine(R);pushMine(R,true);postMsg(R,m,`${PROFILE.name}님이 준비를 시작했어요`,true);track("race_start");toast("친구들한테 알렸어요");render(true)},
   nextStep:()=>{const R=S.race,m=getMeeting(S.cur),plan=prepPlan(m),L=R.me;if(L.phase!=="prep")return;L.step=Math.min(plan.length,L.step+1);
     L.status=L.step<plan.length?ingOf(plan[L.step].name):"곧 나감";saveMine(R);pushMine(R,true);S.sheet=null;render(true)},
   prevStep:()=>{const R=S.race,m=getMeeting(S.cur),plan=prepPlan(m),L=R.me;if(L.phase!=="prep"||L.step===0)return;L.step--;L.status=ingOf(plan[L.step].name);saveMine(R);pushMine(R,true);render(true)},
   depart:()=>{const R=S.race,m=getMeeting(S.cur),L=R.me;L.phase="moving";L.dep=Date.now();L.progress=0;L.eta=m.legs[0];L.status="이동중";L.gps=false;R.startDist=null;
     saveMine(R);pushMine(R,true);startGps(R,m);postMsg(R,m,`${PROFILE.name}님이 출발했어요`,true);track("depart");S.sheet=null;go("race")},
   arrive:()=>{const R=S.race,m=getMeeting(S.cur),L=R.me;if(L.arr)return;if(!L.dep)L.dep=Date.now();L.phase="arrived";L.arr=Date.now();L.progress=1;L.eta=0;L.status="도착!";stopGps(R);
-    const k=m.people.filter((_,i)=>liveOf(R,i).arr).length;saveMine(R);pushMine(R,true);postMsg(R,m,`${PROFILE.name}님이 ${k}등으로 도착했어요`,true);track("arrive");toast(`${k}등으로 도착! 🎉`);S.sheet=null;go("race")},
+    const k=m.people.filter((_,i)=>liveOf(R,i).arr).length;saveMine(R);pushMine(R,true);postMsg(R,m,`${PROFILE.name}님이 ${k}등으로 도착했어요`,true);track("arrive");toast(`${k}등 도착`);S.sheet=null;go("race")},
   statusSheet:()=>{S.sheet={type:"status"};render(true)},
   quick:v=>{S.sheet=null;sendChat(v)},
   send:()=>{const t=S.chatDraft.trim();if(t){S.chatDraft="";const i=document.getElementById("chatin");if(i)i.value="";sendChat(t)}},
