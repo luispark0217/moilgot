@@ -1246,7 +1246,8 @@ function hostSubscribe(code){if(CH)SB.removeChannel(CH);
     const me=S.d.people[0];S.d.people=[me,...others.map(rowToPerson)];S.d.people[0].id=host?.id;S.d.count=Math.max(S.d.count,S.d.people.length);syncFriends(S.d);
     const after=S.d.people.filter(p=>p.st).length;if(after>before&&S.screen==="s4"){const last=[...others].reverse().find(r=>r.st);toast(`${last?.name||"친구"}님이 출발지를 입력했어요`)}
     if(["s4","loc"].includes(S.screen))render(true)};
-  CH=SB.channel("host-"+code).on("postgres_changes",{event:"*",schema:"public",table:"participants",filter:`code=eq.${code}`},refresh).subscribe();refresh()}
+  CH=SB.channel("host-"+code).on("postgres_changes",{event:"*",schema:"public",table:"participants",filter:`code=eq.${code}`},refresh).subscribe(st=>{if(st==="SUBSCRIBED")refresh()});refresh();
+  window.__livePoll=()=>{if(S.d&&S.d.code===code&&!S.guest&&["s4","loc"].includes(S.screen))refresh()};clearInterval(window.__hostIv);window.__hostIv=setInterval(()=>{if(document.visibilityState==="visible")window.__livePoll()},6000)}
 async function guestBoot(code){S.screen="boot";render();
   const {data:m,error}=await SB.from("meetings").select("*").eq("code",code).maybeSingle();
   if(error||!m){S.screen="gone";render();return}
@@ -1258,7 +1259,8 @@ async function guestBoot(code){S.screen="boot";render();
   S.guest={online:true,code,meeting:m,idx:0};await guestRefresh();
   const me=S.d.people[S.guest.idx];S.screen=me.st?"g_wait":"g_land";render();
   SB.channel("guest-"+code).on("postgres_changes",{event:"*",schema:"public",table:"participants",filter:`code=eq.${code}`},()=>guestRefresh(true))
-    .on("postgres_changes",{event:"UPDATE",schema:"public",table:"meetings",filter:`code=eq.${code}`},p=>{S.guest.meeting=p.new;guestRefresh(true);if(p.new.status==="confirmed"){saveGuestMeeting();toast("약속이 확정됐어요!")}}).subscribe();
+    .on("postgres_changes",{event:"UPDATE",schema:"public",table:"meetings",filter:`code=eq.${code}`},p=>{S.guest.meeting=p.new;guestRefresh(true);if(p.new.status==="confirmed"){saveGuestMeeting();toast("약속이 확정됐어요!")}}).subscribe(st=>{if(st==="SUBSCRIBED")guestRefresh(true)});
+  window.__livePoll=async()=>{if(!S.guest||S.guest.code!==code)return;const {data:m2}=await SB.from("meetings").select("*").eq("code",code).maybeSingle();if(m2&&m2.status!==S.guest.meeting.status){S.guest.meeting=m2;if(m2.status==="confirmed"){saveGuestMeeting();toast("약속이 확정됐어요!")}}guestRefresh(true)};clearInterval(window.__guestIv);window.__guestIv=setInterval(()=>{if(document.visibilityState==="visible")window.__livePoll()},8000);
   if(m.status==="confirmed")saveGuestMeeting()}
 async function guestRefresh(rerender){const g=S.guest,m=g.meeting;const {data:rows}=await SB.from("participants").select("*").eq("code",g.code).order("created_at");
   const host=rows.find(r=>r.is_host),others=rows.filter(r=>r!==host),ppl=[...(host?[host]:[]),...others].map(rowToPerson);
@@ -1488,6 +1490,7 @@ document.addEventListener("change",e=>{const k=e.target.dataset.in;if(k==="fair"
   if(k==="fname"&&S.screen==="s4")render(true)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.sheet){S.sheet=null;render(true)}
   if(e.key==="Enter"&&e.target.id==="chatin"&&!e.isComposing&&e.keyCode!==229){e.preventDefault();A.send()}});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&window.__livePoll)window.__livePoll()});
 // 시간 휠(시/분): 스크롤이 멈추면 가운데 값 선택
 let wheelT;document.addEventListener("scroll",e=>{const id=e.target.id;if((id!=="twH"&&id!=="twM")||!S.d)return;clearTimeout(wheelT);
   wheelT=setTimeout(()=>{if(!S.d||S.screen!=="s3")return;const i=Math.round(e.target.scrollTop/50),H=Math.floor(S.d.time/60),M=S.d.time%60;
