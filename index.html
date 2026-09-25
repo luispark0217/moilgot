@@ -1360,7 +1360,7 @@ const A={
   pick:v=>openLoc("draft",+v),
   pickFav:v=>openLoc("fav",v),
   lqClear:()=>{S.loc.q="";S.loc.results=[];const i=document.getElementById("lq");if(i){i.value="";i.focus()}refreshLoc()},
-  lpick:v=>{const r=S.loc.results[+v];S.loc.sel=makeLoc(r.name,r.sub,r.lat,r.lng,"검색",r.kind==="st"?r.st:null);S.loc.st=S.loc.sel.st;S.loc.q="";S.loc.results=[];render(true)},
+  lpick:v=>{const li=document.getElementById("lq");if(li){li.value="";li.blur()}const r=S.loc.results[+v];S.loc.sel=makeLoc(r.name,r.sub,r.lat,r.lng,"검색",r.kind==="st"?r.st:null);S.loc.st=S.loc.sel.st;S.loc.q="";S.loc.results=[];render(true)},
   lst:v=>{const L=S.loc;L.st=v;L.sel=makeLoc(L.sel.label,L.sel.sub,L.sel.lat,L.sel.lng,L.sel.src,v);render(true)},
   gps:()=>{if(!navigator.geolocation){toast("이 기기에선 위치를 쓸 수 없어요. 검색으로 찾아주세요");return}
     toast("현재 위치를 찾는 중...");
