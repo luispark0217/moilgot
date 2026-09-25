@@ -1245,7 +1245,7 @@ function render(keep){
 function go(s){S.screen=s;S.sheet=null;render();if(s==="s4"&&ONLINE()&&S.d&&!S.guest)hostSync()}
 function verdictHTML(){const v=S.verdict;
   return `<div class="verdict"><div class="box">${av(v.name,v.idx)}<div style="font-weight:800;font-size:15px">${esc(v.name)}님 ${v.mode==="last"?"벌칙은":"당첨!"}</div><h2>${esc(v.pen)}</h2>
-  <div class="row2"><button class="btn" data-a="shareVerdict" style="background:#1F2022;color:#fff">채팅에 공유</button><button class="btn" data-a="finish" style="background:#fff;color:#1F2022">모임 마치기</button></div></div></div>
+  <div class="row2"><button class="btn" data-a="shareVerdict" style="background:#1F2022;color:#fff"${S.verdict.shared?" disabled":""}>${S.verdict.shared?"공유 완료 ✓":"채팅에 공유"}</button><button class="btn" data-a="finish" style="background:#fff;color:#1F2022">모임 마치기</button></div></div></div>
   <div class="confetti">${Array.from({length:40},(_,i)=>`<i style="left:${(i*37)%100}%;background:${AVC[i%6]};animation-delay:${(i%10)*0.08}s"></i>`).join("")}</div>`}
 
 /* ============================================================
@@ -1500,7 +1500,7 @@ const A={
     setTimeout(()=>{rl.spinning=false;const order=rankOrder(R,m),loser=order[order.length-1];
       S.verdict=rl.mode==="last"?{idx:loser,name:nameOf(m,loser),pen:items[k],mode:"last"}:{idx:k,name:items[k],pen:"오늘 커피 쏘기",mode:"all"};
       track("roulette");render(true)},4300)},
-  shareVerdict:()=>{const v=S.verdict,R=S.race,m=getMeeting(S.cur);postMsg(R,m,`🎯 룰렛 결과: ${v.name}님 → ${v.pen}`,true);S.verdict=null;go("chat")},
+  shareVerdict:()=>{const v=S.verdict,R=S.race,m=getMeeting(S.cur);if(v.shared)return;v.shared=true;postMsg(R,m,`🎯 룰렛 결과: ${v.name}님 → ${v.pen}`,true);toast("채팅에 공유했어요 · 모임 마치기를 누르면 기록에 저장돼요");render(true)},
   finish:()=>{const v=S.verdict,R=S.race,m=getMeeting(S.cur),order=rankOrder(R,m);
     m.status="done";m.result={order,lateMin:m.people.map((_,i)=>{const a=liveOf(R,i).arr;return a?Math.max(0,Math.round((a-meetStart(m))/6e4)):null}),penalty:v.pen,loser:v.mode==="last"?order[order.length-1]:v.idx};
     if(m.result.lateMin[0]>0)PROFILE.lateAvg=Math.round((PROFILE.lateAvg*2+m.result.lateMin[0])/3);saveProfile();
